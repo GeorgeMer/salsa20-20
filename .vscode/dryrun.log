@@ -1,0 +1,6 @@
+make --dry-run --always-make --keep-going --print-directory
+make: Entering directory '/home/david/TUM/SS2022/GRA/Salsa20'
+make: Leaving directory '/home/david/TUM/SS2022/GRA/Salsa20'
+ 
+make: *** No targets specified and no makefile found.  Stop.
+
