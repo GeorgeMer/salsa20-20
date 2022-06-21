@@ -15,4 +15,4 @@
 *.toc
 *.synctex.gz
 
-.vscode/*
+../.vscode/*
