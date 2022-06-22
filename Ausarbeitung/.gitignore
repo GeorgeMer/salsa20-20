@@ -15,4 +15,6 @@
 *.toc
 *.synctex.gz
 
+.vscode
 .vscode/*
+**/.vscode/*
