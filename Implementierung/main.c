@@ -1,13 +1,19 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <getopt.h>
 #include "salsa20.h"
+
+static struct option long_options[] =
+    {
+        {"help", no_argument, 0, 'h'},
+};
 
 const char *usage_msg =
     "Usage: %s [-V X | -B X | -k K | -i I | -o P | -h | --help] file_path    Encrypt a file with Salsa20 encryption\n"
     "   or: %s -h                                                            Show help message and exit\n"
     "   or: %s --help                                                        Show help message and exit\n";
-;
+
 const char *help_msg =
     "Positional arguments:\n"
     "  path   The path to the file to be encrypted\n"
@@ -32,17 +38,21 @@ int main(int argc, char **argv)
     const char *progname = argv[0];
     int opt;
 
-    if (argc < 4)
+    if (argc == 1)
     {
         print_usage(progname);
         return EXIT_FAILURE;
     }
+    int longindex = 0;
 
     // option parsing
-    while (opt = getopt(argc, argv, "V:B:k:i:o:h") != -1)
+    while ((opt = getopt_long(argc, argv, "V:B:k:i:o:h", long_options, &longindex)) != -1)
     {
         switch (opt)
         {
+        case 0:
+            print_help(progname);
+            return EXIT_SUCCESS;
         case 'V':
             break;
         case 'B':
