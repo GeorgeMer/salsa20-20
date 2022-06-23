@@ -1,7 +1,10 @@
 #include <stdio.h>
-#include <unistd.h>
 #include <stdlib.h>
+#include <stdint.h>
+#include <unistd.h>
 #include <getopt.h>
+#include <errno.h>
+#include <sys/stat.h>
 #include "salsa20.h"
 
 static struct option long_options[] =
@@ -33,6 +36,53 @@ void print_help(const char *progname)
     print_usage(progname);
     fprintf(stderr, "\n%s", help_msg);
 }
+
+const uint8_t *read_file(const char *path)
+{
+    FILE *file = fopen(path, "r");
+    char *message = NULL;
+
+    if (file == NULL)
+    {
+        perror("Something went wrong opening your file. Did you enter the correct path?");
+        goto error;
+    }
+
+    struct stat statbuf;
+    if (fstat(fileno(file), &statbuf))
+    {
+        perror("Error retrieving file stats");
+        goto error;
+    }
+
+    if (!S_ISREG(statbuf.st_mode) || statbuf.st_size <= 0)
+    {
+        fprintf(stderr, "Error processing file: Not a regular file or invalid size\n");
+        goto error;
+    }
+
+    if (!(message = malloc(statbuf.st_size + 1)))
+    {
+        fprintf("Error reading file: Could not allocate enough memory\n");
+        goto error;
+    }
+
+    if (!fread(message, 1, statbuf.st_size, file))
+    {
+        perror("Error reading file");
+        free(message);
+        goto error;
+    }
+
+    fclose(file);
+    message[statbuf.st_size] = '\0';
+    return (const uint8_t *)message;
+
+error:
+    fclose(file);
+    return EXIT_FAILURE;
+}
+
 int main(int argc, char **argv)
 {
     const char *progname = argv[0];
@@ -43,16 +93,12 @@ int main(int argc, char **argv)
         print_usage(progname);
         return EXIT_FAILURE;
     }
-    int longindex = 0;
 
     // option parsing
-    while ((opt = getopt_long(argc, argv, "V:B:k:i:o:h", long_options, &longindex)) != -1)
+    while ((opt = getopt_long(argc, argv, "V:B:k:i:o:h", long_options, NULL)) != -1)
     {
         switch (opt)
         {
-        case 0:
-            print_help(progname);
-            return EXIT_SUCCESS;
         case 'V':
             break;
         case 'B':
@@ -72,6 +118,7 @@ int main(int argc, char **argv)
         }
     }
 
+    // checking if path to input file is missing
     if (optind >= argc)
     {
         printf("%s: Missing positional argument -- 'file'\n", progname);
@@ -79,7 +126,6 @@ int main(int argc, char **argv)
         return EXIT_FAILURE;
     }
 
-    const char *input_path = argv[optind];
-
     // read the file and start the encryption
+    const uint8_t *message = read_file(argv[optind]);
 }
