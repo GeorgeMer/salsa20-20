@@ -16,5 +16,3 @@
 *.synctex.gz
 
 .vscode
-.vscode/*
-**/.vscode/*

@@ -23,9 +23,9 @@ const char *help_msg =
     "\n"
     "Optional arguments:\n"
     "  -V X   The implementation to be used (default: X = 0)\n"
-    "  -B X   If set, runtime of chosen implementation will be mesured and output. X represents the number of repition of function calls\n"
-    "  -k K   K resemlbes the key\n"
-    "  -i I   I resemlbes the initialization vector\n"
+    "  -B X   If set, runtime of chosen implementation will be measured and output. X represents the number of repetition of function calls\n"
+    "  -k K   K resembles the key\n"
+    "  -i I   I resembles the initialization vector\n"
     "  -o P   P is the path to the output file\n"
     "  -h     Show help message (this text) and exit\n"
     "  --help Same effect as -h\n";
@@ -63,7 +63,7 @@ const uint8_t *read_file(const char *path)
 
     if (!(message = malloc(statbuf.st_size + 1)))
     {
-        fprintf("Error reading file: Could not allocate enough memory\n");
+        fprintf(stderr, "Error reading file: Could not allocate enough memory\n");
         goto error;
     }
 
