@@ -89,7 +89,7 @@ const uint8_t *read_file(const char *path)
     // closes file and ends the program by returning EXIT_FAILURE
 error:
     fclose(file);
-    return NULL;
+    exit(EXIT_FAILURE);
 }
 
 uint64_t convert_string_to_uint64_t(const char *string)
@@ -102,17 +102,17 @@ uint64_t convert_string_to_uint64_t(const char *string)
     if (endptr == string || *endptr != '\0')
     {
         fprintf(stderr, "%s could not be converted to uint64_t\n", string);
-        return EXIT_FAILURE;
+        exit(EXIT_FAILURE);
     }
     else if (errno == ERANGE)
     {
         fprintf(stderr, "%s over - or underflows uin64_t", string);
-        return EXIT_FAILURE;
+        exit(EXIT_FAILURE);
     }
     else if (errno == EINVAL)
     {
         fprintf(stderr, "%s No conversion could be performed", string);
-        return EXIT_FAILURE;
+        exit(EXIT_FAILURE);
     }
     return result;
 }
@@ -128,7 +128,7 @@ static void write_file(const char *path, const char *string)
         if (!(file = fopen("encrypted.txt", "w")))
         {
             perror("Something went wrong creating a file.");
-            return;
+            exit(EXIT_FAILURE);
         }
     }
     else
@@ -136,7 +136,7 @@ static void write_file(const char *path, const char *string)
         if (!(file = fopen(path, "w")))
         {
             perror("Something went wrong opening your output file. Did you enter the correct path?");
-            return;
+            exit(EXIT_FAILURE);
         }
     }
 
@@ -144,7 +144,7 @@ static void write_file(const char *path, const char *string)
     {
         perror("Something went wrong writing to your output file.");
         fclose(file);
-        return;
+        exit(EXIT_FAILURE);
     }
     // close successfully written file
     fclose(file);
