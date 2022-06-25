@@ -27,7 +27,7 @@ const char *help_msg =
     "\n"
     "Optional arguments:\n"
     "  -V X   The implementation to be used (default: X = 0)\n"
-    "  -B X   If set, runtime of chosen implementation will be mesured and output. X represents the number of repetition of function calls\n"
+    "  -B X   If set, runtime of chosen implementation will be measured and output. X represents the number of repetition of function calls\n"
     "  -k K   K resembles the key\n"
     "  -i I   I resembles the initialization vector\n"
     "  -o P   P is the path to the output file\n"
