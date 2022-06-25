@@ -4,13 +4,17 @@
 #include <unistd.h>
 #include <getopt.h>
 #include <errno.h>
+#include <stdbool.h>
 #include <sys/stat.h>
+#include <string.h>
 #include "salsa20.h"
 
 static struct option long_options[] =
     {
         {"help", no_argument, 0, 'h'},
 };
+
+size_t mlen = 0;
 
 const char *usage_msg =
     "Usage: %s [-V X | -B X | -k K | -i I | -o P | -h | --help] file_path    Encrypt a file with Salsa20 encryption\n"
@@ -23,7 +27,7 @@ const char *help_msg =
     "\n"
     "Optional arguments:\n"
     "  -V X   The implementation to be used (default: X = 0)\n"
-    "  -B X   If set, runtime of chosen implementation will be measured and output. X represents the number of repetition of function calls\n"
+    "  -B X   If set, runtime of chosen implementation will be mesured and output. X represents the number of repetition of function calls\n"
     "  -k K   K resembles the key\n"
     "  -i I   I resembles the initialization vector\n"
     "  -o P   P is the path to the output file\n"
@@ -78,13 +82,72 @@ const uint8_t *read_file(const char *path)
     // close successfully read file, add 0 byte add the end of char array and convert it to uint8_t array
     fclose(file);
     message[statbuf.st_size] = '\0';
+    mlen = statbuf.st_size;
     return (const uint8_t *)message;
 
     // label to jump to if error occured reading input file
     // closes file and ends the program by returning EXIT_FAILURE
 error:
     fclose(file);
-    return EXIT_FAILURE;
+    return NULL;
+}
+
+uint64_t convert_string_to_uint64_t(const char *string)
+{
+    char *endptr;
+    uint64_t result = strtoull(string, &endptr, 10);
+    errno = 0;
+
+    // error handling
+    if (endptr == string || *endptr != '\0')
+    {
+        fprintf(stderr, "%s could not be converted to uint64_t\n", string);
+        return EXIT_FAILURE;
+    }
+    else if (errno == ERANGE)
+    {
+        fprintf(stderr, "%s over - or underflows uin64_t", string);
+        return EXIT_FAILURE;
+    }
+    else if (errno == EINVAL)
+    {
+        fprintf(stderr, "%s No conversion could be performed", string);
+        return EXIT_FAILURE;
+    }
+    return result;
+}
+
+static void write_file(const char *path, const char *string)
+{
+    FILE *file;
+
+    // error handling
+    if (path == NULL)
+    {
+        // create txt file "encrypted" if no path to output file was given
+        if (!(file = fopen("encrypted.txt", "w")))
+        {
+            perror("Something went wrong creating a file.");
+            return;
+        }
+    }
+    else
+    {
+        if (!(file = fopen(path, "w")))
+        {
+            perror("Something went wrong opening your output file. Did you enter the correct path?");
+            return;
+        }
+    }
+
+    if (!(fwrite(string, 1, strlen(string), file)))
+    {
+        perror("Something went wrong writing to your output file.");
+        fclose(file);
+        return;
+    }
+    // close successfully written file
+    fclose(file);
 }
 
 int main(int argc, char **argv)
@@ -98,20 +161,41 @@ int main(int argc, char **argv)
         return EXIT_FAILURE;
     }
 
+    // default values
+    uint64_t implementation_number = 0;
+    uint64_t number_of_iterations;
+    bool measure_runtime = false;
+    uint32_t key[8];
+    uint64_t iv = 0;
+    const char *output_file = NULL;
+
     // option parsing
     while ((opt = getopt_long(argc, argv, "V:B:k:i:o:h", long_options, NULL)) != -1)
     {
         switch (opt)
         {
         case 'V':
+            implementation_number = convert_string_to_uint64_t(optarg);
+
+            if (implementation_number > 1)
+            {
+                perror("This implementation does not exist! Valid implementation numbers are 0 and 1.");
+                return EXIT_FAILURE;
+            }
+
             break;
         case 'B':
+            number_of_iterations = convert_string_to_uint64_t(optarg);
+            measure_runtime = true;
             break;
         case 'k':
+            // TODO: how to read string input into uint32_t 8 element array
             break;
         case 'i':
+            iv = convert_string_to_uint64_t(optarg);
             break;
         case 'o':
+            output_file = optarg;
             break;
         case 'h':
             print_help(progname);
@@ -130,6 +214,12 @@ int main(int argc, char **argv)
         return EXIT_FAILURE;
     }
 
-    // read the file and start the encryption
+    // read the file and start the encryption using implementation according to implementation_number
+    // if measure_runtime == true then measure runtime with function being called number_of_iterations times
+    // don't forget to free message again!
     const uint8_t *message = read_file(argv[optind]);
+    uint8_t cipher[mlen];
+
+    salsa20_crypt(mlen, message, cipher, key, iv);
+    write_file(output_file, (const char *)cipher);
 }
