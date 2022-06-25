@@ -42,6 +42,7 @@ const uint8_t *read_file(const char *path)
     FILE *file = fopen(path, "r");
     char *message = NULL;
 
+    // error handling
     if (file == NULL)
     {
         perror("Something went wrong opening your file. Did you enter the correct path?");
@@ -74,10 +75,13 @@ const uint8_t *read_file(const char *path)
         goto error;
     }
 
+    // close successfully read file, add 0 byte add the end of char array and convert it to uint8_t array
     fclose(file);
     message[statbuf.st_size] = '\0';
     return (const uint8_t *)message;
 
+    // label to jump to if error occured reading input file
+    // closes file and ends the program by returning EXIT_FAILURE
 error:
     fclose(file);
     return EXIT_FAILURE;
