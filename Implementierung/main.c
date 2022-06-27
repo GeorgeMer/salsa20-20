@@ -106,12 +106,12 @@ uint64_t convert_string_to_uint64_t(const char *string)
     }
     else if (errno == ERANGE)
     {
-        fprintf(stderr, "%s over - or underflows uin64_t", string);
+        fprintf(stderr, "%s over - or underflows uint64_t", string);
         exit(EXIT_FAILURE);
     }
     else if (errno == EINVAL)
     {
-        fprintf(stderr, "%s No conversion could be performed", string);
+        fprintf(stderr, "%s No conversion could be performed from String to uint64_t", string);
         exit(EXIT_FAILURE);
     }
     return result;
@@ -221,5 +221,6 @@ int main(int argc, char **argv)
     uint8_t cipher[mlen];
 
     salsa20_crypt(mlen, message, cipher, key, iv);
+    free(message);
     write_file(output_file, (const char *)cipher);
 }
