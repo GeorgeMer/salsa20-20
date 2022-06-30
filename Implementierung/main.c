@@ -181,7 +181,7 @@ static void write_file(const char *path, const char *string)
 
 uint64_t gettime_in_seconds(const struct timespec start, const struct timespec end)
 {
-    return ((uint64_t)(end.tv_sec - start.tv_sec)) + ((uint64_t)((end.tv_nsec - start.tv_nsec) % 1000000000));
+    return ((uint64_t)(end.tv_sec - start.tv_sec)) + ((uint64_t)((end.tv_nsec - start.tv_nsec) / 1000000000));
 }
 
 int main(int argc, char **argv)
@@ -297,11 +297,11 @@ int main(int argc, char **argv)
     }
 
     // read the file and start the encryption using implementation according to implementation_number
-    // if measure_runtime == true then measure runtime with function being called number_of_iterations times
 
     const uint8_t *message = read_file(argv[optind]);
     uint8_t cipher[mlen];
 
+    // if measure_runtime == true then measure runtime with function being called number_of_iterations times
     if (measure_runtime)
     {
         struct timespec start;
