@@ -2,7 +2,7 @@
 #include <stdint.h>
 #include <stdio.h>
 
-uint32_t rotateLeft(uint32_t n, uint32_t d)
+uint32_t test(uint32_t n, uint32_t d)
 {
     return (n << d) | (n >> (32 - d));
 }

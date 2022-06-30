@@ -101,6 +101,12 @@ error:
 
 uint64_t convert_string_to_uint64_t(const char *string)
 {
+    if (*string == '-')
+    {
+        fprintf(stderr, "Negative numbers are not allowed as options.\n");
+        exit(EXIT_FAILURE);
+    }
+
     char *endptr;
     uint64_t result = strtoull(string, &endptr, 0);
     errno = 0;
@@ -113,12 +119,12 @@ uint64_t convert_string_to_uint64_t(const char *string)
     }
     else if (errno == ERANGE)
     {
-        fprintf(stderr, "%s over - or underflows uint64_t", string);
+        fprintf(stderr, "%s over - or underflows uint64_t\n", string);
         exit(EXIT_FAILURE);
     }
     else if (errno == EINVAL)
     {
-        fprintf(stderr, "%s No conversion could be performed from String to uint64_t", string);
+        fprintf(stderr, "%s No conversion could be performed from String to uint64_t\n", string);
         exit(EXIT_FAILURE);
     }
     return result;
@@ -138,12 +144,12 @@ uint32_t convert_string_to_uint32_t(const char *string, int base)
     }
     else if (errno == ERANGE)
     {
-        fprintf(stderr, "%s over - or underflows uint32_t", string);
+        fprintf(stderr, "%s over - or underflows uint32_t\n", string);
         exit(EXIT_FAILURE);
     }
     else if (errno == EINVAL)
     {
-        fprintf(stderr, "%s No conversion could be performed from String to uint32_t", string);
+        fprintf(stderr, "%s No conversion could be performed from String to uint32_t\n", string);
         exit(EXIT_FAILURE);
     }
     return result;
@@ -173,6 +179,7 @@ static void write_file(const char *path, uint8_t *cipher)
     }
 
     // writing cipher to output file as string of hexadecimals
+
     for (size_t i = 0; i < mlen; i++)
     {
         if (fprintf(file, "%x", *(cipher + i)) < 0)
@@ -228,7 +235,7 @@ int main(int argc, char **argv)
 
             if (implementation_number > 2)
             {
-                perror("This implementation does not exist! Valid implementation numbers are 0, 1 and 2.");
+                fprintf(stderr, "This implementation does not exist! Valid implementation numbers are 0, 1 and 2.\n");
                 return EXIT_FAILURE;
             }
 
@@ -247,10 +254,12 @@ int main(int argc, char **argv)
             if (*(optarg) == '0' && *(optarg) == 'x')
             {
                 base = 16;
+                optarg += 2;
             }
             else if (*(optarg) == '0')
             {
                 base = 8;
+                optarg += 1;
             }
 
             while (*(optarg) != '\0')
@@ -302,6 +311,12 @@ int main(int argc, char **argv)
         print_usage(progname);
         return EXIT_FAILURE;
     }
+    else if (optind < argc - 1)
+    {
+        printf("%s: You can only enter one input file\n", progname);
+        print_usage(progname);
+        return EXIT_FAILURE;
+    }
 
     // read the file and start the encryption using implementation according to implementation_number
 
@@ -310,7 +325,7 @@ int main(int argc, char **argv)
 
     if (cipher == NULL)
     {
-        fprintf(stderr, "Couldn't allocate enough memory.");
+        fprintf(stderr, "Couldn't allocate enough memory.\n");
         return EXIT_FAILURE;
     }
 
@@ -323,7 +338,7 @@ int main(int argc, char **argv)
         // error handling
         if (clock_gettime(CLOCK_MONOTONIC, &start))
         {
-            perror("Something went wrong measuring the runtime.");
+            fprintf(stderr, "Something went wrong measuring the runtime.\n");
             return EXIT_FAILURE;
         }
 
@@ -346,10 +361,14 @@ int main(int argc, char **argv)
             }
         }
 
+        // free input pointer and write to output file
+        free((void *)message);
+        write_file(output_file, cipher);
+
         // error handling
         if (clock_gettime(CLOCK_MONOTONIC, &end))
         {
-            perror("Something went wrong measuring the runtime.\n");
+            fprintf(stderr, "Something went wrong measuring the runtime.\n");
             return EXIT_FAILURE;
         }
 
@@ -359,6 +378,7 @@ int main(int argc, char **argv)
                "%" PRIu64 " function calls amounts to "
                "%" PRIu64 " seconds.\n",
                implementation_number, number_of_iterations, gettime_in_seconds(start, end));
+        return EXIT_SUCCESS;
     }
     else
     {
