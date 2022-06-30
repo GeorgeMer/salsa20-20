@@ -44,7 +44,7 @@ bool assertEqualsArrays_8bit(uint8_t expected[], uint64_t xlen, uint8_t actual[]
     if (xlen != alen)
     {
         printf("Lengths don't match: %u != %u", xlen, alen);
-        //return false;
+        return false;
     }
 
     for (uint64_t i = 0; i < xlen; i++)
@@ -52,7 +52,7 @@ bool assertEqualsArrays_8bit(uint8_t expected[], uint64_t xlen, uint8_t actual[]
         if (expected[i] != actual[i])
         {
             printf("Expected: %u \nActual: %u \nAt: %u \nLenght: %u\n", expected[i], actual[i], i,xlen);
-            //return false;
+            return false;
         }
     }
     printf("Success\n");
