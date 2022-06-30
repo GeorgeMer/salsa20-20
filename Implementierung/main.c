@@ -32,7 +32,8 @@ const char *help_msg =
     "  -i I   I resembles the initialization vector\n"
     "  -o P   P is the path to the output file\n"
     "  -h     Show help message (this text) and exit\n"
-    "  --help Same effect as -h\n";
+    "  --help Same effect as -h\n"
+    "  All numbers can be input as decimal (no prefix), octal (0 prefix) and hexadecimal (0x prefix)\n";
 
 void print_usage(const char *progname) { fprintf(stderr, usage_msg, progname, progname, progname); }
 void print_help(const char *progname)
@@ -95,7 +96,7 @@ error:
 uint64_t convert_string_to_uint64_t(const char *string)
 {
     char *endptr;
-    uint64_t result = strtoull(string, &endptr, 10);
+    uint64_t result = strtoull(string, &endptr, 0);
     errno = 0;
 
     // error handling
@@ -115,6 +116,45 @@ uint64_t convert_string_to_uint64_t(const char *string)
         exit(EXIT_FAILURE);
     }
     return result;
+}
+
+uint32_t convert_string_to_uint32_t(const char *string)
+{
+    char *endptr;
+    uint32_t result = strtoul(string, &endptr, 0);
+    errno = 0;
+
+    // error handling
+    if (endptr == string || *endptr != '\0')
+    {
+        fprintf(stderr, "%s could not be converted to uint32_t\n", string);
+        exit(EXIT_FAILURE);
+    }
+    else if (errno == ERANGE)
+    {
+        fprintf(stderr, "%s over - or underflows uint32_t", string);
+        exit(EXIT_FAILURE);
+    }
+    else if (errno == EINVAL)
+    {
+        fprintf(stderr, "%s No conversion could be performed from String to uint32_t", string);
+        exit(EXIT_FAILURE);
+    }
+    return result;
+}
+
+uint32_t *convert_string_to_key(const char *key_string)
+{
+    uint32_t key[8];
+
+    key[7] = convert_string_to_uint32_t(*(key_string)&255);
+    key[6] = convert_string_to_uint32_t((*(key_string) >> 8) & 255);
+    key[5] = convert_string_to_uint32_t((*(key_string) >> 16) & 255);
+    key[4] = convert_string_to_uint32_t((*(key_string) >> 24) & 255);
+    key[3] = convert_string_to_uint32_t((*(key_string) >> 32) & 255);
+    key[2] = convert_string_to_uint32_t((*(key_string) >> 40) & 255);
+    key[1] = convert_string_to_uint32_t((*(key_string) >> 48) & 255);
+    key[0] = convert_string_to_uint32_t((*(key_string) >> 56) & 255);
 }
 
 static void write_file(const char *path, const char *string)
@@ -165,7 +205,7 @@ int main(int argc, char **argv)
     uint64_t implementation_number = 0;
     uint64_t number_of_iterations;
     bool measure_runtime = false;
-    uint32_t key[8];
+    uint32_t *key;
     uint64_t iv = 0;
     const char *output_file = NULL;
 
@@ -189,7 +229,7 @@ int main(int argc, char **argv)
             measure_runtime = true;
             break;
         case 'k':
-            // TODO: how to read string input into uint32_t 8 element array
+            key = convert_string_to_key(optarg);
             break;
         case 'i':
             iv = convert_string_to_uint64_t(optarg);
