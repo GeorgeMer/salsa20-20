@@ -123,14 +123,6 @@ uint32_t littleendian(uint8_t input[4])
            input[3] * 16777216;
 }
 
-<<<<<<< HEAD
-void salsa20_core(uint32_t output[16], const uint32_t input[16])
-{
-    for (size_t i = 0; i < 20; i++)
-    {
-    }
-}
-=======
 uint8_t salsa20_hash(uint8_t output[64], const uint8_t input[64])
 {
     uint8_t temp_input[4];
@@ -156,4 +148,3 @@ void salsa20_core(uint32_t output[16], const uint32_t input[16])
     {
     }
 }
->>>>>>> d564ce018efe0fbc26fbbd0f1352794c5dd83ca8
