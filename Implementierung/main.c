@@ -28,8 +28,8 @@ const char *help_msg =
     "Optional arguments:\n"
     "  -V X   The implementation to be used (default: X = 0)\n"
     "  -B X   If set, runtime of chosen implementation will be measured and output. X represents the number of repetition of function calls\n"
-    "  -k K   K resembles the key\n"
-    "  -i I   I resembles the initialization vector\n"
+    "  -k K   K resembles the key\n (default: K = 2^256 - 1883)"
+    "  -i I   I resembles the initialization vector (default: I = 2^59 - 427)\n"
     "  -o P   P is the path to the output file\n"
     "  -h     Show help message (this text) and exit\n"
     "  --help Same effect as -h\n"
@@ -143,20 +143,6 @@ uint32_t convert_string_to_uint32_t(const char *string)
     return result;
 }
 
-uint32_t *convert_string_to_key(const char *key_string)
-{
-    uint32_t key[8];
-
-    key[7] = convert_string_to_uint32_t(*(key_string)&255);
-    key[6] = convert_string_to_uint32_t((*(key_string) >> 8) & 255);
-    key[5] = convert_string_to_uint32_t((*(key_string) >> 16) & 255);
-    key[4] = convert_string_to_uint32_t((*(key_string) >> 24) & 255);
-    key[3] = convert_string_to_uint32_t((*(key_string) >> 32) & 255);
-    key[2] = convert_string_to_uint32_t((*(key_string) >> 40) & 255);
-    key[1] = convert_string_to_uint32_t((*(key_string) >> 48) & 255);
-    key[0] = convert_string_to_uint32_t((*(key_string) >> 56) & 255);
-}
-
 static void write_file(const char *path, const char *string)
 {
     FILE *file;
@@ -205,8 +191,16 @@ int main(int argc, char **argv)
     uint64_t implementation_number = 0;
     uint64_t number_of_iterations;
     bool measure_runtime = false;
-    uint32_t *key;
-    uint64_t iv = 0;
+    uint32_t key[8];
+    key[0] = 0x10000001;
+    key[1] = 0xc4a1da00;
+    key[2] = 0x0;
+    key[3] = 0x0;
+    key[4] = 0x0;
+    key[5] = 0x0;
+    key[6] = 0x0;
+    key[7] = 0x0;
+    uint64_t iv = 0x7ffffff76b48c40;
     const char *output_file = NULL;
 
     // option parsing
@@ -229,7 +223,14 @@ int main(int argc, char **argv)
             measure_runtime = true;
             break;
         case 'k':
-            key = convert_string_to_key(optarg);
+            key[7] = convert_string_to_uint32_t(*(optarg)&255);
+            key[6] = convert_string_to_uint32_t((*(optarg) >> 8) & 255);
+            key[5] = convert_string_to_uint32_t((*(optarg) >> 16) & 255);
+            key[4] = convert_string_to_uint32_t((*(optarg) >> 24) & 255);
+            key[3] = convert_string_to_uint32_t((*(optarg) >> 32) & 255);
+            key[2] = convert_string_to_uint32_t((*(optarg) >> 40) & 255);
+            key[1] = convert_string_to_uint32_t((*(optarg) >> 48) & 255);
+            key[0] = convert_string_to_uint32_t((*(optarg) >> 56) & 255);
             break;
         case 'i':
             iv = convert_string_to_uint64_t(optarg);
