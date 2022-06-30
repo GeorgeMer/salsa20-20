@@ -118,10 +118,10 @@ uint64_t convert_string_to_uint64_t(const char *string)
     return result;
 }
 
-uint32_t convert_string_to_uint32_t(const char *string)
+uint32_t convert_string_to_uint32_t(const char *string, int base)
 {
     char *endptr;
-    uint32_t result = strtoul(string, &endptr, 0);
+    uint32_t result = strtoul(string, &endptr, base);
     errno = 0;
 
     // error handling
@@ -222,15 +222,48 @@ int main(int argc, char **argv)
             number_of_iterations = convert_string_to_uint64_t(optarg);
             measure_runtime = true;
             break;
-        case 'k':
-            key[7] = convert_string_to_uint32_t(*(optarg)&255);
-            key[6] = convert_string_to_uint32_t((*(optarg) >> 8) & 255);
-            key[5] = convert_string_to_uint32_t((*(optarg) >> 16) & 255);
-            key[4] = convert_string_to_uint32_t((*(optarg) >> 24) & 255);
-            key[3] = convert_string_to_uint32_t((*(optarg) >> 32) & 255);
-            key[2] = convert_string_to_uint32_t((*(optarg) >> 40) & 255);
-            key[1] = convert_string_to_uint32_t((*(optarg) >> 48) & 255);
-            key[0] = convert_string_to_uint32_t((*(optarg) >> 56) & 255);
+        case 'k':;
+            // converting 256 bit string input number into 8 element uint_32t array
+            uint8_t index = 0;
+            uint8_t count = 0;
+            char current_string[9];
+            int base = 10;
+
+            if (*(optarg) == '0' && *(optarg) == 'x')
+            {
+                base = 16;
+            }
+            else if (*(optarg) == '0')
+            {
+                base = 8;
+            }
+
+            while (*(optarg) != '\0')
+            {
+                current_string[count++] = *(optarg);
+                optarg += 1;
+                if (count == 9)
+                {
+                    current_string[count] = '\0';
+                    count = 0;
+                    key[index++] = convert_string_to_uint32_t(current_string, base);
+                }
+            }
+
+            if (count != 0)
+            {
+                while (count < 9)
+                {
+                    current_string[count++] = '0';
+                }
+                current_string[count] = '\0';
+                key[index++] = convert_string_to_uint32_t(current_string, base);
+            }
+
+            for (int i = index; i < 8; i++)
+            {
+                key[i] = 0x0;
+            }
             break;
         case 'i':
             iv = convert_string_to_uint64_t(optarg);
@@ -257,11 +290,11 @@ int main(int argc, char **argv)
 
     // read the file and start the encryption using implementation according to implementation_number
     // if measure_runtime == true then measure runtime with function being called number_of_iterations times
-    // don't forget to free message again!
+
     const uint8_t *message = read_file(argv[optind]);
     uint8_t cipher[mlen];
 
     salsa20_crypt(mlen, message, cipher, key, iv);
-    free(message);
+    free((void *)message);
     write_file(output_file, (const char *)cipher);
 }
