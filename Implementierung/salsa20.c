@@ -111,7 +111,11 @@ void doubleRound(uint32_t output[16], const uint32_t input[16]) {
 }
 
 uint32_t littleendian(uint8_t input[4]) {
-    return input[0] + input[1] + input[2] + input[3]; 
+    return 
+    input[0] + 
+    input[1] * 256 + 
+    input[2] * 65536 + 
+    input[3] * 16777216; 
 }
 
 void salsa20_core(uint32_t output[16], const uint32_t input[16]){
