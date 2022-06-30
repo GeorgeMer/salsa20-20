@@ -7,14 +7,12 @@ uint32_t rotateLeft(uint32_t n, uint32_t d)
     return (n << d) | (n >> (32 - d));
 }
 
-uint8_t[] intToBytes(uint32_t n)
+void intToBytes(uint8_t bytes[4], uint32_t n)
 {
-    uint8_t bytes[4];
     bytes[0] = (n >> 24) & 0xFF;
     bytes[1] = (n >> 16) & 0xFF;
     bytes[2] = (n >> 8) & 0xFF;
     bytes[3] = n & 0xFF;
-    return bytes;
 }
 
 void quarterRound(uint32_t output[4], const uint32_t input[4])
@@ -163,7 +161,9 @@ uint8_t salsa20_hash(uint32_t output[16], const uint8_t input[64])
 
     for (int i = 0; i < 16; i++)
     {
-        output[i] = littleendian(intToBytes(x[i] + z[i]))
+        uint8_t bytes[4];
+        intToBytes(bytes, x[i] + z[i]);
+        output[i] = littleendian(bytes);
     }
 }
 
@@ -172,7 +172,8 @@ void salsa20_core(uint32_t output[16], const uint32_t input[16])
     uint8_t inputBytes[64];
     for (int i = 0, j = 0; i < 16; i++, j += 4)
     {
-        uint8_t bytes[] = intToBytes(input[i]);
+        uint8_t bytes[4];
+        intToBytes(bytes, input[i]);
         inputBytes[j] = bytes[0];
         inputBytes[j + 1] = bytes[1];
         inputBytes[j + 2] = bytes[2];
