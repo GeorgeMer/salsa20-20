@@ -2,9 +2,15 @@
 #include <stdint.h>
 #include <stdio.h>
 
-void salsa20_core(uint32_t output[16], const uint32_t input[16])
-{
-}
+#ifdef CORE0
+#include "../salsa_core/salsa_core_v0.h"
+#elif defined CORE1
+#include "../salsa_core/salsa_core_v1.h"
+#elif defined CORE2
+#include "../salsa_core/salsa_core_v2.h"
+#else
+#include "../salsa_core/salsa_core_v0.h"
+#endif
 
 void salsa20_crypt(size_t mlen, const uint8_t msg[mlen], uint8_t cipher[mlen], uint32_t key[8], uint64_t iv)
 {

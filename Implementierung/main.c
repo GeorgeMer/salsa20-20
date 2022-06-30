@@ -10,7 +10,15 @@
 #include <string.h>
 #include <time.h>
 #include <inttypes.h>
+#ifdef CRYPT1
 #include "salsa_crypt/salsa_crypt_v0.h"
+#elif defined CRYPT1
+#include "salsa_crypt/salsa_crypt_v1.h"
+#elif defined CRYPT1
+#include "salsa_crypt/salsa_crypt_v2.h"
+#else
+#include "salsa_crypt/salsa_crypt_v0.h"
+#endif
 
 static struct option long_options[] =
     {

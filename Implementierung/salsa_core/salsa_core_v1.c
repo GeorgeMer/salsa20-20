@@ -155,8 +155,8 @@ uint8_t salsa20_hash(uint32_t output[16], const uint8_t input[64])
 
     for (int i = 0; i < 5; i++)
     {
-        doubleround(temp_output, z);
-        doubleround(z, temp_output);
+        doubleRound(temp_output, z);
+        doubleRound(z, temp_output);
     }
 
     for (int i = 0; i < 16; i++)
