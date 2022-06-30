@@ -53,8 +53,8 @@ const uint8_t *read_file(const char *path)
     // error handling
     if (file == NULL)
     {
-        perror("Something went wrong opening your file. Did you enter the correct path?");
-        goto error;
+        perror("Something went wrong opening your file");
+        exit(EXIT_FAILURE);
     }
 
     struct stat statbuf;
@@ -146,7 +146,7 @@ uint32_t convert_string_to_uint32_t(const char *string, int base)
     return result;
 }
 
-static void write_file(const char *path, const char *string)
+static void write_file(const char *path, uint8_t *cipher)
 {
     FILE *file;
 
@@ -156,7 +156,7 @@ static void write_file(const char *path, const char *string)
         // create txt file "encrypted" if no path to output file was given
         if (!(file = fopen("encrypted.txt", "w")))
         {
-            perror("Something went wrong creating a file.");
+            perror("Something went wrong creating a file");
             exit(EXIT_FAILURE);
         }
     }
@@ -164,16 +164,20 @@ static void write_file(const char *path, const char *string)
     {
         if (!(file = fopen(path, "w")))
         {
-            perror("Something went wrong opening your output file. Did you enter the correct path?");
+            perror("Something went wrong opening your output file");
             exit(EXIT_FAILURE);
         }
     }
 
-    if (!(fwrite(string, 1, strlen(string), file)))
+    // writing cipher to output file as string of hexadecimals
+    for (size_t i = 0; i < mlen; i++)
     {
-        perror("Something went wrong writing to your output file.");
-        fclose(file);
-        exit(EXIT_FAILURE);
+        if (fprintf(file, "%x", *(cipher + i)) < 0)
+        {
+            perror("Something went wrong writing to your output file");
+            fclose(file);
+            exit(EXIT_FAILURE);
+        }
     }
     // close successfully written file
     fclose(file);
@@ -347,6 +351,6 @@ int main(int argc, char **argv)
 
     // free input pointer and write to output file
     free((void *)message);
-    write_file(output_file, (const char *)cipher);
+    write_file(output_file, cipher);
     return EXIT_SUCCESS;
 }
