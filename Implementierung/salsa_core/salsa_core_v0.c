@@ -7,7 +7,7 @@ uint32_t rotateLeft(uint32_t number, uint32_t amount)
     return (number << amount) | (number >> (32 - amount));
 }
 
-void salsa20_core(uint32_t output[16], const uint32_t input[16])
+void salsa20_core_v0(uint32_t output[16], const uint32_t input[16])
 {
     for (uint8_t i = 0; i < 16; i++)
     {

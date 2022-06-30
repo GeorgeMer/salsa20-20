@@ -2,17 +2,9 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#ifdef CORE0
 #include "../salsa_core/salsa_core_v0.h"
-#elif defined CORE1
-#include "../salsa_core/salsa_core_v1.h"
-#elif defined CORE2
-#include "../salsa_core/salsa_core_v2.h"
-#else
-#include "../salsa_core/salsa_core_v0.h"
-#endif
 
-void salsa20_crypt(size_t mlen, const uint8_t msg[mlen], uint8_t cipher[mlen], uint32_t key[8], uint64_t iv)
+void salsa20_crypt_v0(size_t mlen, const uint8_t msg[mlen], uint8_t cipher[mlen], uint32_t key[8], uint64_t iv)
 {
     uint32_t in[16];
 
@@ -44,7 +36,7 @@ void salsa20_crypt(size_t mlen, const uint8_t msg[mlen], uint8_t cipher[mlen], u
         in[9] = (i >> 32) & 0xFFFFFFFF;
 
         // get 64byte hash
-        salsa20_core(hash, in);
+        salsa20_core_v0(hash, in);
 
         // transform it to byte-array
         uint8_t h[64];

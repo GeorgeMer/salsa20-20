@@ -167,7 +167,7 @@ uint8_t salsa20_hash(uint32_t output[16], const uint8_t input[64])
     }
 }
 
-void salsa20_core(uint32_t output[16], const uint32_t input[16])
+void salsa20_core_v2(uint32_t output[16], const uint32_t input[16])
 {
     uint8_t inputBytes[64];
     for (int i = 0, j = 0; i < 16; i++, j += 4)
