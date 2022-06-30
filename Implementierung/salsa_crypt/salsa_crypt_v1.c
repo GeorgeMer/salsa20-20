@@ -37,7 +37,7 @@ void salsa20_crypt_v1(size_t mlen, const uint8_t msg[mlen], uint8_t cipher[mlen]
         in[9] = (i >> 32) & 0xFFFFFFFF;
 
         // get 64byte hash
-        salsa20_core_v1(hash, in);
+        salsa_core_v1(hash, in);
 
         // go byte by byte through hash and msg, xor to cipher
         for (uint8_t j = 0; j < 16; j++)
@@ -50,7 +50,7 @@ void salsa20_crypt_v1(size_t mlen, const uint8_t msg[mlen], uint8_t cipher[mlen]
     in[9] = (i >> 32) & 0xFFFFFFFF;
 
     // get hash
-    salsa20_core_v1(hash, in);
+    salsa_core_v1(hash, in);
 
     i *= 64;
 
