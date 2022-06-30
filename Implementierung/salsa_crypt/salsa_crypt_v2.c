@@ -1,6 +1,15 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <immintrin.h>
+
+//dummy
+void salsa20_core(uint32_t output[16], const uint32_t input[16]){
+    for(int i=0;i<16;i++){
+        output[i] = input[i];
+    }
+}
+
 
 void salsa20_crypt(size_t mlen, const uint8_t msg[mlen], uint8_t cipher[mlen], uint32_t key[8], uint64_t iv){
     uint32_t in[16];
@@ -24,13 +33,9 @@ void salsa20_crypt(size_t mlen, const uint8_t msg[mlen], uint8_t cipher[mlen], u
 
 
     uint32_t hash[16]; //output array
-
+    uint64_t i = 0;
     //use one hash to encode 64 bytes of msg
-    for(uint64_t i=0; i<mlen/64; i++){
-
-
-        //TODO: use simd
-
+    for(; i<mlen/64; i++){
 
         //set counter
         in[8] = i & 0xFFFFFFFF;      
@@ -38,11 +43,50 @@ void salsa20_crypt(size_t mlen, const uint8_t msg[mlen], uint8_t cipher[mlen], u
 
         //get 64byte hash
         salsa20_core(hash,in);
+        
 
-        //go byte by byte through hash and msg, xor to cipher
-        for(uint8_t j=0;j<16;j++)
-            for(uint8_t k=0;k<4;k++)
-                cipher[4*j+k] = ((hash[j] >> 8*k) & 0xFF) ^ msg[4*j+k];  
+        for(uint8_t j = 0;j<4;j++){
+
+            //load 16 bytes of hash
+            __m128i h =  _mm_loadu_si128(hash + 4*j);
+            
+            
+            //load hash
+            __m128i m = _mm_loadu_si128(msg + 64*i + 16*j);
+
+            //perform xor
+            __m128i c = _mm_xor_si128(h,m);
+
+            //store
+            _mm_storeu_si128(cipher + 64*i + 16*j, c);
+        }
     }
+
+    // -- finish up --
+
+    //set counter
+    in[8] = i & 0xFFFFFFFF;
+    in[9] = (i >> 32) & 0xFFFFFFFF;
+
+    // get 64byte hash
+    salsa20_core(hash, in);
+
+    i*=64;
+
+    //transform it to byte-array
+    uint8_t h[64];
+    for (uint8_t j = 0; j < 16; j++)
+    {
+        h[j*4] = ((hash[j] >> 8 * 0) & 0xFF);
+        h[j*4 + 1] = ((hash[j] >> 8 * 1) & 0xFF);
+        h[j*4 + 2] = ((hash[j] >> 8 * 2) & 0xFF);
+        h[j*4 + 3] = ((hash[j] >> 8 * 3) & 0xFF);
+    }
+
+    // go byte by byte through hash and msg, xor to cipher
+    for (uint8_t j = 0; j < 64 && i + j < mlen; j++)
+        cipher[i + j] = (h[j]) ^ msg[i + j];
+
+
 
 }
