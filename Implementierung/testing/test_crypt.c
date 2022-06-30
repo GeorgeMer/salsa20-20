@@ -6,6 +6,7 @@
 #include <time.h>
 
 #include "../salsa_crypt/salsa_crypt_v1.h"
+#include "../salsa_crypt/salsa_crypt_v2.h"
 #include "asserts.h"
 
 
@@ -45,9 +46,9 @@ int main(int argc, char **argv)
         iv = ((2 * randomInt(0, RAND_MAX) + randomInt(0, 1)) << 32) | (2 * randomInt(0, RAND_MAX) + randomInt(0, 1));
 
      
-        salsa20_crypt_test(mlen, msg, cipher1, key, iv);
+        salsa20_crypt_v1(mlen, msg, cipher1, key, iv);
         
-        salsa20_crypt(mlen, msg, cipher2, key, iv);
+        salsa20_crypt_v2(mlen, msg, cipher2, key, iv);
         
         printf("%d: ",i);
         assertEqualsArrays_8bit(cipher1,mlen,cipher2,mlen);
