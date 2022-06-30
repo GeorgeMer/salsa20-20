@@ -103,6 +103,17 @@ void columnRound(uint32_t output[16], const uint32_t input[16]){
     output[11] = temp_out[3];
 }
 
+void doubleRound(uint32_t output[16], const uint32_t input[16]) {
+    // doubleround(x) = rowround(columnround(x))
+    uint32_t temp_output [16];
+    columnRound(temp_output, input);
+    rowRound(output, temp_output);
+}
+
+uint32_t littleendian(uint8_t input[4]) {
+    return input[0] + input[1] + input[2] + input[3]; 
+}
+
 void salsa20_core(uint32_t output[16], const uint32_t input[16]){
     for (size_t i = 0; i < 20; i++) {
 
