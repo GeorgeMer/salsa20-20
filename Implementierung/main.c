@@ -1,3 +1,4 @@
+#define _POSIX_C_SOURCE 199309L
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -7,6 +8,8 @@
 #include <stdbool.h>
 #include <sys/stat.h>
 #include <string.h>
+#include <time.h>
+#include <inttypes.h>
 #include "salsa20.h"
 
 static struct option long_options[] =
@@ -27,7 +30,7 @@ const char *help_msg =
     "\n"
     "Optional arguments:\n"
     "  -V X   The implementation to be used (default: X = 0)\n"
-    "  -B X   If set, runtime of chosen implementation will be measured and output. X represents the number of repetition of function calls\n"
+    "  -B X   If set, runtime of chosen implementation will be measured and output. X represents the number of repetition of function calls (default: No runtime measurement)\n"
     "  -k K   K resembles the key\n (default: K = 2^256 - 1883)"
     "  -i I   I resembles the initialization vector (default: I = 2^59 - 427)\n"
     "  -o P   P is the path to the output file\n"
@@ -176,6 +179,11 @@ static void write_file(const char *path, const char *string)
     fclose(file);
 }
 
+uint64_t gettime_in_seconds(const struct timespec start, const struct timespec end)
+{
+    return ((uint64_t)(end.tv_sec - start.tv_sec)) + ((uint64_t)((end.tv_nsec - start.tv_nsec) % 1000000000));
+}
+
 int main(int argc, char **argv)
 {
     const char *progname = argv[0];
@@ -294,7 +302,45 @@ int main(int argc, char **argv)
     const uint8_t *message = read_file(argv[optind]);
     uint8_t cipher[mlen];
 
-    salsa20_crypt(mlen, message, cipher, key, iv);
+    if (measure_runtime)
+    {
+        struct timespec start;
+        struct timespec end;
+
+        // error handling
+        if (clock_gettime(CLOCK_MONOTONIC, &start))
+        {
+            perror("Something went wrong measuring the runtime.");
+            return EXIT_FAILURE;
+        }
+
+        // calling the function number_of_iterations times
+        for (uint64_t i = 1; i <= number_of_iterations; i++)
+        {
+            salsa20_crypt(mlen, message, cipher, key, iv);
+        }
+
+        // error handling
+        if (clock_gettime(CLOCK_MONOTONIC, &end))
+        {
+            perror("Something went wrong measuring the runtime.\n");
+            return EXIT_FAILURE;
+        }
+
+        // printing the result to the console
+        printf("The runtime for implementation "
+               "%" PRIu64 " with "
+               "%" PRIu64 " function calls amounts to "
+               "%" PRIu64 " seconds.\n",
+               implementation_number, number_of_iterations, gettime_in_seconds(start, end));
+    }
+    else
+    {
+        salsa20_crypt(mlen, message, cipher, key, iv);
+    }
+
+    // free input pointer and write to output file
     free((void *)message);
     write_file(output_file, (const char *)cipher);
+    return EXIT_SUCCESS;
 }
