@@ -1,3 +1,4 @@
+#define _POSIX_C_SOURCE 199309L
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -7,6 +8,8 @@
 #include <stdbool.h>
 #include <sys/stat.h>
 #include <string.h>
+#include <time.h>
+#include <inttypes.h>
 #include "salsa20.h"
 
 static struct option long_options[] =
@@ -27,9 +30,9 @@ const char *help_msg =
     "\n"
     "Optional arguments:\n"
     "  -V X   The implementation to be used (default: X = 0)\n"
-    "  -B X   If set, runtime of chosen implementation will be measured and output. X represents the number of repetition of function calls\n"
-    "  -k K   K resembles the key\n"
-    "  -i I   I resembles the initialization vector\n"
+    "  -B X   If set, runtime of chosen implementation will be measured and output. X represents the number of repetition of function calls (default: No runtime measurement)\n"
+    "  -k K   K resembles the key\n (default: K = 2^256 - 1883)"
+    "  -i I   I resembles the initialization vector (default: I = 2^59 - 427)\n"
     "  -o P   P is the path to the output file\n"
     "  -h     Show help message (this text) and exit\n"
     "  --help Same effect as -h\n"
@@ -118,10 +121,10 @@ uint64_t convert_string_to_uint64_t(const char *string)
     return result;
 }
 
-uint32_t convert_string_to_uint32_t(const char *string)
+uint32_t convert_string_to_uint32_t(const char *string, int base)
 {
     char *endptr;
-    uint32_t result = strtoul(string, &endptr, 0);
+    uint32_t result = strtoul(string, &endptr, base);
     errno = 0;
 
     // error handling
@@ -141,20 +144,6 @@ uint32_t convert_string_to_uint32_t(const char *string)
         exit(EXIT_FAILURE);
     }
     return result;
-}
-
-uint32_t *convert_string_to_key(const char *key_string)
-{
-    uint32_t key[8];
-
-    key[7] = convert_string_to_uint32_t(*(key_string)&255);
-    key[6] = convert_string_to_uint32_t((*(key_string) >> 8) & 255);
-    key[5] = convert_string_to_uint32_t((*(key_string) >> 16) & 255);
-    key[4] = convert_string_to_uint32_t((*(key_string) >> 24) & 255);
-    key[3] = convert_string_to_uint32_t((*(key_string) >> 32) & 255);
-    key[2] = convert_string_to_uint32_t((*(key_string) >> 40) & 255);
-    key[1] = convert_string_to_uint32_t((*(key_string) >> 48) & 255);
-    key[0] = convert_string_to_uint32_t((*(key_string) >> 56) & 255);
 }
 
 static void write_file(const char *path, const char *string)
@@ -190,6 +179,11 @@ static void write_file(const char *path, const char *string)
     fclose(file);
 }
 
+uint64_t gettime_in_seconds(const struct timespec start, const struct timespec end)
+{
+    return ((uint64_t)(end.tv_sec - start.tv_sec)) + ((uint64_t)((end.tv_nsec - start.tv_nsec) / 1000000000));
+}
+
 int main(int argc, char **argv)
 {
     const char *progname = argv[0];
@@ -205,8 +199,16 @@ int main(int argc, char **argv)
     uint64_t implementation_number = 0;
     uint64_t number_of_iterations;
     bool measure_runtime = false;
-    uint32_t *key;
-    uint64_t iv = 0;
+    uint32_t key[8];
+    key[0] = 0x10000001;
+    key[1] = 0xc4a1da00;
+    key[2] = 0x0;
+    key[3] = 0x0;
+    key[4] = 0x0;
+    key[5] = 0x0;
+    key[6] = 0x0;
+    key[7] = 0x0;
+    uint64_t iv = 0x7ffffff76b48c40;
     const char *output_file = NULL;
 
     // option parsing
@@ -228,8 +230,48 @@ int main(int argc, char **argv)
             number_of_iterations = convert_string_to_uint64_t(optarg);
             measure_runtime = true;
             break;
-        case 'k':
-            key = convert_string_to_key(optarg);
+        case 'k':;
+            // converting 256 bit string input number into 8 element uint_32t array
+            uint8_t index = 0;
+            uint8_t count = 0;
+            char current_string[9];
+            int base = 10;
+
+            if (*(optarg) == '0' && *(optarg) == 'x')
+            {
+                base = 16;
+            }
+            else if (*(optarg) == '0')
+            {
+                base = 8;
+            }
+
+            while (*(optarg) != '\0')
+            {
+                current_string[count++] = *(optarg);
+                optarg += 1;
+                if (count == 9)
+                {
+                    current_string[count] = '\0';
+                    count = 0;
+                    key[index++] = convert_string_to_uint32_t(current_string, base);
+                }
+            }
+
+            if (count != 0)
+            {
+                while (count < 9)
+                {
+                    current_string[count++] = '0';
+                }
+                current_string[count] = '\0';
+                key[index++] = convert_string_to_uint32_t(current_string, base);
+            }
+
+            for (int i = index; i < 8; i++)
+            {
+                key[i] = 0x0;
+            }
             break;
         case 'i':
             iv = convert_string_to_uint64_t(optarg);
@@ -255,12 +297,50 @@ int main(int argc, char **argv)
     }
 
     // read the file and start the encryption using implementation according to implementation_number
-    // if measure_runtime == true then measure runtime with function being called number_of_iterations times
-    // don't forget to free message again!
+
     const uint8_t *message = read_file(argv[optind]);
     uint8_t cipher[mlen];
 
-    salsa20_crypt(mlen, message, cipher, key, iv);
-    free(message);
+    // if measure_runtime == true then measure runtime with function being called number_of_iterations times
+    if (measure_runtime)
+    {
+        struct timespec start;
+        struct timespec end;
+
+        // error handling
+        if (clock_gettime(CLOCK_MONOTONIC, &start))
+        {
+            perror("Something went wrong measuring the runtime.");
+            return EXIT_FAILURE;
+        }
+
+        // calling the function number_of_iterations times
+        for (uint64_t i = 1; i <= number_of_iterations; i++)
+        {
+            salsa20_crypt(mlen, message, cipher, key, iv);
+        }
+
+        // error handling
+        if (clock_gettime(CLOCK_MONOTONIC, &end))
+        {
+            perror("Something went wrong measuring the runtime.\n");
+            return EXIT_FAILURE;
+        }
+
+        // printing the result to the console
+        printf("The runtime for implementation "
+               "%" PRIu64 " with "
+               "%" PRIu64 " function calls amounts to "
+               "%" PRIu64 " seconds.\n",
+               implementation_number, number_of_iterations, gettime_in_seconds(start, end));
+    }
+    else
+    {
+        salsa20_crypt(mlen, message, cipher, key, iv);
+    }
+
+    // free input pointer and write to output file
+    free((void *)message);
     write_file(output_file, (const char *)cipher);
+    return EXIT_SUCCESS;
 }
