@@ -10,15 +10,10 @@
 #include <string.h>
 #include <time.h>
 #include <inttypes.h>
-#ifdef CRYPT1
+
 #include "salsa_crypt/salsa_crypt_v0.h"
-#elif defined CRYPT1
 #include "salsa_crypt/salsa_crypt_v1.h"
-#elif defined CRYPT1
 #include "salsa_crypt/salsa_crypt_v2.h"
-#else
-#include "salsa_crypt/salsa_crypt_v0.h"
-#endif
 
 static struct option long_options[] =
     {
@@ -227,9 +222,9 @@ int main(int argc, char **argv)
         case 'V':
             implementation_number = convert_string_to_uint64_t(optarg);
 
-            if (implementation_number > 1)
+            if (implementation_number > 2)
             {
-                perror("This implementation does not exist! Valid implementation numbers are 0 and 1.");
+                perror("This implementation does not exist! Valid implementation numbers are 0, 1 and 2.");
                 return EXIT_FAILURE;
             }
 
@@ -331,7 +326,20 @@ int main(int argc, char **argv)
         // calling the function number_of_iterations times
         for (uint64_t i = 1; i <= number_of_iterations; i++)
         {
-            salsa20_crypt(mlen, message, cipher, key, iv);
+            switch (implementation_number)
+            {
+            case 0:
+                salsa20_crypt_v0(mlen, message, cipher, key, iv);
+                break;
+            case 1:
+                salsa20_crypt_v1(mlen, message, cipher, key, iv);
+                break;
+            case 2:
+                salsa20_crypt_v2(mlen, message, cipher, key, iv);
+                break;
+            default:
+                break;
+            }
         }
 
         // error handling
@@ -350,7 +358,20 @@ int main(int argc, char **argv)
     }
     else
     {
-        salsa20_crypt(mlen, message, cipher, key, iv);
+        switch (implementation_number)
+        {
+        case 0:
+            salsa20_crypt_v0(mlen, message, cipher, key, iv);
+            break;
+        case 1:
+            salsa20_crypt_v1(mlen, message, cipher, key, iv);
+            break;
+        case 2:
+            salsa20_crypt_v2(mlen, message, cipher, key, iv);
+            break;
+        default:
+            break;
+        }
     }
 
     // free input pointer and write to output file
