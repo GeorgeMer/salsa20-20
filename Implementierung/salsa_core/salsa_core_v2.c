@@ -2,18 +2,21 @@
 #include <stdint.h>
 #include <stdio.h>
 
-int rotateLeft(uint32_t n, uint32_t d) {
-   return (n << d)|(n >> (32 - d));
+uint32_t rotateLeft(uint32_t number, uint32_t amount)
+{
+    return (number << amount) | (number >> (32 - amount));
 }
 
-void quarterRound(uint32_t output[4], const uint32_t input[4]) {
+void quarterRound(uint32_t output[4], const uint32_t input[4])
+{
     output[1] = input[1] ^ (rotateLeft(input[0] + input[3], 7));
     output[2] = input[2] ^ (rotateLeft(input[1] + input[0], 9));
     output[3] = input[3] ^ (rotateLeft(input[2] + input[1], 13));
     output[0] = input[0] ^ (rotateLeft(input[3] + input[2], 18));
 }
 
-void rowRound(uint32_t output[16], const uint32_t input[16]){
+void rowRound(uint32_t output[16], const uint32_t input[16])
+{
     uint32_t temp_in[4];
     uint32_t temp_out[4];
 
@@ -58,7 +61,8 @@ void rowRound(uint32_t output[16], const uint32_t input[16]){
     output[14] = temp_out[3];
 }
 
-void columnRound(uint32_t output[16], const uint32_t input[16]){
+void columnRound(uint32_t output[16], const uint32_t input[16])
+{
     uint32_t temp_in[4];
     uint32_t temp_out[4];
 
@@ -103,24 +107,25 @@ void columnRound(uint32_t output[16], const uint32_t input[16]){
     output[11] = temp_out[3];
 }
 
-void doubleRound(uint32_t output[16], const uint32_t input[16]) {
+void doubleRound(uint32_t output[16], const uint32_t input[16])
+{
     // doubleround(x) = rowround(columnround(x))
-    uint32_t temp_output [16];
+    uint32_t temp_output[16];
     columnRound(temp_output, input);
     rowRound(output, temp_output);
 }
 
-uint32_t littleendian(uint8_t input[4]) {
-    return 
-    input[0] + 
-    input[1] * 256 + 
-    input[2] * 65536 + 
-    input[3] * 16777216; 
+uint32_t littleendian(uint8_t input[4])
+{
+    return input[0] +
+           input[1] * 256 +
+           input[2] * 65536 +
+           input[3] * 16777216;
 }
 
-void salsa20_core(uint32_t output[16], const uint32_t input[16]){
-    for (size_t i = 0; i < 20; i++) {
-
+void salsa20_core(uint32_t output[16], const uint32_t input[16])
+{
+    for (size_t i = 0; i < 20; i++)
+    {
     }
 }
-

@@ -10,7 +10,7 @@
 #include <string.h>
 #include <time.h>
 #include <inttypes.h>
-#include "salsa_crypt/salsa_crypt_v1.h"
+#include "salsa_crypt/salsa_crypt_v0.h"
 
 static struct option long_options[] =
     {
