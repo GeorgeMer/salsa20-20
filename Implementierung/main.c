@@ -10,7 +10,7 @@
 #include <string.h>
 #include <time.h>
 #include <inttypes.h>
-#include "salsa20.h"
+#include "salsa_crypt/salsa_crypt_v1.h"
 
 static struct option long_options[] =
     {
@@ -299,7 +299,13 @@ int main(int argc, char **argv)
     // read the file and start the encryption using implementation according to implementation_number
 
     const uint8_t *message = read_file(argv[optind]);
-    uint8_t cipher[mlen];
+    uint8_t *cipher = malloc(mlen);
+
+    if (cipher == NULL)
+    {
+        fprintf(stderr, "Couldn't allocate enough memory.");
+        return EXIT_FAILURE;
+    }
 
     // if measure_runtime == true then measure runtime with function being called number_of_iterations times
     if (measure_runtime)

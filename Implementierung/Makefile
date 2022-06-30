@@ -3,7 +3,7 @@ CFLAGS=-O0 -std=c11 -g -Wall -Wextra -Wpedantic
 
 .PHONY: all 
 all: main 
-main: main.c salsa20.h salsa20.c 
+main:  salsa_crypt/salsa_crypt_v1.c main.c
 	$(CC) $(CFLAGS) -o $@ $^ 
 .PHONY: clean 
 clean: 
