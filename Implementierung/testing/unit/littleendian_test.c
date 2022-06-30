@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "../../salsa_core/salsa_core_v2.h"
+#include "../../salsa_core/salsa_core_v1.h"
 
 int main()
 {

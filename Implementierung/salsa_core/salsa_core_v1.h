@@ -1,5 +1,5 @@
-#ifndef SALSACOREV2_H
-#define SALSACOREV2_H
+#ifndef SALSACOREV1_H
+#define SALSACOREV1_H
 
 #include <stddef.h>
 #include <stdint.h>
