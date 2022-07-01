@@ -1,6 +1,5 @@
 #include <stddef.h>
 #include <stdint.h>
-#include <stdio.h>
 
 #include "../salsa_core/salsa_core_v0.h"
 
@@ -8,48 +7,50 @@ void salsa_crypt_v0(size_t mlen, const uint8_t msg[mlen], uint8_t cipher[mlen], 
 {
     uint32_t in[16];
 
-    // write to start array, except to 64bits of counter
+    // initalize input matrix
     in[0] = 0x61707865;
-    in[1] = key[0];
-    in[2] = key[1];
-    in[3] = key[2];
-    in[4] = key[3];
+    in[1] = __builtin_bswap32(key[0]);
+    in[2] = __builtin_bswap32(key[1]);
+    in[3] = __builtin_bswap32(key[2]);
+    in[4] = __builtin_bswap32(key[3]);
     in[5] = 0x3320646e;
-    in[6] = iv & 0xFFFFFFFF;
-    in[7] = (iv >> 32) & 0xFFFFFFFF;
-
+    in[6] = __builtin_bswap32(iv >> 32);
+    in[7] = __builtin_bswap32(iv & 0xffffffff);
+    in[8] = 0;
+    in[9] = 0;
     in[10] = 0x79622d32;
-    in[11] = key[4];
-    in[12] = key[5];
-    in[13] = key[6];
-    in[14] = key[7];
+    in[11] = __builtin_bswap32(key[4]);
+    in[12] = __builtin_bswap32(key[5]);
+    in[13] = __builtin_bswap32(key[6]);
+    in[14] = __builtin_bswap32(key[7]);
     in[15] = 0x6b206574;
 
-    uint32_t hash[16]; // output array
+    // output matrix
+    uint32_t out[16];
+    salsa_core_v0(out, in);
 
-    uint64_t i = 0;
-    // use one hash to encode 64 bytes of msg
-    for (; i < mlen / 64 + 1; i++)
+    size_t index = 0;
+    uint8_t *stream = ((uint8_t *)out);
+
+    for (size_t i = 0; i < mlen; i++)
     {
-        // set counter
-        in[8] = i & 0xFFFFFFFF;
-        in[9] = (i >> 32) & 0xFFFFFFFF;
-
-        // get 64byte hash
-        salsa_core_v0(hash, in);
-
-        // transform it to byte-array
-        uint8_t h[64];
-        for (uint8_t j = 0; j < 16; j++)
+        if (index == 63)
         {
-            h[j * 4] = ((hash[j] >> 8 * 0) & 0xFF);
-            h[j * 4 + 1] = ((hash[j] >> 8 * 1) & 0xFF);
-            h[j * 4 + 2] = ((hash[j] >> 8 * 2) & 0xFF);
-            h[j * 4 + 3] = ((hash[j] >> 8 * 3) & 0xFF);
-        }
+            index = 0;
 
-        // go byte by byte through hash and msg, xor to cipher
-        for (uint8_t j = 0; j < 64 && 64 * i + j < mlen; j++)
-            cipher[64 * i + j] = (h[j]) ^ msg[64 * i + j];
+            if (in[8] == UINT32_MAX)
+            {
+                in[9] += 1;
+            }
+            else
+            {
+                in[8] += 1;
+            }
+
+            salsa_core_v0(out, in);
+            stream = ((uint8_t *)out);
+        }
+        cipher[i] = msg[i] ^ (*(stream + index));
+        index++;
     }
 }

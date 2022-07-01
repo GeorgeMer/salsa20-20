@@ -182,11 +182,32 @@ static void write_file(const char *path, uint8_t *cipher)
 
     for (size_t i = 0; i < mlen; i++)
     {
-        if (fprintf(file, "%x", *(cipher + i)) < 0)
+        if (*(cipher + i) == 0)
         {
-            perror("Something went wrong writing to your output file");
-            fclose(file);
-            exit(EXIT_FAILURE);
+            if (fprintf(file, "00") < 0)
+            {
+                perror("Something went wrong writing to your output file");
+                fclose(file);
+                exit(EXIT_FAILURE);
+            }
+        }
+        else if (*(cipher + i) <= 15)
+        {
+            if (fprintf(file, "0%x", *(cipher + i)) < 0)
+            {
+                perror("Something went wrong writing to your output file");
+                fclose(file);
+                exit(EXIT_FAILURE);
+            }
+        }
+        else
+        {
+            if (fprintf(file, "%x", *(cipher + i)) < 0)
+            {
+                perror("Something went wrong writing to your output file");
+                fclose(file);
+                exit(EXIT_FAILURE);
+            }
         }
     }
     // close successfully written file
@@ -251,7 +272,7 @@ int main(int argc, char **argv)
             char current_string[9];
             int base = 10;
 
-            if (*(optarg) == '0' && *(optarg) == 'x')
+            if (*(optarg) == '0' && *(optarg + 1) == 'x')
             {
                 base = 16;
                 optarg += 2;
@@ -266,7 +287,7 @@ int main(int argc, char **argv)
             {
                 current_string[count++] = *(optarg);
                 optarg += 1;
-                if (count == 9)
+                if (count == 8)
                 {
                     current_string[count] = '\0';
                     count = 0;

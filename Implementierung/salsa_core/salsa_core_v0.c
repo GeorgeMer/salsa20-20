@@ -1,11 +1,7 @@
 #include <stddef.h>
 #include <stdint.h>
-#include <stdio.h>
 
-uint32_t rotateLeft(uint32_t number, uint32_t amount)
-{
-    return (number << amount) | (number >> (32 - amount));
-}
+#include "rotate_left.h"
 
 void salsa_core_v0(uint32_t output[16], const uint32_t input[16])
 {

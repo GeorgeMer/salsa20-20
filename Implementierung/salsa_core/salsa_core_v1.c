@@ -2,10 +2,7 @@
 #include <stdint.h>
 #include <stdio.h>
 
-uint32_t test(uint32_t n, uint32_t d)
-{
-    return (n << d) | (n >> (32 - d));
-}
+#include "rotate_left.h"
 
 void intToBytes(uint8_t bytes[4], uint32_t n)
 {
