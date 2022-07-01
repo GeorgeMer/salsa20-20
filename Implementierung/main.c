@@ -179,9 +179,21 @@ static void write_file(const char *path, uint8_t *cipher)
     }
 
     // writing cipher to output file as string of hexadecimals
-
+    // linebreak every 76 characters
+    size_t linebreak = 0;
     for (size_t i = 0; i < mlen; i++)
     {
+        if (linebreak == 76)
+        {
+            if (fprintf(file, "\n") < 0)
+            {
+                perror("Something went wrong writing to your output file");
+                fclose(file);
+                exit(EXIT_FAILURE);
+            }
+            linebreak = 0;
+        }
+
         if (*(cipher + i) == 0)
         {
             // writing 0 to output file as 00
@@ -212,6 +224,7 @@ static void write_file(const char *path, uint8_t *cipher)
                 exit(EXIT_FAILURE);
             }
         }
+        linebreak += 2;
     }
     // close successfully written file
     fclose(file);
@@ -275,7 +288,8 @@ int main(int argc, char **argv)
             char current_string[9];
             int base = 10;
 
-            // TODO: catch too large input
+            // TODO: catch too large input STACKSMASHING POSSIBLE!!!!!!!!
+            // TODO: richtig machen fprintf/perror
             if (*(optarg) == '0' && *(optarg + 1) == 'x')
             {
                 if (strlen(optarg) > 67)
