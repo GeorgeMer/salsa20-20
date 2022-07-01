@@ -108,8 +108,8 @@ uint64_t convert_string_to_uint64_t(const char *string)
     }
 
     char *endptr;
-    uint64_t result = strtoull(string, &endptr, 0);
     errno = 0;
+    uint64_t result = strtoull(string, &endptr, 0);
 
     // error handling
     if (endptr == string || *endptr != '\0')
@@ -133,8 +133,8 @@ uint64_t convert_string_to_uint64_t(const char *string)
 uint32_t convert_string_to_uint32_t(const char *string, int base)
 {
     char *endptr;
-    uint32_t result = strtoul(string, &endptr, base);
     errno = 0;
+    uint32_t result = strtoul(string, &endptr, base);
 
     // error handling
     if (endptr == string || *endptr != '\0')
@@ -184,6 +184,7 @@ static void write_file(const char *path, uint8_t *cipher)
     {
         if (*(cipher + i) == 0)
         {
+            // writing 0 to output file as 00
             if (fprintf(file, "00") < 0)
             {
                 perror("Something went wrong writing to your output file");
@@ -193,6 +194,7 @@ static void write_file(const char *path, uint8_t *cipher)
         }
         else if (*(cipher + i) <= 15)
         {
+            // writing single digit hex to output file as 0z
             if (fprintf(file, "0%x", *(cipher + i)) < 0)
             {
                 perror("Something went wrong writing to your output file");
@@ -202,6 +204,7 @@ static void write_file(const char *path, uint8_t *cipher)
         }
         else
         {
+            // writing double digit hex to output file
             if (fprintf(file, "%x", *(cipher + i)) < 0)
             {
                 perror("Something went wrong writing to your output file");
@@ -272,8 +275,14 @@ int main(int argc, char **argv)
             char current_string[9];
             int base = 10;
 
+            // TODO: catch too large input
             if (*(optarg) == '0' && *(optarg + 1) == 'x')
             {
+                if (strlen(optarg) > 67)
+                {
+                    fprintf(stderr, "The key entered does not fit in 256 bit.\n");
+                    return EXIT_FAILURE;
+                }
                 base = 16;
                 optarg += 2;
             }
