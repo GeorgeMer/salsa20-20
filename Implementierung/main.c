@@ -11,6 +11,7 @@
 #include "salsa_crypt/salsa_crypt_v2.h"
 
 #include "file_IO.h"
+#include "number_conversions.h"
 
 static struct option long_options[] =
     {
@@ -99,117 +100,7 @@ int main(int argc, char **argv)
             measure_runtime = true;
             break;
         case 'k':;
-            if (*(optarg) == '-')
-            {
-                fprintf(stderr, "Negative numbers are not allowed as options.\n");
-                exit(EXIT_FAILURE);
-            }
-
-            // converting 256 bit string input number into 8 element uint_32t array
-            uint8_t index = 0;
-            uint8_t count = 0;
-            char current_string[9];
-            int base = 10;
-
-            if (*(optarg) == '0' && *(optarg + 1) == 'x')
-            {
-                base = 16;
-                uint8_t start = 2;
-                if (strlen(optarg) > 66)
-                {
-                    // check for leading zeroes
-                    while (*(optarg + start) == '0')
-                    {
-                        start++;
-                    }
-
-                    if (strlen(optarg + start) > 64)
-                    {
-                        fprintf(stderr, "The key entered does not fit in 256 bit.\n");
-                        return EXIT_FAILURE;
-                    }
-                }
-                optarg += start;
-                size_t i = strlen(optarg) - 1, k = 0;
-                for (; i >= 8; i -= 8, k++)
-                {
-                    char hexnum[8] = {*(optarg + i - 7), *(optarg + i - 6), *(optarg + i - 5), *(optarg + i - 4),
-                                      *(optarg + i - 3), *(optarg + i - 2), *(optarg + i - 1), *(optarg + i)};
-                    key[k] = convert_string_to_uint32_t(hexnum, base);
-                }
-                if (i != 0)
-                {
-                    char *lastnum = malloc(i + 2);
-                    if (lastnum == NULL)
-                    {
-                        fprintf(stderr, "Couldn't allocate memory\n");
-                        return EXIT_FAILURE;
-                    }
-                    for (size_t j = 0; j <= i; j++)
-                    {
-                        *(lastnum + j) = *(optarg + j);
-                    }
-                    *(lastnum + i + 1) = '\0';
-                    key[k] = convert_string_to_uint32_t(lastnum, base);
-
-                    free(lastnum);
-                }
-                else
-                {
-
-                    char *lastnum = malloc(2);
-                    if (lastnum == NULL)
-                    {
-                        fprintf(stderr, "Couldn't allocate memory\n");
-                        return EXIT_FAILURE;
-                    }
-                    *lastnum = *optarg;
-                    *(lastnum + 1) = '\0';
-                    key[k] = convert_string_to_uint32_t(lastnum, base);
-                    free(lastnum);
-                }
-                for (int i = 0; i < 8; i++)
-                {
-                    printf("%08x ", key[i]);
-                }
-            }
-
-            else
-            {
-
-                if (strlen(optarg) > 77)
-                {
-                    fprintf(stderr, "The key entered does not fit in 256 bit.\n");
-                    return EXIT_FAILURE;
-                }
-            }
-
-            while (*(optarg) != '\0')
-            {
-                current_string[count++] = *(optarg);
-                optarg += 1;
-                if (count == 8)
-                {
-                    current_string[count] = '\0';
-                    count = 0;
-                    key[index++] = convert_string_to_uint32_t(current_string, base);
-                }
-            }
-
-            if (count != 0)
-            {
-                while (count < 9)
-                {
-                    current_string[count++] = '0';
-                }
-                current_string[count] = '\0';
-                key[index++] = convert_string_to_uint32_t(current_string, base);
-            }
-
-            for (int i = index; i < 8; i++)
-            {
-                key[i] = 0x0;
-            }
+            convert_string_to_uint32_t_array(optarg, key);
             break;
         case 'i':
             iv = convert_string_to_uint64_t(optarg);
