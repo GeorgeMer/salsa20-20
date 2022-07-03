@@ -14,7 +14,7 @@ int randint(int n)
     }
     else
     {
-        // Supporting larger values for n would requires an even more
+        // Supporting larger values for n would require an even more
         // elaborate implementation that combines multiple calls to rand()
         assert(n <= RAND_MAX);
 

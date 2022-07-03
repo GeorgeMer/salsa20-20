@@ -12,6 +12,19 @@ void intToBytes(uint8_t bytes[4], uint32_t n)
     bytes[3] = n & 0xFF;
 }
 
+void intToBytesP(uint8_t *p, uint32_t n)
+{
+    p[0] = (n >> 24) & 0xFF;
+    p[1] = (n >> 16) & 0xFF;
+    p[2] = (n >> 8) & 0xFF;
+    p[3] = n & 0xFF;
+}
+
+void bytesToInt(uint32_t *p, uint8_t *bytes)
+{
+    uint32_t out = bytes[0] + (bytes[1] << 8) + (bytes[2] << 16) + (bytes[3] << 24);
+}
+
 void quarterRound(uint32_t output[4], const uint32_t input[4])
 {
     output[1] = input[1] ^ (rotateLeft(input[0] + input[3], 7));
@@ -128,7 +141,7 @@ uint32_t littleendian(uint8_t input[4])
            input[3] * 16777216;
 }
 
-uint8_t salsa20_hash(uint32_t output[16], const uint8_t input[64])
+uint8_t salsa20_hash(uint8_t output[64], const uint8_t input[64])
 {
     uint8_t temp_input[4];
     uint32_t x[16];
@@ -160,22 +173,54 @@ uint8_t salsa20_hash(uint32_t output[16], const uint8_t input[64])
     {
         uint8_t bytes[4];
         intToBytes(bytes, x[i] + z[i]);
-        output[i] = littleendian(bytes);
+        temp_output[i] = littleendian(bytes);
+        intToBytesP(&output[i * 4], littleendian(bytes));
     }
+}
+
+uint8_t salsa20_expansion(uint8_t output[64], uint8_t k[32], int8_t n[16])
+{
+    uint8_t temp_input[64];
+
+    // n is always 16 bytes and k_len can be either 16 or 32
+    const uint8_t a_0[4] = {101, 120, 112, 97};
+    const uint8_t a_1[4] = {110, 100, 32, 51};
+    const uint8_t a_2[4] = {50, 45, 98, 121};
+    const uint8_t a_3[4] = {116, 101, 32, 107};
+
+    // (a_0, k_0, a_1, n, a_2, k_1, a_3)
+    for (int i = 0; i < 4; i++) {
+        temp_input[i] = a_0[i];
+        temp_input[i + 20] = a_1[i];
+        temp_input[i + 40] = a_2[i];
+        temp_input[i + 60] = a_3[i];
+    }
+
+    for (int i = 0; i < 16; i++) {
+        temp_input[i + 4] = k[i];
+        temp_input[i + 24] = n[i];
+        temp_input[i + 44] = k[i + 16];
+    }
+
+    salsa20_hash(output, temp_input);
 }
 
 void salsa_core_v1(uint32_t output[16], const uint32_t input[16])
 {
-    uint8_t inputBytes[64];
-    for (int i = 0, j = 0; i < 16; i++, j += 4)
-    {
-        uint8_t bytes[4];
-        intToBytes(bytes, input[i]);
-        inputBytes[j] = bytes[0];
-        inputBytes[j + 1] = bytes[1];
-        inputBytes[j + 2] = bytes[2];
-        inputBytes[j + 3] = bytes[3];
+    // k: input[1-4] and input[11-14]
+    uint8_t k[32]; 
+    for (int i = 0; i < 4; i++) {
+        intToBytesP(&k[i * 4], input[i + 1]);
+        intToBytesP(&k[i * 4 + 16], input[i + 11]);
     }
 
-    salsa20_hash(output, inputBytes);
+    //nonce = input[6], input[7]
+
+    uint8_t n[16];
+
+    intToBytesP(n, input[6]);
+    intToBytesP(&n[4], input[6]);
+    // the upper 8 bytes of n remain as 0s
+    
+    salsa20_expansion(output, k, n);
 }

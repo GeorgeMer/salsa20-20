@@ -8,6 +8,7 @@
 #include "../salsa_crypt/salsa_crypt_v1.h"
 #include "../salsa_crypt/salsa_crypt_v2.h"
 #include "asserts.h"
+#include "print_tests.h"
 
 
 int main(int argc, char **argv)
@@ -27,7 +28,7 @@ int main(int argc, char **argv)
  
         srand(i + time(NULL));
         
-        uint64_t mlen = randomInt(10, 50000);
+        uint64_t mlen = randomInt(10, 50);
         uint8_t msg[mlen];
         uint8_t cipher1[mlen];
         uint8_t cipher2[mlen];
@@ -49,7 +50,11 @@ int main(int argc, char **argv)
         salsa_crypt_v1(mlen, msg, cipher1, key, iv);
         
         salsa_crypt_v2(mlen, msg, cipher2, key, iv);
-        
+        print_arr_8bit(cipher2, mlen);
+        print_char_arr(msg, mlen);
+        print_key(key);
+        printf("Nonce: %llx\n", iv);
+
         printf("%d: ",i);
         assertEqualsArrays_8bit(cipher1,mlen,cipher2,mlen);
         //if(! ()  ){
