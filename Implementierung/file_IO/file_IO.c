@@ -51,7 +51,7 @@ error:
     exit(EXIT_FAILURE);
 }
 
-static void write_file(const char *path, uint8_t *cipher)
+void write_file(const char *path, uint8_t *cipher)
 {
     FILE *file;
 

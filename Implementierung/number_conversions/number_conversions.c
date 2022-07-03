@@ -85,7 +85,7 @@ void convert_string_to_uint32_t_array(const char *string, uint32_t key[8])
             if (strlen(string + start) > 64)
             {
                 fprintf(stderr, "The key entered does not fit in 256 bit.\n");
-                return EXIT_FAILURE;
+                exit(EXIT_FAILURE);
             }
         }
         string += start;
@@ -102,7 +102,7 @@ void convert_string_to_uint32_t_array(const char *string, uint32_t key[8])
             if (lastnum == NULL)
             {
                 fprintf(stderr, "Couldn't allocate memory\n");
-                return EXIT_FAILURE;
+                exit(EXIT_FAILURE);
             }
             for (size_t j = 0; j <= i; j++)
             {
@@ -120,7 +120,7 @@ void convert_string_to_uint32_t_array(const char *string, uint32_t key[8])
             if (lastnum == NULL)
             {
                 fprintf(stderr, "Couldn't allocate memory\n");
-                return EXIT_FAILURE;
+                exit(EXIT_FAILURE);
             }
             *lastnum = *string;
             *(lastnum + 1) = '\0';
@@ -139,7 +139,7 @@ void convert_string_to_uint32_t_array(const char *string, uint32_t key[8])
         if (strlen(string) > 77)
         {
             fprintf(stderr, "The key entered does not fit in 256 bit.\n");
-            return EXIT_FAILURE;
+            exit(EXIT_FAILURE);
         }
     }
 

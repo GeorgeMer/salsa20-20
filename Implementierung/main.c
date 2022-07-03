@@ -1,6 +1,5 @@
 #define _POSIX_C_SOURCE 199309L
 #include <getopt.h>
-#include <errno.h>
 #include <stdbool.h>
 #include <string.h>
 #include <time.h>
@@ -10,8 +9,8 @@
 #include "salsa_crypt/salsa_crypt_v1.h"
 #include "salsa_crypt/salsa_crypt_v2.h"
 
-#include "file_IO.h"
-#include "number_conversions.h"
+#include "file_IO/file_IO.h"
+#include "number_conversions/number_conversions.h"
 
 static struct option long_options[] =
     {
@@ -48,9 +47,9 @@ void print_help(const char *progname)
     fprintf(stderr, "\n%s", help_msg);
 }
 
-uint64_t gettime_in_seconds(const struct timespec start, const struct timespec end)
+double gettime_in_seconds(const struct timespec start, const struct timespec end)
 {
-    return ((uint64_t)(end.tv_sec - start.tv_sec)) + ((uint64_t)((end.tv_nsec - start.tv_nsec) / 1000000000));
+    return ((double)((end.tv_sec - start.tv_sec) * 1000)) + ((double)((end.tv_nsec - start.tv_nsec) / 1000)) / 1000;
 }
 
 int main(int argc, char **argv)
@@ -185,7 +184,7 @@ int main(int argc, char **argv)
         printf("The runtime for implementation "
                "%" PRIu64 " with "
                "%" PRIu64 " function calls amounts to "
-               "%" PRIu64 " seconds.\n",
+               "%f seconds.\n",
                implementation_number, number_of_iterations, gettime_in_seconds(start, end));
     }
     else
