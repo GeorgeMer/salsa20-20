@@ -80,14 +80,8 @@ void salsa_crypt_v1(size_t mlen, const uint8_t msg[mlen], uint8_t cipher[mlen], 
     i *= 64;
 
     // transform it to byte-array
-    uint8_t h[64];
-    for (uint8_t j = 0; j < 16; j++)
-    {
-        h[j * 4] = ((hash[j] >> 8 * 0) & 0xFF);
-        h[j * 4 + 1] = ((hash[j] >> 8 * 1) & 0xFF);
-        h[j * 4 + 2] = ((hash[j] >> 8 * 2) & 0xFF);
-        h[j * 4 + 3] = ((hash[j] >> 8 * 3) & 0xFF);
-    }
+    uint8_t *h = ((uint8_t *)hash);
+
     // go byte by byte through hash and msg, xor to cipher
     for (uint8_t j = 0; j < 64 && i + j < mlen; j++)
         cipher[i + j] = (h[j]) ^ msg[i + j];
