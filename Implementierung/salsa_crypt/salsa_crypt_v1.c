@@ -8,21 +8,22 @@ void salsa_crypt_v1(size_t mlen, const uint8_t msg[mlen], uint8_t cipher[mlen], 
 {
     uint32_t in[16];
 
-    // write to start array, except to 64bits of counter
+    // initalize input matrix
     in[0] = 0x61707865;
-    in[1] = key[0];
-    in[2] = key[1];
-    in[3] = key[2];
-    in[4] = key[3];
+    in[1] = __builtin_bswap32(key[0]);
+    in[2] = __builtin_bswap32(key[1]);
+    in[3] = __builtin_bswap32(key[2]);
+    in[4] = __builtin_bswap32(key[3]);
     in[5] = 0x3320646e;
-    in[6] = iv & 0xFFFFFFFF;
-    in[7] = (iv >> 32) & 0xFFFFFFFF;
-
+    in[6] = __builtin_bswap32(iv >> 32);
+    in[7] = __builtin_bswap32(iv & 0xffffffff);
+    in[8] = UINT32_MAX;
+    in[9] = UINT32_MAX;
     in[10] = 0x79622d32;
-    in[11] = key[4];
-    in[12] = key[5];
-    in[13] = key[6];
-    in[14] = key[7];
+    in[11] = __builtin_bswap32(key[4]);
+    in[12] = __builtin_bswap32(key[5]);
+    in[13] = __builtin_bswap32(key[6]);
+    in[14] = __builtin_bswap32(key[7]);
     in[15] = 0x6b206574;
 
     uint32_t hash[16]; // output array
@@ -33,8 +34,20 @@ void salsa_crypt_v1(size_t mlen, const uint8_t msg[mlen], uint8_t cipher[mlen], 
     {
 
         // set counter
-        in[8] = i & 0xFFFFFFFF;
-        in[9] = (i >> 32) & 0xFFFFFFFF;
+        if (in[8] == UINT32_MAX && in[9] == UINT32_MAX)
+        {
+            in[8] = 0;
+            in[9] = 0;
+        }
+        else if (in[8] == UINT32_MAX)
+        {
+            in[9] += 1;
+            in[8] = 0;
+        }
+        else
+        {
+            in[8] += 1;
+        }
 
         // get 64byte hash
         salsa_core_v1(hash, in);
@@ -46,8 +59,20 @@ void salsa_crypt_v1(size_t mlen, const uint8_t msg[mlen], uint8_t cipher[mlen], 
     }
 
     // remaining bytes
-    in[8] = i & 0xFFFFFFFF;
-    in[9] = (i >> 32) & 0xFFFFFFFF;
+    if (in[8] == UINT32_MAX && in[9] == UINT32_MAX)
+    {
+        in[8] = 0;
+        in[9] = 0;
+    }
+    else if (in[8] == UINT32_MAX)
+    {
+        in[9] += 1;
+        in[8] = 0;
+    }
+    else
+    {
+        in[8] += 1;
+    }
 
     // get hash
     salsa_core_v1(hash, in);
