@@ -32,6 +32,7 @@ Im Folgenden bezeichne:
 Salsa 20/20 ist eine Stromchiffre basierend auf einem sogenannten Add-Rotate-XOR-Schema, ins Leben gerufen von David J. Bernstein.
 \\Salsa20/20 verwendet einen Kern, eine 4x4 Matrix bestehend aus vorzeichenlosen 32-bit Little-Endian-Ganzzahlen, welcher durch Add, Rotate und XOR Operationen auf bestimmen Startwerten erzeugt wird.
 Auf diesem generierten Kern wird dann mit der zu verschlüsselnden Nachricht Byte für Byte eine XOR-Operation ausgeführt.
+\cite{intel2017man}
 
 \subsubsection{Der Salsa20-Kern:}
 Der Salsa20-Kern ist eine Funktion, welche einen 64-Byte Block generiert, mit dem wie oben beschrieben auf der zu verschlüsselnden Nachricht Byte für Byte eine XOR-Operation augeführt wird.
