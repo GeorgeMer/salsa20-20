@@ -1,5 +1,6 @@
 #include <stddef.h>
 #include <stdint.h>
+#include <stdio.h>
 
 #include "../salsa_core/salsa_core_v0.h"
 
@@ -37,7 +38,9 @@ void salsa_crypt_v0(size_t mlen, const uint8_t msg[mlen], uint8_t cipher[mlen], 
     // xor msg with keystream and increment counter after 64 bytes
     for (size_t i = 0; i < mlen; i++)
     {
-        if (index == 63)
+        printf("C0: %d\n", in[8]);
+        printf("C1: %d\n", in[9]);
+        if (index == 64)
         {
             index = 0;
 
@@ -49,6 +52,7 @@ void salsa_crypt_v0(size_t mlen, const uint8_t msg[mlen], uint8_t cipher[mlen], 
             else if (in[8] == UINT32_MAX)
             {
                 in[9] += 1;
+                in[8] = 0;
             }
             else
             {
