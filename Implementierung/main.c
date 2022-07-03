@@ -282,6 +282,20 @@ int main(int argc, char **argv)
             measure_runtime = true;
             break;
         case 'k':;
+            key[0] = 0x0;
+            key[1] = 0x0;
+            key[2] = 0x0;
+            key[3] = 0x0;
+            key[4] = 0x0;
+            key[5] = 0x0;
+            key[6] = 0x0;
+            key[7] = 0x0;
+            if (*(optarg) == '-')
+            {
+                fprintf(stderr, "Negative numbers are not allowed as options.\n");
+                exit(EXIT_FAILURE);
+            }
+
             // converting 256 bit string input number into 8 element uint_32t array
             uint8_t index = 0;
             uint8_t count = 0;
@@ -292,26 +306,70 @@ int main(int argc, char **argv)
             // TODO: richtig machen fprintf/perror
             if (*(optarg) == '0' && *(optarg + 1) == 'x')
             {
+                base = 16;
+                uint8_t start = 2;
                 if (strlen(optarg) > 66)
                 {
-                    fprintf(stderr, "The key entered does not fit in 256 bit.\n");
-                    return EXIT_FAILURE;
+                    // check for leading zeroes
+                    while (*(optarg + start) == '0')
+                    {
+                        start++;
+                    }
+
+                    if (strlen(optarg + start) > 64)
+                    {
+                        fprintf(stderr, "The key entered does not fit in 256 bit.\n");
+                        return EXIT_FAILURE;
+                    }
                 }
-                base = 16;
-                optarg += 2;
-            }
-            else if (*(optarg) == '0')
-            {
-                if (strlen(optarg) > 86)
+                optarg += start;
+                size_t i = strlen(optarg) - 1, k = 0;
+                for (; i >= 8; i -= 8, k++)
                 {
-                    fprintf(stderr, "The key entered does not fit in 256 bit.\n");
-                    return EXIT_FAILURE;
+                    char hexnum[8] = {*(optarg + i - 7), *(optarg + i - 6), *(optarg + i - 5), *(optarg + i - 4),
+                                      *(optarg + i - 3), *(optarg + i - 2), *(optarg + i - 1), *(optarg + i)};
+                    key[k] = convert_string_to_uint32_t(hexnum, base);
                 }
-                base = 8;
-                optarg += 1;
+                if (i != 0)
+                {
+                    char *lastnum = malloc(i + 2);
+                    if (lastnum == NULL)
+                    {
+                        fprintf(stderr, "Couldn't allocate memory\n");
+                        return EXIT_FAILURE;
+                    }
+                    for (size_t j = 0; j <= i; j++)
+                    {
+                        *(lastnum + j) = *(optarg + j);
+                    }
+                    *(lastnum + i + 1) = '\0';
+                    key[k] = convert_string_to_uint32_t(lastnum, base);
+
+                    free(lastnum);
+                }
+                else
+                {
+
+                    char *lastnum = malloc(2);
+                    if (lastnum == NULL)
+                    {
+                        fprintf(stderr, "Couldn't allocate memory\n");
+                        return EXIT_FAILURE;
+                    }
+                    *lastnum = *optarg;
+                    *(lastnum + 1) = '\0';
+                    key[k] = convert_string_to_uint32_t(lastnum, base);
+                    free(lastnum);
+                }
+                for (int i = 0; i < 8; i++)
+                {
+                    printf("%08x ", key[i]);
+                }
             }
+
             else
             {
+
                 if (strlen(optarg) > 77)
                 {
                     fprintf(stderr, "The key entered does not fit in 256 bit.\n");
