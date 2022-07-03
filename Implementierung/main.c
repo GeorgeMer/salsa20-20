@@ -40,7 +40,7 @@ const char *help_msg =
     "  -o P   P is the path to the output file\n"
     "  -h     Show help message (this text) and exit\n"
     "  --help Same effect as -h\n"
-    "  All numbers can be input as decimal (no prefix), octal (0 prefix) and hexadecimal (0x prefix)\n"
+    "  All numbers can be input as decimal (no prefix) or hexadecimal (0x prefix)\n"
     "  Negative Numbers are not allowed.";
 
 void print_usage(const char *progname) { fprintf(stderr, usage_msg, progname, progname, progname); }
@@ -282,14 +282,6 @@ int main(int argc, char **argv)
             measure_runtime = true;
             break;
         case 'k':;
-            key[0] = 0x0;
-            key[1] = 0x0;
-            key[2] = 0x0;
-            key[3] = 0x0;
-            key[4] = 0x0;
-            key[5] = 0x0;
-            key[6] = 0x0;
-            key[7] = 0x0;
             if (*(optarg) == '-')
             {
                 fprintf(stderr, "Negative numbers are not allowed as options.\n");
@@ -302,8 +294,6 @@ int main(int argc, char **argv)
             char current_string[9];
             int base = 10;
 
-            // TODO: catch too large input STACKSMASHING POSSIBLE!!!!!!!!
-            // TODO: richtig machen fprintf/perror
             if (*(optarg) == '0' && *(optarg + 1) == 'x')
             {
                 base = 16;
@@ -463,7 +453,7 @@ int main(int argc, char **argv)
             switch (implementation_number)
             {
             case 0:
-                salsa_crypt_v0(mlen, message, cipher, key, iv);
+                salsa_crypt(mlen, message, cipher, key, iv);
                 break;
             case 1:
                 salsa_crypt_v1(mlen, message, cipher, key, iv);
@@ -495,7 +485,7 @@ int main(int argc, char **argv)
         switch (implementation_number)
         {
         case 0:
-            salsa_crypt_v0(mlen, message, cipher, key, iv);
+            salsa_crypt(mlen, message, cipher, key, iv);
             break;
         case 1:
             salsa_crypt_v1(mlen, message, cipher, key, iv);
