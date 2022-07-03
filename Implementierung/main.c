@@ -5,12 +5,12 @@
 #include <time.h>
 #include <inttypes.h>
 
+#include "file_IO/file_IO.h"
+#include "number_conversions/number_conversions.h"
+
 #include "salsa_crypt/salsa_crypt_v0.h"
 #include "salsa_crypt/salsa_crypt_v1.h"
 #include "salsa_crypt/salsa_crypt_v2.h"
-
-#include "file_IO/file_IO.h"
-#include "number_conversions/number_conversions.h"
 
 static struct option long_options[] =
     {

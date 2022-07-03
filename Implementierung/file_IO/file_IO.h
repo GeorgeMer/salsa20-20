@@ -1,5 +1,6 @@
-#include <stdint.h>
+#define _POSIX_SOURCE
 #include <stdio.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/stat.h>
