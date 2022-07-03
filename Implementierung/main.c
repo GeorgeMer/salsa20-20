@@ -33,8 +33,9 @@ const char *help_msg =
     "\n"
     "Optional arguments:\n"
     "  -V X   The implementation to be used (default: X = 0)\n"
-    "  -B X   If set, runtime of chosen implementation will be measured and output. X represents the number of repetition of function calls (default: No runtime measurement)\n"
-    "  -k K   K resembles the key\n (default: K = 2^256 - 1883)"
+    "  -B X   If set, runtime of chosen implementation will be measured and output.\n"
+    "         X represents the number of repetition of function calls (default: No runtime measurement)\n"
+    "  -k K   K resembles the key (default: K = 2^256 - 1883)\n"
     "  -i I   I resembles the initialization vector (default: I = 2^59 - 427)\n"
     "  -o P   P is the path to the output file\n"
     "  -h     Show help message (this text) and exit\n"
@@ -56,7 +57,7 @@ const uint8_t *read_file(const char *path)
     // error handling
     if (file == NULL)
     {
-        perror("Something went wrong opening your file");
+        perror("Error opening file");
         exit(EXIT_FAILURE);
     }
 
@@ -165,7 +166,7 @@ static void write_file(const char *path, uint8_t *cipher)
         // create txt file "encrypted" if no path to output file was given
         if (!(file = fopen("encrypted.txt", "w")))
         {
-            perror("Something went wrong creating a file");
+            perror("Error creating file");
             exit(EXIT_FAILURE);
         }
     }
@@ -173,7 +174,7 @@ static void write_file(const char *path, uint8_t *cipher)
     {
         if (!(file = fopen(path, "w")))
         {
-            perror("Something went wrong opening your output file");
+            perror("Error opening output file");
             exit(EXIT_FAILURE);
         }
     }
@@ -187,9 +188,7 @@ static void write_file(const char *path, uint8_t *cipher)
         {
             if (fprintf(file, "\n") < 0)
             {
-                perror("Something went wrong writing to your output file");
-                fclose(file);
-                exit(EXIT_FAILURE);
+                goto cleanup;
             }
             linebreak = 0;
         }
@@ -199,9 +198,7 @@ static void write_file(const char *path, uint8_t *cipher)
             // writing 0 to output file as 00
             if (fprintf(file, "00") < 0)
             {
-                perror("Something went wrong writing to your output file");
-                fclose(file);
-                exit(EXIT_FAILURE);
+                goto cleanup;
             }
         }
         else if (*(cipher + i) <= 15)
@@ -209,9 +206,7 @@ static void write_file(const char *path, uint8_t *cipher)
             // writing single digit hex to output file as 0z
             if (fprintf(file, "0%x", *(cipher + i)) < 0)
             {
-                perror("Something went wrong writing to your output file");
-                fclose(file);
-                exit(EXIT_FAILURE);
+                goto cleanup;
             }
         }
         else
@@ -219,15 +214,18 @@ static void write_file(const char *path, uint8_t *cipher)
             // writing double digit hex to output file
             if (fprintf(file, "%x", *(cipher + i)) < 0)
             {
-                perror("Something went wrong writing to your output file");
-                fclose(file);
-                exit(EXIT_FAILURE);
+                goto cleanup;
             }
         }
         linebreak += 2;
     }
     // close successfully written file
     fclose(file);
+
+cleanup:
+    fprintf(stderr, "Error writing to output file");
+    fclose(file);
+    exit(EXIT_FAILURE);
 }
 
 uint64_t gettime_in_seconds(const struct timespec start, const struct timespec end)
@@ -292,7 +290,7 @@ int main(int argc, char **argv)
             // TODO: richtig machen fprintf/perror
             if (*(optarg) == '0' && *(optarg + 1) == 'x')
             {
-                if (strlen(optarg) > 67)
+                if (strlen(optarg) > 66)
                 {
                     fprintf(stderr, "The key entered does not fit in 256 bit.\n");
                     return EXIT_FAILURE;
@@ -302,8 +300,21 @@ int main(int argc, char **argv)
             }
             else if (*(optarg) == '0')
             {
+                if (strlen(optarg) > 86)
+                {
+                    fprintf(stderr, "The key entered does not fit in 256 bit.\n");
+                    return EXIT_FAILURE;
+                }
                 base = 8;
                 optarg += 1;
+            }
+            else
+            {
+                if (strlen(optarg) > 77)
+                {
+                    fprintf(stderr, "The key entered does not fit in 256 bit.\n");
+                    return EXIT_FAILURE;
+                }
             }
 
             while (*(optarg) != '\0')
@@ -405,10 +416,6 @@ int main(int argc, char **argv)
             }
         }
 
-        // free input pointer and write to output file
-        free((void *)message);
-        write_file(output_file, cipher);
-
         // error handling
         if (clock_gettime(CLOCK_MONOTONIC, &end))
         {
@@ -422,7 +429,6 @@ int main(int argc, char **argv)
                "%" PRIu64 " function calls amounts to "
                "%" PRIu64 " seconds.\n",
                implementation_number, number_of_iterations, gettime_in_seconds(start, end));
-        return EXIT_SUCCESS;
     }
     else
     {

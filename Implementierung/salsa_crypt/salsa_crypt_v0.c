@@ -41,7 +41,12 @@ void salsa_crypt_v0(size_t mlen, const uint8_t msg[mlen], uint8_t cipher[mlen], 
         {
             index = 0;
 
-            if (in[8] == UINT32_MAX)
+            if (in[8] == UINT32_MAX && in[9] == UINT32_MAX)
+            {
+                in[8] = 0;
+                in[9] = 0;
+            }
+            else if (in[8] == UINT32_MAX)
             {
                 in[9] += 1;
             }
