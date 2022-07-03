@@ -15,6 +15,8 @@
 #include "salsa_crypt/salsa_crypt_v1.h"
 #include "salsa_crypt/salsa_crypt_v2.h"
 
+#include "file_IO"
+
 static struct option long_options[] =
     {
         {"help", no_argument, 0, 'h'},
@@ -155,79 +157,6 @@ uint32_t convert_string_to_uint32_t(const char *string, int base)
         exit(EXIT_FAILURE);
     }
     return result;
-}
-
-static void write_file(const char *path, uint8_t *cipher)
-{
-    FILE *file;
-
-    // error handling
-    if (path == NULL)
-    {
-        // create txt file "encrypted" if no path to output file was given
-        if (!(file = fopen("encrypted.txt", "w")))
-        {
-            perror("Error creating file ");
-            exit(EXIT_FAILURE);
-        }
-    }
-    else
-    {
-        if (!(file = fopen(path, "w")))
-        {
-            perror("Error opening output file ");
-            exit(EXIT_FAILURE);
-        }
-    }
-
-    // writing cipher to output file as string of hexadecimals
-    // linebreak every 76 characters
-    size_t linebreak = 0;
-    for (size_t i = 0; i < mlen; i++)
-    {
-        if (linebreak == 76)
-        {
-            if (fprintf(file, "\n") < 0)
-            {
-                goto cleanup;
-            }
-            linebreak = 0;
-        }
-
-        if (*(cipher + i) == 0)
-        {
-            // writing 0 to output file as 00
-            if (fprintf(file, "00") < 0)
-            {
-                goto cleanup;
-            }
-        }
-        else if (*(cipher + i) <= 15)
-        {
-            // writing single digit hex to output file as 0z
-            if (fprintf(file, "0%x", *(cipher + i)) < 0)
-            {
-                goto cleanup;
-            }
-        }
-        else
-        {
-            // writing double digit hex to output file
-            if (fprintf(file, "%x", *(cipher + i)) < 0)
-            {
-                goto cleanup;
-            }
-        }
-        linebreak += 2;
-    }
-    // close successfully written file
-    fclose(file);
-    return;
-
-cleanup:
-    fprintf(stderr, "Error writing to output file\n");
-    fclose(file);
-    exit(EXIT_FAILURE);
 }
 
 uint64_t gettime_in_seconds(const struct timespec start, const struct timespec end)
