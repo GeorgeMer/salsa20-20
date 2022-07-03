@@ -40,7 +40,8 @@ const char *help_msg =
     "  -o P   P is the path to the output file\n"
     "  -h     Show help message (this text) and exit\n"
     "  --help Same effect as -h\n"
-    "  All numbers can be input as decimal (no prefix), octal (0 prefix) and hexadecimal (0x prefix)\n";
+    "  All numbers can be input as decimal (no prefix), octal (0 prefix) and hexadecimal (0x prefix)\n"
+    "  Negative Numbers are not allowed.";
 
 void print_usage(const char *progname) { fprintf(stderr, usage_msg, progname, progname, progname); }
 void print_help(const char *progname)
@@ -184,14 +185,14 @@ static void write_file(const char *path, uint8_t *cipher)
     size_t linebreak = 0;
     for (size_t i = 0; i < mlen; i++)
     {
-        /*         if (linebreak == 76)
-                {
-                    if (fprintf(file, "\n") < 0)
-                    {
-                        goto cleanup;
-                    }
-                    linebreak = 0;
-                } */
+        if (linebreak == 76)
+        {
+            if (fprintf(file, "\n") < 0)
+            {
+                goto cleanup;
+            }
+            linebreak = 0;
+        }
 
         if (*(cipher + i) == 0)
         {
@@ -224,7 +225,7 @@ static void write_file(const char *path, uint8_t *cipher)
     return;
 
 cleanup:
-    fprintf(stderr, "Error writing to output file ");
+    fprintf(stderr, "Error writing to output file\n");
     fclose(file);
     exit(EXIT_FAILURE);
 }
