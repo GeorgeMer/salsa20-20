@@ -1,6 +1,5 @@
 #include <stddef.h>
 #include <stdint.h>
-#include <stdio.h>
 
 #include "rotate_left.h"
 
@@ -58,45 +57,17 @@ void columnRound(uint32_t output[16], const uint32_t input[16])
     uint32_t temp_in[4];
     uint32_t temp_out[4];
 
-    temp_in[0] = input[0];
-    temp_in[1] = input[4];
-    temp_in[2] = input[8];
-    temp_in[3] = input[12];
-    quarterRound(temp_out, temp_in);
-    output[0] = temp_out[0];
-    output[4] = temp_out[1];
-    output[8] = temp_out[2];
-    output[12] = temp_out[3];
+    quarterRound(&output[0], &output[4], &output[8], &output[12],
+    input[0], input[4], input[8], input[12]);
 
-    temp_in[0] = input[5];
-    temp_in[1] = input[9];
-    temp_in[2] = input[13];
-    temp_in[3] = input[1];
-    quarterRound(temp_out, temp_in);
-    output[5] = temp_out[0];
-    output[9] = temp_out[1];
-    output[13] = temp_out[2];
-    output[1] = temp_out[3];
+    quarterRound(&output[5], &output[9], &output[13], &output[1],
+    input[5], input[9], input[13], input[1]);
 
-    temp_in[0] = input[10];
-    temp_in[1] = input[14];
-    temp_in[2] = input[2];
-    temp_in[3] = input[6];
-    quarterRound(temp_out, temp_in);
-    output[10] = temp_out[0];
-    output[14] = temp_out[1];
-    output[2] = temp_out[2];
-    output[6] = temp_out[3];
+    quarterRound(&output[10], &output[14], &output[2], &output[6],
+    input[10], input[14], input[2], input[6]);
 
-    temp_in[0] = input[15];
-    temp_in[1] = input[3];
-    temp_in[2] = input[7];
-    temp_in[3] = input[11];
-    quarterRound(temp_out, temp_in);
-    output[15] = temp_out[0];
-    output[3] = temp_out[1];
-    output[7] = temp_out[2];
-    output[11] = temp_out[3];
+    quarterRound(&output[15], &output[3], &output[7], &output[11],
+    input[15], input[3], input[7], input[11]);
 }
 
 void doubleRound(uint32_t output[16], const uint32_t input[16])
@@ -156,7 +127,6 @@ void salsa20_expansion(uint8_t output[64], uint8_t k[32], int8_t n[16])
 {
     uint8_t temp_input[64];
 
-    // n is always 16 bytes and k_len can be either 16 or 32
     const uint8_t a_0[4] = {101, 120, 112, 97};
     const uint8_t a_1[4] = {110, 100, 32, 51};
     const uint8_t a_2[4] = {50, 45, 98, 121};
@@ -192,10 +162,8 @@ void salsa_core_v1(uint32_t output[16], const uint32_t input[16])
     }
 
     // nonce = input[6], input[7]
-
     uint8_t n[16];
-
-    intToBytesP(n, input[6]);
+    intToBytesP(&n[0], input[6]);
     intToBytesP(&n[4], input[6]);
     // the upper 8 bytes of n remain as 0s
 
