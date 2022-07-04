@@ -24,14 +24,13 @@ void bytesToInt(uint32_t *p, uint8_t *bytes)
     uint32_t out = bytes[0] + (bytes[1] << 8) + (bytes[2] << 16) + (bytes[3] << 24);
 }
 
-/* void quarterRound(uint32_t output[4], const uint32_t input[4]) */
 void quarterRound(uint32_t *out0, uint32_t *out1, uint32_t *out2, uint32_t *out3,
                   uint32_t in0, uint32_t in1, uint32_t in2, uint32_t in3)
 {
     *out1 = in1 ^ (rotateLeft(in0 + in3, 7));
     *out2 = in2 ^ (rotateLeft(in1 + in0, 9));
-    *out3 = in3 ^ (rotateLeft(in2 + in2, 13));
-    *out0 = in0 ^ (rotateLeft(in3 + in3, 18));
+    *out3 = in3 ^ (rotateLeft(in2 + in1, 13));
+    *out0 = in0 ^ (rotateLeft(in3 + in2, 18));
 }
 
 void rowRound(uint32_t output[16], const uint32_t input[16])
@@ -54,9 +53,6 @@ void rowRound(uint32_t output[16], const uint32_t input[16])
 
 void columnRound(uint32_t output[16], const uint32_t input[16])
 {
-    uint32_t temp_in[4];
-    uint32_t temp_out[4];
-
     quarterRound(&output[0], &output[4], &output[8], &output[12],
     input[0], input[4], input[8], input[12]);
 
@@ -86,7 +82,7 @@ uint32_t littleendian(uint8_t input[4])
            input[3] * 16777216;
 }
 
-void salsa20_hash(uint8_t output[64], const uint8_t input[64])
+void hash(uint8_t output[64], const uint8_t input[64])
 {
     uint8_t temp_input[4];
     uint32_t x[16];
@@ -120,10 +116,11 @@ void salsa20_hash(uint8_t output[64], const uint8_t input[64])
         intToBytes(bytes, x[i] + z[i]);
         temp_output[i] = littleendian(bytes);
         intToBytesP(&output[i * 4], littleendian(bytes));
+        /* littleendian_inv(&output[i * 4], x[i] + z[i]); */
     }
 }
 
-void salsa20_expansion(uint8_t output[64], uint8_t k[32], int8_t n[16])
+void expansion(uint8_t output[64], uint8_t k[32], int8_t n[16])
 {
     uint8_t temp_input[64];
 
@@ -148,7 +145,7 @@ void salsa20_expansion(uint8_t output[64], uint8_t k[32], int8_t n[16])
         temp_input[i + 44] = k[i + 16];
     }
 
-    salsa20_hash(output, temp_input);
+    hash(output, temp_input);
 }
 
 void salsa_core_v1(uint32_t output[16], const uint32_t input[16])
@@ -164,8 +161,8 @@ void salsa_core_v1(uint32_t output[16], const uint32_t input[16])
     // nonce = input[6], input[7]
     uint8_t n[16];
     intToBytesP(&n[0], input[6]);
-    intToBytesP(&n[4], input[6]);
+    intToBytesP(&n[4], input[7]);
     // the upper 8 bytes of n remain as 0s
 
-    salsa20_expansion(output, k, n);
+    expansion(output, k, n);
 }
