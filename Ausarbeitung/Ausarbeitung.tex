@@ -1,13 +1,14 @@
 % Diese Zeile bitte -nicht- aendern.
 \documentclass[course=erap]{aspdoc}
+\usepackage{amssymb}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% TODO: Ersetzen Sie in den folgenden Zeilen die entsprechenden -Texte-
 %% mit den richtigen Werten.
-\newcommand{\theGroup}{IhreGruppennummer} % Beispiel: 42
-\newcommand{\theNumber}{IhreProjektnummer} % Beispiel: A123
-\author{Vorname1 Nachname1 \and Vorname2 Nachname2 \and Vorname3 Nachname3}
-\date{AktuellesSemester} % Beispiel: Wintersemester 2019/20
+\newcommand{\theGroup}{215} % Beispiel: 42
+\newcommand{\theNumber}{A500} % Beispiel: A123
+\author{David Csida \and Georgios Merezas \and Fabian Degen}
+\date{Sommersemester 2022} % Beispiel: Wintersemester 2019/20
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Diese Zeile bitte -nicht- aendern.
@@ -17,13 +18,41 @@
 \maketitle
 
 \section{Einleitung}
+\subsection{Einführung}
+Sei es beim Herstellen einer Verbindung mit einem Server oder das chatten mit Freunden und Bekannten rund um den Globus, nie genoss die Kryptographie mehr Relevanz als jetzt.
+Man möchte nicht, dass die Nachrichten die man an seine Geliebten versendet von einer dritten Person mitgelesen werden können. Darum existieren kryptographische Verfahren zur Verschlüsselung von Informationen.
+Eines dieser Verschlüsselungsverfahren ist Salsa20/20, welches es zu implementieren galt.
+
+\subsection{Definitionen}
+Im Folgenden bezeichne: 
+\\ \hspace*{5mm} 1. $x \lll y$ die Linksrotation von $x$ um $y$ Bit. 
+\\ \hspace*{5mm} 2. $\oplus$ den Binären XOR-Operator.
+
+\subsection{Funktionsweise Salsa20/20}
+Salsa 20/20 ist eine Stromchiffre basierend auf einem sogenannten Add-Rotate-XOR-Schema, ins Leben gerufen von David J. Bernstein.
+\\Salsa20/20 verwendet einen Kern, eine 4x4 Matrix bestehend aus vorzeichenlosen 32-bit Little-Endian-Ganzzahlen, welcher durch Add, Rotate und XOR Operationen auf bestimmen Startwerten erzeugt wird.
+Auf diesem generierten Kern wird dann mit der zu verschlüsselnden Nachricht Byte für Byte eine XOR-Operation ausgeführt.
+\cite{intel2017man}
+
+\subsubsection{Der Salsa20-Kern:}
+Der Salsa20-Kern ist eine Funktion, welche einen 64-Byte Block generiert, mit dem wie oben beschrieben auf der zu verschlüsselnden Nachricht Byte für Byte eine XOR-Operation augeführt wird.
+Der 64-Byte-Block wird in 20 sogenannten Runden aus einem 256-Bit-Key, einer 64-Bit Nonce und einem 64-Bit Counter generiert.
+Den Startzustand bildet dabei folgende 4x4 Matrix:
+\[
+    \begin{pmatrix}
+    0\text{x}61707865 & K_0 & K_1 & K_2\\
+    K_3 & 0\text{x}3320646\text{e} & N_0 & N_1\\
+    C_0 & C_1 & 0\text{x}79622\text{d}32 & K_4\\
+    K_5 & K_6 & K_7 & 0\text{x}6\text{b}206574
+    \end{pmatrix}
+\]
+
 
 
 \section{Lösungsansatz}
 
 
-% TODO: Je nach Aufgabenstellung einen der Begriffe wählen
-\section{Korrektheit/Genauigkeit}
+\section{Korrektheit}
 
 
 \section{Performanzanalyse}

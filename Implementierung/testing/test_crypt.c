@@ -5,8 +5,10 @@
 #include <stdlib.h>
 #include <time.h>
 
+#include "../salsa_crypt/salsa_crypt_v1.h"
 #include "../salsa_crypt/salsa_crypt_v2.h"
 #include "asserts.h"
+#include "print_tests.h"
 
 void salsa20_crypt_test(size_t mlen, const uint8_t msg[mlen], uint8_t cipher[mlen], uint32_t key[8], uint64_t iv)
 {
@@ -94,10 +96,14 @@ int main(int argc, char **argv)
         iv = (( ((uint64_t)randomInt(0, RAND_MAX)) * ((uint64_t)randomInt(0, RAND_MAX)) + randomInt(0, 1)) << 32) | (2 * ((uint64_t)randomInt(0, RAND_MAX)) + randomInt(0, 1));
         
      
-        salsa20_crypt_test(mlen, msg, cipher1, key, iv);
+        salsa_crypt_v1(mlen, msg, cipher1, key, iv);
         
-        salsa20_crypt(mlen, msg, cipher2, key, iv);
-        
+        salsa_crypt_v2(mlen, msg, cipher2, key, iv);
+        print_arr_8bit(cipher2, mlen);
+        print_char_arr(msg, mlen);
+        print_key(key);
+        printf("Nonce: %llx\n", iv);
+
         printf("%d: ",i);
         
         if(! (assertEqualsArrays_8bit(cipher1,mlen,cipher2,mlen))  ){

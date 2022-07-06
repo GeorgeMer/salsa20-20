@@ -1,15 +1,12 @@
 #define _POSIX_C_SOURCE 199309L
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdint.h>
-#include <unistd.h>
 #include <getopt.h>
-#include <errno.h>
 #include <stdbool.h>
-#include <sys/stat.h>
 #include <string.h>
 #include <time.h>
 #include <inttypes.h>
+
+#include "file_IO/file_IO.h"
+#include "number_conversions/number_conversions.h"
 
 #include "salsa_crypt/salsa_crypt_v0.h"
 #include "salsa_crypt/salsa_crypt_v1.h"
@@ -40,7 +37,8 @@ const char *help_msg =
     "  -o P   P is the path to the output file\n"
     "  -h     Show help message (this text) and exit\n"
     "  --help Same effect as -h\n"
-    "  All numbers can be input as decimal (no prefix), octal (0 prefix) and hexadecimal (0x prefix)\n";
+    "  All numbers can be input as decimal (no prefix) or hexadecimal (0x prefix)\n"
+    "  Negative Numbers are not allowed.";
 
 void print_usage(const char *progname) { fprintf(stderr, usage_msg, progname, progname, progname); }
 void print_help(const char *progname)
@@ -49,189 +47,9 @@ void print_help(const char *progname)
     fprintf(stderr, "\n%s", help_msg);
 }
 
-const uint8_t *read_file(const char *path)
+double gettime_in_seconds(const struct timespec start, const struct timespec end)
 {
-    FILE *file = fopen(path, "r");
-    char *message = NULL;
-
-    // error handling
-    if (file == NULL)
-    {
-        perror("Error opening file ");
-        exit(EXIT_FAILURE);
-    }
-
-    struct stat statbuf;
-    if (fstat(fileno(file), &statbuf))
-    {
-        perror("Error retrieving file stats ");
-        goto error;
-    }
-
-    if (!S_ISREG(statbuf.st_mode) || statbuf.st_size <= 0)
-    {
-        fprintf(stderr, "Error processing file: Not a regular file or invalid size\n");
-        goto error;
-    }
-
-    if (!(message = malloc(statbuf.st_size + 1)))
-    {
-        fprintf(stderr, "Error reading file: Could not allocate enough memory\n");
-        goto error;
-    }
-
-    if (!fread(message, 1, statbuf.st_size, file))
-    {
-        perror("Error reading file ");
-        free(message);
-        goto error;
-    }
-
-    // close successfully read file, add 0 byte add the end of char array and convert it to uint8_t array
-    fclose(file);
-    message[statbuf.st_size] = '\0';
-    mlen = statbuf.st_size;
-    return (const uint8_t *)message;
-
-    // label to jump to if error occured reading input file
-    // closes file and ends the program by returning EXIT_FAILURE
-error:
-    fclose(file);
-    exit(EXIT_FAILURE);
-}
-
-uint64_t convert_string_to_uint64_t(const char *string)
-{
-    if (*string == '-')
-    {
-        fprintf(stderr, "Negative numbers are not allowed as options.\n");
-        exit(EXIT_FAILURE);
-    }
-
-    char *endptr;
-    errno = 0;
-    uint64_t result = strtoull(string, &endptr, 0);
-
-    // error handling
-    if (endptr == string || *endptr != '\0')
-    {
-        fprintf(stderr, "%s could not be converted to uint64_t\n", string);
-        exit(EXIT_FAILURE);
-    }
-    else if (errno == ERANGE)
-    {
-        fprintf(stderr, "%s over - or underflows uint64_t\n", string);
-        exit(EXIT_FAILURE);
-    }
-    else if (errno == EINVAL)
-    {
-        fprintf(stderr, "%s No conversion could be performed from String to uint64_t\n", string);
-        exit(EXIT_FAILURE);
-    }
-    return result;
-}
-
-uint32_t convert_string_to_uint32_t(const char *string, int base)
-{
-    char *endptr;
-    errno = 0;
-    uint32_t result = strtoul(string, &endptr, base);
-
-    // error handling
-    if (endptr == string || *endptr != '\0')
-    {
-        fprintf(stderr, "%s could not be converted to uint32_t\n", string);
-        exit(EXIT_FAILURE);
-    }
-    else if (errno == ERANGE)
-    {
-        fprintf(stderr, "%s over - or underflows uint32_t\n", string);
-        exit(EXIT_FAILURE);
-    }
-    else if (errno == EINVAL)
-    {
-        fprintf(stderr, "%s No conversion could be performed from String to uint32_t\n", string);
-        exit(EXIT_FAILURE);
-    }
-    return result;
-}
-
-static void write_file(const char *path, uint8_t *cipher)
-{
-    FILE *file;
-
-    // error handling
-    if (path == NULL)
-    {
-        // create txt file "encrypted" if no path to output file was given
-        if (!(file = fopen("encrypted.txt", "w")))
-        {
-            perror("Error creating file ");
-            exit(EXIT_FAILURE);
-        }
-    }
-    else
-    {
-        if (!(file = fopen(path, "w")))
-        {
-            perror("Error opening output file ");
-            exit(EXIT_FAILURE);
-        }
-    }
-
-    // writing cipher to output file as string of hexadecimals
-    // linebreak every 76 characters
-    size_t linebreak = 0;
-    for (size_t i = 0; i < mlen; i++)
-    {
-        /*         if (linebreak == 76)
-                {
-                    if (fprintf(file, "\n") < 0)
-                    {
-                        goto cleanup;
-                    }
-                    linebreak = 0;
-                } */
-
-        if (*(cipher + i) == 0)
-        {
-            // writing 0 to output file as 00
-            if (fprintf(file, "00") < 0)
-            {
-                goto cleanup;
-            }
-        }
-        else if (*(cipher + i) <= 15)
-        {
-            // writing single digit hex to output file as 0z
-            if (fprintf(file, "0%x", *(cipher + i)) < 0)
-            {
-                goto cleanup;
-            }
-        }
-        else
-        {
-            // writing double digit hex to output file
-            if (fprintf(file, "%x", *(cipher + i)) < 0)
-            {
-                goto cleanup;
-            }
-        }
-        linebreak += 2;
-    }
-    // close successfully written file
-    fclose(file);
-    return;
-
-cleanup:
-    fprintf(stderr, "Error writing to output file ");
-    fclose(file);
-    exit(EXIT_FAILURE);
-}
-
-uint64_t gettime_in_seconds(const struct timespec start, const struct timespec end)
-{
-    return ((uint64_t)(end.tv_sec - start.tv_sec)) + ((uint64_t)((end.tv_nsec - start.tv_nsec) / 1000000000));
+    return ((double)((end.tv_sec - start.tv_sec) * 1000)) + ((double)((end.tv_nsec - start.tv_nsec) / 1000)) / 1000;
 }
 
 int main(int argc, char **argv)
@@ -281,127 +99,7 @@ int main(int argc, char **argv)
             measure_runtime = true;
             break;
         case 'k':;
-            key[0] = 0x0;
-            key[1] = 0x0;
-            key[2] = 0x0;
-            key[3] = 0x0;
-            key[4] = 0x0;
-            key[5] = 0x0;
-            key[6] = 0x0;
-            key[7] = 0x0;
-            if (*(optarg) == '-')
-            {
-                fprintf(stderr, "Negative numbers are not allowed as options.\n");
-                exit(EXIT_FAILURE);
-            }
-
-            // converting 256 bit string input number into 8 element uint_32t array
-            uint8_t index = 0;
-            uint8_t count = 0;
-            char current_string[9];
-            int base = 10;
-
-            // TODO: catch too large input STACKSMASHING POSSIBLE!!!!!!!!
-            // TODO: richtig machen fprintf/perror
-            if (*(optarg) == '0' && *(optarg + 1) == 'x')
-            {
-                base = 16;
-                uint8_t start = 2;
-                if (strlen(optarg) > 66)
-                {
-                    // check for leading zeroes
-                    while (*(optarg + start) == '0')
-                    {
-                        start++;
-                    }
-
-                    if (strlen(optarg + start) > 64)
-                    {
-                        fprintf(stderr, "The key entered does not fit in 256 bit.\n");
-                        return EXIT_FAILURE;
-                    }
-                }
-                optarg += start;
-                size_t i = strlen(optarg) - 1, k = 0;
-                for (; i >= 8; i -= 8, k++)
-                {
-                    char hexnum[8] = {*(optarg + i - 7), *(optarg + i - 6), *(optarg + i - 5), *(optarg + i - 4),
-                                      *(optarg + i - 3), *(optarg + i - 2), *(optarg + i - 1), *(optarg + i)};
-                    key[k] = convert_string_to_uint32_t(hexnum, base);
-                }
-                if (i != 0)
-                {
-                    char *lastnum = malloc(i + 2);
-                    if (lastnum == NULL)
-                    {
-                        fprintf(stderr, "Couldn't allocate memory\n");
-                        return EXIT_FAILURE;
-                    }
-                    for (size_t j = 0; j <= i; j++)
-                    {
-                        *(lastnum + j) = *(optarg + j);
-                    }
-                    *(lastnum + i + 1) = '\0';
-                    key[k] = convert_string_to_uint32_t(lastnum, base);
-
-                    free(lastnum);
-                }
-                else
-                {
-
-                    char *lastnum = malloc(2);
-                    if (lastnum == NULL)
-                    {
-                        fprintf(stderr, "Couldn't allocate memory\n");
-                        return EXIT_FAILURE;
-                    }
-                    *lastnum = *optarg;
-                    *(lastnum + 1) = '\0';
-                    key[k] = convert_string_to_uint32_t(lastnum, base);
-                    free(lastnum);
-                }
-                for (int i = 0; i < 8; i++)
-                {
-                    printf("%08x ", key[i]);
-                }
-            }
-
-            else
-            {
-
-                if (strlen(optarg) > 77)
-                {
-                    fprintf(stderr, "The key entered does not fit in 256 bit.\n");
-                    return EXIT_FAILURE;
-                }
-            }
-
-            while (*(optarg) != '\0')
-            {
-                current_string[count++] = *(optarg);
-                optarg += 1;
-                if (count == 8)
-                {
-                    current_string[count] = '\0';
-                    count = 0;
-                    key[index++] = convert_string_to_uint32_t(current_string, base);
-                }
-            }
-
-            if (count != 0)
-            {
-                while (count < 9)
-                {
-                    current_string[count++] = '0';
-                }
-                current_string[count] = '\0';
-                key[index++] = convert_string_to_uint32_t(current_string, base);
-            }
-
-            for (int i = index; i < 8; i++)
-            {
-                key[i] = 0x0;
-            }
+            convert_string_to_uint32_t_array(optarg, key);
             break;
         case 'i':
             iv = convert_string_to_uint64_t(optarg);
@@ -462,7 +160,7 @@ int main(int argc, char **argv)
             switch (implementation_number)
             {
             case 0:
-                salsa_crypt_v0(mlen, message, cipher, key, iv);
+                salsa_crypt(mlen, message, cipher, key, iv);
                 break;
             case 1:
                 salsa_crypt_v1(mlen, message, cipher, key, iv);
@@ -486,7 +184,7 @@ int main(int argc, char **argv)
         printf("The runtime for implementation "
                "%" PRIu64 " with "
                "%" PRIu64 " function calls amounts to "
-               "%" PRIu64 " seconds.\n",
+               "%f seconds.\n",
                implementation_number, number_of_iterations, gettime_in_seconds(start, end));
     }
     else
@@ -494,7 +192,7 @@ int main(int argc, char **argv)
         switch (implementation_number)
         {
         case 0:
-            salsa_crypt_v0(mlen, message, cipher, key, iv);
+            salsa_crypt(mlen, message, cipher, key, iv);
             break;
         case 1:
             salsa_crypt_v1(mlen, message, cipher, key, iv);

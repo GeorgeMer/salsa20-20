@@ -4,7 +4,7 @@
 
 #include "../salsa_core/salsa_core_v0.h"
 
-void salsa_crypt_v0(size_t mlen, const uint8_t msg[mlen], uint8_t cipher[mlen], uint32_t key[8], uint64_t iv)
+void salsa_crypt(size_t mlen, const uint8_t msg[mlen], uint8_t cipher[mlen], uint32_t key[8], uint64_t iv)
 {
     uint32_t in[16];
 
@@ -28,7 +28,7 @@ void salsa_crypt_v0(size_t mlen, const uint8_t msg[mlen], uint8_t cipher[mlen], 
 
     // output matrix
     uint32_t out[16];
-    salsa_core_v0(out, in);
+    salsa_core(out, in);
 
     size_t index = 0;
 
@@ -57,7 +57,7 @@ void salsa_crypt_v0(size_t mlen, const uint8_t msg[mlen], uint8_t cipher[mlen], 
                 in[8] += 1;
             }
 
-            salsa_core_v0(out, in);
+            salsa_core(out, in);
             stream = ((uint8_t *)out);
         }
         cipher[i] = msg[i] ^ (*(stream + index));

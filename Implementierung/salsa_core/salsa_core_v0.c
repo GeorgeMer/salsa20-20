@@ -3,7 +3,7 @@
 
 #include "rotate_left.h"
 
-void salsa_core_v0(uint32_t output[16], const uint32_t input[16])
+void salsa_core(uint32_t output[16], const uint32_t input[16])
 {
     for (uint8_t i = 0; i < 16; i++)
     {
