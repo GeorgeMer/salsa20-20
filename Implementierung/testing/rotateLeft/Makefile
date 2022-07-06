@@ -1,4 +1,4 @@
-CFLAGS=-O0 -std=gnu11 -g -Wall -Wextra -Wpedantic
+CFLAGS=-O3 -std=gnu11 -g -Wall -Wextra -Wpedantic
 
 .PHONY: all 
 all: main 

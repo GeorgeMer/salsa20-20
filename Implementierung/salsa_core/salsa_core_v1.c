@@ -120,7 +120,7 @@ void hash(uint8_t output[64], const uint8_t input[64])
     }
 }
 
-void expansion(uint8_t output[64], uint8_t k[32], int8_t n[16])
+void expansion(uint8_t output[64], uint8_t k[32], uint8_t n[16])
 {
     uint8_t temp_input[64];
 
