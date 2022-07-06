@@ -3,5 +3,4 @@ Implementierung/.testing
 Implementierung/test
 
 Implementierung/main
-Implementierung/test.txt
-Implementierung/encrypted.txt
+*.txt
