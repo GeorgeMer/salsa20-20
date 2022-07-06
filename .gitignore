@@ -1,6 +1,7 @@
 .vscode
 Implementierung/.testing
+Implementierung/test
 
-main
-test.txt
-encrypted.txt
+Implementierung/main
+Implementierung/test.txt
+Implementierung/encrypted.txt
