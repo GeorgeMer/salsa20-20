@@ -20,7 +20,7 @@
 \section{Einleitung}
 \subsection{Einführung}
 Sei es beim Herstellen einer Verbindung mit einem Server oder das chatten mit Freunden und Bekannten rund um den Globus, nie genoss die Kryptographie mehr Relevanz als jetzt.
-Man möchte nicht, dass die Nachrichten die man an seine Geliebten versendet von einer dritten Person mitgelesen werden können. Darum existieren kryptographische Verfahren zur Verschlüsselung von Informationen.
+Man möchte nicht, dass die Nachrichten, die man an seine Geliebten versendet von einer dritten Person mitgelesen werden können. Darum existieren kryptographische Verfahren zur Verschlüsselung von Informationen.
 Eines dieser Verschlüsselungsverfahren ist Salsa20/20, welches es zu implementieren galt.
 
 \subsection{Definitionen}
@@ -30,14 +30,14 @@ Im Folgenden bezeichne:
 
 \subsection{Funktionsweise Salsa20/20}
 Salsa 20/20 ist eine Stromchiffre basierend auf einem sogenannten Add-Rotate-XOR-Schema, ins Leben gerufen von David J. Bernstein.
-\\Salsa20/20 verwendet einen Kern, eine 4x4 Matrix bestehend aus vorzeichenlosen 32-bit Little-Endian-Ganzzahlen, welcher durch Add, Rotate und XOR Operationen auf bestimmen Startwerten erzeugt wird.
+\\Salsa20/20 verwendet einen Kern, eine 4$\times$4 Matrix bestehend aus vorzeichenlosen 32-bit Little-Endian-Ganzzahlen, welcher durch Add, Rotate und XOR Operationen auf bestimmen Startwerten erzeugt wird.
 Auf diesem generierten Kern wird dann mit der zu verschlüsselnden Nachricht Byte für Byte eine XOR-Operation ausgeführt.
 \cite{intel2017man}
 
 \subsubsection{Der Salsa20-Kern:}
 Der Salsa20-Kern ist eine Funktion, welche einen 64-Byte Block generiert, mit dem wie oben beschrieben auf der zu verschlüsselnden Nachricht Byte für Byte eine XOR-Operation augeführt wird.
 Der 64-Byte-Block wird in 20 sogenannten Runden aus einem 256-Bit-Key, einer 64-Bit Nonce und einem 64-Bit Counter generiert.
-Den Startzustand bildet dabei folgende 4x4 Matrix:
+Den Startzustand bildet dabei folgende 4$\times$4 Matrix:
 \[
     \begin{pmatrix}
     0\text{x}61707865 & K_0 & K_1 & K_2\\
@@ -46,12 +46,47 @@ Den Startzustand bildet dabei folgende 4x4 Matrix:
     K_5 & K_6 & K_7 & 0\text{x}6\text{b}206574
     \end{pmatrix}
 \]
-
+% TODO: implementation description
 
 
 \section{Lösungsansatz}
+\subsection{Theoretischer Teil}
+\subsubsection{Transponieren}
+Das Transponieren der Matrix ist Teil des Salsa20-Kern Algorithmus, aber ist nicht sonderlich performant. Um er weiter zu optimieren, 
+anstatt 20 Runden von der Kern Funktion auszuführen und nach jede Runde die Matrix zu transponieren, kann man nur 10 Mal durch die Schleife iterieren
+und in jedem Schleifendurchlauf zwei Runden nacheinander ausführen, aber mit "transponierte" Indexe von der Matrix.   
+\subsubsection{Werte an der Diagonale}
+\subsubsection{Funktionsweise einer Stromchiffre}
+Eine Stromchiffre ist ein symmetrischer kryptographischer Algorithmus, der für Ver- und Entschlüsselung von Daten benutzt ist. 
+Dieser Algorithmus nimmt einen Klartext und ein Schlüsselstrom, ausführt eine bitweise XOR-Operation und am Ende gibt einen Geheimtext zurück. 
+Man kann dann mit Benutzung von demselben Schlüsselstrom wieder den Klartext bekommen, wenn man den Geheimtext zu diesem Algorithmus übergibt.
+% TODO: Beispiel von Klartext, Strom und Cipher
+\vspace{1mm}
+\\Das funktioniert, weil die XOR-Operation symmetrisch ist:
+\begin{table}[!h]
+    \begin{tabular}{|c|c|c|c|c|}
+    \hline
+    Klartext & Strom & Geheimtext & Strom & Ergebnis \\
+    \hline
+    0 & 0 & 0 & 0 & 0 \\
+    0 & 1 & 1 & 1 & 0 \\
+    1 & 0 & 1 & 0 & 1 \\
+    1 & 1 & 0 & 1 & 1 \\
+    \hline
+    \end{tabular}
+\end{table}
+\\
+Man sieht, dass das Ergebnis mit dem Klartext übereinstimmt, unabhängig davon, was die Bits von dem Klartext und dem Strom waren.
+\vspace{3mm}
+\\
+Damit das richtig mit Salsa20 funktioniert, müssen die Parameter so gewählt werden, SAME STROMBIT FOR VER UND Entschlüsselung 
+SO THAT WE GET THE MESSAGE BACK.
+\\
+Das bekommt man mit der Nutzung von demselben Key für alle Nachrichten (unser Klartext), demselben Nonce für jede einzelne Nachricht, und demselben Counter je 64 Bytes der Nachricht. 
+Der Counter ist keine Eingabe unseres Algorithmus, TO MAKE THE STROM (OUTPUT OF SalsaCore) LESS PREDICTABLE AND LESS VURNERABLE TO ATTACK.
 
 
+\subsection{Praktischer Teil}
 \section{Korrektheit}
 
 
