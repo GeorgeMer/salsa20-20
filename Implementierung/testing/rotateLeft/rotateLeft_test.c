@@ -46,12 +46,14 @@ int main()
     printf("SIMD 128:\n");
 
     __m128i_u _output;
+    uint32_t output_test[4];
 
     start = clock();
     for (int i = 0; i < 100000000; i++)
     {
         _output = rotateLeftSIMD_128(
             _mm_set_epi32(input[3], input[2], input[1], input[0]), 4);
+        /* _mm_storeu_si128((__m128i *)output_test, _output); */
     }
     end = clock();
 

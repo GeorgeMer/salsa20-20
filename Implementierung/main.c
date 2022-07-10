@@ -65,7 +65,7 @@ int main(int argc, char **argv)
 
     // default values
     uint64_t implementation_number = 0;
-    uint64_t number_of_iterations;
+    uint64_t number_of_iterations = 0;
     bool measure_runtime = false;
     uint32_t key[8];
     key[0] = 0x10000001;

@@ -55,7 +55,7 @@ void rotateLeftSIMD_32_xor(uint32_t amount, uint32_t n0, uint32_t *output0, uint
 __m128i rotateLeftSIMD_128_xor(uint32_t amount, __m128i numbers0, __m128i numbers1, __m128i xor)
 {
     __m128i numbers = _mm_add_epi32(numbers0, numbers1);
-    // input has to be reversed afterwards
+    // xor has to be reversed afterwards
     return _mm_xor_si128(_mm_or_si128(
         _mm_slli_epi32(numbers, amount),
         _mm_srli_epi32(numbers, 32 - amount)), xor);

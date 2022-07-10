@@ -56,7 +56,7 @@ void salsa_crypt_v2(size_t mlen, const uint8_t msg[mlen], uint8_t cipher[mlen], 
         {
 
             // load 16 bytes of hash
-            __m128i h = _mm_loadu_si128(hash + 4 * j);
+            __m128i h = _mm_loadu_si128((__m128i_u*)hash + 4 * j);
 
             // load hash
             __m128i m = _mm_loadu_si128(msg + 64 * i + 16 * j);

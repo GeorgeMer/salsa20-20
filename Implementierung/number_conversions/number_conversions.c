@@ -157,7 +157,7 @@ void convert_string_to_uint32_t_array(const char *string, uint32_t key[8])
 
     if (count != 0)
     {
-        while (count < 9)
+        while (count < 8)
         {
             current_string[count++] = '0';
         }
