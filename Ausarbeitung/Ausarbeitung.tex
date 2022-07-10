@@ -39,12 +39,12 @@ Folgende theoretische Fragen waren zu beantworten:
 \begin{itemize}
     \item Wie könnte man das im letzten Schritt einer jeden Salsa20-Kern Runde ineffiziente, stattfindende transponieren der Matrix optimieren?
     \item Was bedeuten die Werte an der Diagonalen des Startzustands?
-    \item Erklären der Funktionsweise einer Stromchiffre anhand eines Beispiels. Warum kann man dieselbe Funktion zum Ver- und Entschlüsseln verwenden? Wie müssen die Parameter gewählt werden, damit dies funktioniert? Warum ist der Counter keine EIngabe des Verschlüsselungsalgorithmus?
+    \item Erklären der Funktionsweise einer Stromchiffre anhand eines Beispiels. Warum kann man dieselbe Funktion zum Ver- und Entschlüsseln verwenden? Wie müssen die Parameter gewählt werden, damit dies funktioniert? Warum ist der Counter keine Eingabe des Verschlüsselungsalgorithmus?
 \end{itemize}
 \subsubsection{Praktischer Teil:}
 Zu implementieren  war folgende Funktionalität: 
 \begin{itemize}
-    \item Ein Rahmenprogramm welches I\O-Operationen unterstützt, mithilfe derer man eine ganze Datei in den Speicher einlesen und als Pointer an eine Unterfunktion übergeben kann. Selbiges soll auch zum Schreiben eines Speicherbereiches mit bekannter Länge in eine Datei möglich sein.
+    \item Ein Rahmenprogramm welches I$\backslash$O-Operationen unterstützt, mithilfe derer man eine ganze Datei in den Speicher einlesen und als Pointer an eine Unterfunktion übergeben kann. Selbiges soll auch zum Schreiben eines Speicherbereiches mit bekannter Länge in eine Datei möglich sein.
     \item \textcolor{blue}{void} salsa20\_core(\textcolor{blue} {uint32\_t} output[16] \textcolor{blue}{const uint32\_t} input[16]) \\
     welche den oben beschriebenen Salsa20-Kern implementiert. input bezeichnet den Startzustand des Kerns, output den finalen 64-Byte-Block. \\
     \item \textcolor{blue} {void} salsa20\_crypt(\textcolor{blue}{size\_t} mlen, \textcolor {blue} {const uint8\_t} msg[mlen], \textcolor{blue}{uint8\_t} cipher [mlen], \textcolor{blue}{uint32\_t} key[8], \textcolor {blue} {uint64\_t} iv) \\

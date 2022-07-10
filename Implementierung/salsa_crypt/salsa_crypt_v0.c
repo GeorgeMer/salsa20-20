@@ -33,7 +33,7 @@ void salsa_crypt(size_t mlen, const uint8_t msg[mlen], uint8_t cipher[mlen], uin
     size_t index = 0;
 
     // uint8_t stream of keystream in little endian order
-    uint8_t *stream = ((uint8_t *)out);
+    const uint8_t *stream = ((uint8_t *)out);
 
     // xor msg with keystream and increment counter after 64 bytes
     for (size_t i = 0; i < mlen; i++)
