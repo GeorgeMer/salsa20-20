@@ -27,7 +27,7 @@ kryptographische Verfahren zur Verschlüsselung von Informationen. Eines dieser 
 Salsa20/20, welches es zu implementieren galt.
 
 \subsection{Funktionsweise Salsa20/20}
-Salsa20/20 ist eine Stromchiffre basierend auf einem sogenannten Add-Rotate-XOR-Schema, ins Leben gerufen von 
+Salsa20/20 ist eine Stromchiffre basierend auf einem sogenannten Add-Rotate-XOR-Schema (kurz: ARX-Schema), ins Leben gerufen von 
 David J. Bernstein.
 \\Salsa20/20 verwendet eine 4$\times$4 Matrix bestehend aus vorzeichenlosen 32-bit Little-Endian-Ganzzahlen, 
 welche durch Add, Rotate und XOR Operationen aus bestimmen Startwerten erzeugt wird.
@@ -35,10 +35,16 @@ Auf dieser generierten Matrix wird dann mit der zu verschlüsselnden Nachricht B
 
 \subsubsection{Der Salsa20-Kern:}
 Der Salsa20-Kern ist eine Funktion, welche einen 64-Byte Block generiert, auf dem, wie oben beschrieben, auf 
-der zu verschlüsselnden Nachricht Byte für Byte eine Add-Rotate-XOR-Operation ausgeführt wird. Der 64-Byte-Block wird in 20 
-sogenannten Runden aus einem 256-Bit-Key, einer 64-Bit Nonce und einem 64-Bit Counter generiert.
+der zu verschlüsselnden Nachricht Byte für Byte eine ARX-Operation ausgeführt wird. Es werden bei jeder Operation 
+zwei Werte der Matrix aufaddiert, links-rotiert und mit dem Eintrag exklusiv verodert, welcher dann durch das Ergebnis 
+dieser Operationen ersetzt wird. 
+Der 64-Byte-Block wird in 20 sogenannten Runden aus einem 256-Bit-Key, einer 64-Bit Nonce und einem 64-Bit 
+Counter generiert. Die zwanzig Runden bestehen jeweils aus vier Viertelrunden. Die Viertelrunden unterscheiden sich 
+durch die Anzahl der Rotation, die für jede ARX-Operation ausgeführt werden und durch die Matrix-Einträge, auf die 
+diese Operationen angewandt werden.
 
 \subsection{Aufgabenstellung}
+
 \subsubsection{Theoretischer Teil:}
 Folgende theoretische Fragen waren zu beantworten:
 \begin{itemize}
@@ -46,29 +52,33 @@ Folgende theoretische Fragen waren zu beantworten:
     \item Was bedeuten die Werte an der Diagonalen des Startzustands?
     \item Erklären der Funktionsweise einer Stromchiffre anhand eines Beispiels. Warum kann man dieselbe Funktion zum Ver- und Entschlüsseln verwenden? Wie müssen die Parameter gewählt werden, damit dies funktioniert? Warum ist der Counter keine Eingabe des Verschlüsselungsalgorithmus?
 \end{itemize}
+
 \subsubsection{Praktischer Teil:}
 Zu implementieren  war folgende Funktionalität: 
 \begin{itemize}
-    \item Ein Rahmenprogramm welches I$\backslash$O-Operationen unterstützt, mithilfe derer man eine ganze Datei in den Speicher einlesen und als Pointer an eine Unterfunktion übergeben kann. Selbiges soll auch zum Schreiben eines Speicherbereiches mit bekannter Länge in eine Datei möglich sein.
-    \item \textcolor{blue}{void} salsa20\_core(\textcolor{blue} {uint32\_t} output[16] \textcolor{blue}{const uint32\_t} input[16]) \\
+    \item Ein Rahmenprogramm welches I/O-Operationen unterstützt, mithilfe derer man eine ganze Datei in den Speicher einlesen und als Pointer an eine Unterfunktion übergeben kann. Selbiges soll auch zum Schreiben eines Speicherbereiches mit bekannter Länge in eine Datei möglich sein.
+    \item \textcolor{blue}{void} salsa20\_core (\textcolor{blue} {uint32\_t} output[16] \textcolor{blue}{const uint32\_t} input[16]) \\
     welche den oben beschriebenen Salsa20-Kern implementiert. input bezeichnet den Startzustand des Kerns, output den finalen 64-Byte-Block. \\
-    \item \textcolor{blue} {void} salsa20\_crypt(\textcolor{blue}{size\_t} mlen, \textcolor {blue} {const uint8\_t} msg[mlen], \textcolor{blue}{uint8\_t} cipher [mlen], \textcolor{blue}{uint32\_t} key[8], \textcolor {blue} {uint64\_t} iv) \\
+    \item \textcolor{blue} {void} salsa20\_crypt (\textcolor{blue}{size\_t} mlen, \textcolor{blue} {const uint8\_t} msg[mlen], \textcolor{blue}{uint8\_t} cipher [mlen], \textcolor{blue}{uint32\_t} key[8], \textcolor{blue} {uint64\_t} iv) \\
     welche eine Nachricht msg der Länge mlen mit einem gegebenen Schlüssel und Nonce (iv) verschlüsselt und das Ergebnis in cipher schreibt.
 \end{itemize}
-% TODO: implementation description
+
 
 
 \section{Lösungsansatz}
 \subsection{Theoretischer Teil}
 \subsubsection{Transponieren}
-Das Transponieren der Matrix ist Teil des Salsa20-Kern Algorithmus, aber ist nicht sonderlich performant. Um ihn weiter zu optimieren, 
-kann man anstatt 20 Runden von der Kern Funktion auszuführen und nach jeder Runde die Matrix zu transponieren, nur 10 Mal durch die Schleife iterieren
-und in jedem Schleifendurchlauf zwei Runden nacheinander ausführen, aber mit den ``transponierten'' Indexen der Matrix.   
+Das Transponieren der Matrix ist Teil des Salsa20-Kern Algorithmus, ist aber nicht sonderlich performant. 
+Um ihn weiter zu optimieren, kann man anstatt zwanzig Runden, die jeweils eine Transposition enthalten, zehn sogenannte Doppelrunden 
+ausführen, die jeweils aus einer sogenannten Spaltenrunde und einer Reihenrunde bestehen. Eine Spaltenrunde ist identisch zu einer 
+Runde wie oben definiert, während eine Reihenrunde die Indizes bei Matrixzugriffen so wählt, dass die Matrix behandelt wird
+als wäre sie transponiert.  
 \subsubsection{Werte an der Diagonale}
 \subsubsection{Funktionsweise einer Stromchiffre}
 Eine Stromchiffre ist ein symmetrischer kryptographischer Algorithmus, der für Ver- und Entschlüsselung von Daten verwendet wird. 
-Dieser Algorithmus nimmt einen Klartext und ein Schlüsselstrom und führt eine bitweise XOR-Operation aus und gibt am Ende einen Geheimtext zurück. 
-Man kann durch Benutzung von demselben Schlüsselstrom wieder den Klartext erhalten, wenn man dem Algorithmus den Geheimtext übergibt.
+Dieser Algorithmus nimmt einen Klartext und ein Schlüsselstrom entgegen und führt eine bitweise XOR-Operation aus und gibt am Ende 
+einen Geheimtext zurück. 
+Man kann durch Benutzung desselben Schlüsselstroms wieder den Klartext erhalten, indem man dem Algorithmus den Geheimtext übergibt.
 % TODO: Beispiel von Klartext, Strom und Cipher
 Aufgrund der Symmetrie der XOR-Operation gilt folgendes:
 \begin{table}[!h]
