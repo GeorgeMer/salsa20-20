@@ -38,7 +38,7 @@ void salsa_crypt_v2(size_t mlen, const uint8_t msg[mlen], uint8_t cipher[mlen], 
     // xor msg with keystream
     for (i = 0; i < mlen; i += 16)
     {
-        if (mlen - i < 15)
+        if (mlen - i < 16)
         {
             goto non_vectorized;
         }
