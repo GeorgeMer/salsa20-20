@@ -63,8 +63,76 @@ Zu implementieren  war folgende Funktionalität:
 \subsubsection{Transponieren}
 Das Transponieren der Matrix ist Teil des Salsa20-Kern Algorithmus, aber ist nicht sonderlich performant. Um ihn weiter zu optimieren, 
 kann man anstatt 20 Runden von der Kern Funktion auszuführen und nach jeder Runde die Matrix zu transponieren, nur 10 Mal durch die Schleife iterieren
-und in jedem Schleifendurchlauf zwei Runden nacheinander ausführen, aber mit den ``transponierten'' Indexen der Matrix.   
+und in jedem Schleifendurchlauf zwei Runden nacheinander ausführen, aber mit den „transponierten“ Indexen der Matrix.   
 \subsubsection{Werte an der Diagonale}
+
+Die Werte an der Diagonale haben eine wichtige Bedeutung für die Sicherheit des Salsa20/20 Algorithmus, insbesondere der Salsa20-Kern Funktion.
+\vspace{1mm}
+\\Angenommen eine Matrix und die folgende Transformation dieser Matrix:
+\begin{gather*}
+    x =
+    \begin{pmatrix}
+    A_0 & B_0 & C_0 & D_0\\
+    A_1 & B_1 & C_1 & D_1\\
+    A_2 & B_2 & C_2 & D_2\\
+    A_3 & B_3 & C_3 & D_3\\
+    \end{pmatrix}  
+\quad \quad tr(x) = 
+    \begin{pmatrix}
+        D_3 & D_2 & D_1 & D_0\\
+        C_3 & A_0 & B_0 & C_0\\
+        B_3 & A_1 & B_1 & C_1\\
+        A_3 & A_2 & B_2 & C_2
+    \end{pmatrix}
+\end{gather*}
+Wir bekommen die folgende Eigenschaft:
+\begin{gather*}
+Salsa20( tr(x) ) = tr( Salsa20(x) )
+\end{gather*}
+Diese Transformation ist nicht nur invertierbar, sondern bleibt sie auch durch die Anwendung der Salsa-Funktion erhalten.\cite{salsa20security} 
+\vspace{1mm}
+\\Nehmen wir an, es handelt sich um dieselbe Matrix wie oben, aber nun mit der folgenden Transformation:
+\begin{gather*}
+R(x) =
+    \begin{pmatrix}
+        r(A_0) & r(B_0) & r(C_0) & r(D_0)\\
+        r(A_1) & r(B_1) & r(C_1) & r(D_1)\\
+        r(A_2) & r(B_2) & r(C_2) & r(D_2)\\
+        r(A_3) & r(B_3) & r(C_3) & r(D_3)\\
+    \end{pmatrix}
+\end{gather*}
+wobei $r(y)$ die Rechtsrotation des 4Byte großen $y$ um ein Bit ist.
+\vspace{1mm}
+\\Dann erhalten wir eine gleiche Eigenschaft:
+\begin{gather*}
+Salsa20(R(x)) = R(Salsa20(x))
+\end{gather*}
+Diese Transformation ist ebenfalls invertierbar und bleibt auch (meistens) nach Anwendung der Funktion Salsa20 erhalten.\cite{salsa20security}
+\vspace{1mm}
+\\Da diese Matrixverschiebungen und Rechtsrotationen \textbf{beide} sowohl invertierbar sind als auch mit der Anwendung von der Salsa20-Kern Funktion erhalten bleiben, 
+kann man eine Vielzahl von \textbf{beiden} auf die ursprüngliche Matrix anwenden und am Ende der Salsa20-Kern Funktion dasselbe Ergebnis kriegen, 
+wenn man diese Vielzahl erneut anwendet, auch egal in welcher Reihenfolge.
+\vspace{1mm}
+\\Diese Eigenschaften bedeuten nichts Gutes, wenn wir die Salsa20-Kern direkt mit beliebigen Matrizen verwenden. 
+Bei der Kryptographie geht es normalerweise darum, die Struktur zu zerstören, sodass ein Angriff sie nicht wiederherstellen kann. 
+Doch die Verschiebungen und Bitrotationen werden von der Funktion in keiner Weise beeinflusst.
+\vspace{1mm}
+\\An dieser Stelle kommen die Konstanten auf der Diagonale ins Spiel:
+\vspace{2mm}
+\\Durch die Einführung dieser Konstanten wird sichergestellt, dass keine Menge Verschiebungen oder Rotationen die ursprüngliche Diagonale wiederherstellen kann, 
+außer im trivialen Fall von 0 Verschiebungen und Rotationen. Das bedeutet, dass keine zwei verschiedenen Schlüssel- oder Nonce-Eingaben 
+jemals die gleiche Matrix haben werden, egal wie viele Transformationen angewendet werden.\cite{salsa20security}
+\vspace{1mm}
+\\Natürlich sind nicht alle Werte geeignet, denn es gibt einige Beispiele für Konstanten, 
+wo die Diagonale nach einer bestimmten Anzahl von Verschiebungen/Drehungen mit der originale übereinstimmt.
+\vspace{1mm}
+\\Außerdem stellt der Ersteller des Algorithmus fest\cite{ResponseOnTheSalsa20Core}, dass die Konstanten das Kollisionsproblem beseitigen, 
+auf das in einer anderen Arbeit\cite{onTheSalsa20Core} hingewiesen wurde, 
+nämlich dass $Salsa20(x) = Salsa20(x + \Delta)$ mit z.B. $\Delta=(0x80000000,0x80000000,...)$. 
+\\Ein solches $x+Delta$ ist keine gültige Eingabe für eine Salsa20-Kern Funktion (sofern $x$ eine ist) und wird daher in der Praxis nie vorkommen. 
+Das Gleiche gilt für andere Beispiele von Kollisionen, die in dieser Arbeit auftauchen.
+
+
 \subsubsection{Funktionsweise einer Stromchiffre}
 Eine Stromchiffre ist ein symmetrischer kryptographischer Algorithmus, der für Ver- und Entschlüsselung von Daten verwendet wird. 
 Dieser Algorithmus nimmt einen Klartext und ein Schlüsselstrom und führt eine bitweise XOR-Operation aus und gibt am Ende einen Geheimtext zurück. 
@@ -118,4 +186,5 @@ Der Counter ist keine Eingabe des Salsa20/20 Verschlüsselungsverfahren, sondern
 \bibliographystyle{plain}
 \bibliography{Ausarbeitung}{}
 \cite{intel2017man}
+
 \end{document}
