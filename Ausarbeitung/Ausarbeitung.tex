@@ -79,7 +79,7 @@ als wäre sie transponiert.
 
 Die Werte an der Diagonale haben eine wichtige Bedeutung für die Sicherheit des Salsa20/20 Algorithmus, insbesondere der Salsa20-Kern Funktion.
 \vspace{1mm}
-\\Angenommen eine Matrix und die folgende Transformation dieser Matrix:
+\\Betrachten wir im Folgenden eine Matrix $x$ und deren Transformation $tr(x)$:
 \begin{gather*}
     x =
     \begin{pmatrix}
@@ -96,13 +96,13 @@ Die Werte an der Diagonale haben eine wichtige Bedeutung für die Sicherheit des
         A_3 & A_2 & B_2 & C_2
     \end{pmatrix}
 \end{gather*}
-Wir bekommen die folgende Eigenschaft:
+Dann erhalten wir die folgende Eigenschaft:
 \begin{gather*}
 Salsa20( tr(x) ) = tr( Salsa20(x) )
 \end{gather*}
-Diese Transformation ist nicht nur invertierbar, sondern bleibt sie auch durch die Anwendung der Salsa-Funktion erhalten.\cite{salsa20security} 
+Diese Transformation der Matrix $x$ ist nicht nur invertierbar, sondern bleibt auch durch die Anwendung der Salsa-Funktion erhalten.\cite{salsa20security} 
 \vspace{1mm}
-\\Nehmen wir an, es handelt sich um dieselbe Matrix wie oben, aber nun mit der folgenden Transformation:
+\\Nehmen wir nun die folgende Transformation der oben beschriebenen Matrix $x$:
 \begin{gather*}
 R(x) =
     \begin{pmatrix}
@@ -112,35 +112,35 @@ R(x) =
         r(A_3) & r(B_3) & r(C_3) & r(D_3)\\
     \end{pmatrix}
 \end{gather*}
-wobei $r(y)$ die Rechtsrotation des 4Byte großen $y$ um ein Bit ist.
+wobei $r(y)$ die Rechtsrotation des 4Byte großen $y$ um ein Bit darstellt.
 \vspace{1mm}
-\\Dann erhalten wir eine gleiche Eigenschaft:
+\\Dann erhalten wir eine äquivalente Eigenschaft wie schon mit $tr(x)$:
 \begin{gather*}
 Salsa20(R(x)) = R(Salsa20(x))
 \end{gather*}
-Diese Transformation ist ebenfalls invertierbar und bleibt auch (meistens) nach Anwendung der Funktion Salsa20 erhalten.\cite{salsa20security}
+Diese Transformation ist ebenfalls invertierbar und bleibt auch, in den meisten Fällen, nach Anwendung der Funktion Salsa20 erhalten.\cite{salsa20security}
 \vspace{1mm}
 \\Da diese Matrixverschiebungen und Rechtsrotationen \textbf{beide} sowohl invertierbar sind als auch mit der Anwendung von der Salsa20-Kern Funktion erhalten bleiben, 
-kann man eine Vielzahl von \textbf{beiden} auf die ursprüngliche Matrix anwenden und am Ende der Salsa20-Kern Funktion dasselbe Ergebnis kriegen, 
-wenn man diese Vielzahl erneut anwendet, auch egal in welcher Reihenfolge.
+kann man eine Vielzahl von \textbf{beiden} auf die ursprüngliche Matrix anwenden und am Ende der Salsa20-Kern Funktion, unabhängig von der Reihenfolge des Anwendens, immer noch dasselbe Ergebnis erhalten.
 \vspace{1mm}
-\\Diese Eigenschaften bedeuten nichts Gutes, wenn wir die Salsa20-Kern direkt mit beliebigen Matrizen verwenden. 
-Bei der Kryptographie geht es normalerweise darum, die Struktur zu zerstören, sodass ein Angriff sie nicht wiederherstellen kann. 
-Doch die Verschiebungen und Bitrotationen werden von der Funktion in keiner Weise beeinflusst.
+\\Beim verwenden der Salsa20-Kern Funktion mit beliebigen Matrizen stellen diese Eigenschaften ein großes Sicherheitsrisikio dar. 
+Bei kryptographischen Verfahren ist das Ziel normalerweise, eine Struktur so zu zerstören, dass ein Angriff sie nicht wiederherstellen kann. 
+Die Verschiebungen und Bitrotationen werden von der Funktion jedoch in keiner Weise beeinflusst.
 \vspace{1mm}
 \\An dieser Stelle kommen die Konstanten auf der Diagonale ins Spiel:
 \vspace{2mm}
-\\Durch die Einführung dieser Konstanten wird sichergestellt, dass keine Menge Verschiebungen oder Rotationen die ursprüngliche Diagonale wiederherstellen kann, 
+\\Durch die Einführung dieser Konstanten wird sichergestellt, dass keine Anzahl an Verschiebungen oder Rotationen die ursprüngliche Diagonale wiederherstellen kann, 
 außer im trivialen Fall von 0 Verschiebungen und Rotationen. Das bedeutet, dass keine zwei verschiedenen Schlüssel- oder Nonce-Eingaben 
 jemals die gleiche Matrix haben werden, egal wie viele Transformationen angewendet werden.\cite{salsa20security}
 \vspace{1mm}
 \\Natürlich sind nicht alle Werte geeignet, denn es gibt einige Beispiele für Konstanten, 
-wo die Diagonale nach einer bestimmten Anzahl von Verschiebungen/Drehungen mit der originale übereinstimmt.
+wo die Diagonale nach einer bestimmten Anzahl von Verschiebungen/Rotationen mit der Originalen übereinstimmt.
 \vspace{1mm}
 \\Außerdem stellt der Ersteller des Algorithmus fest\cite{ResponseOnTheSalsa20Core}, dass die Konstanten das Kollisionsproblem beseitigen, 
-auf das in einer anderen Arbeit\cite{onTheSalsa20Core} hingewiesen wurde, 
-nämlich dass $Salsa20(x) = Salsa20(x + \Delta)$ mit z.B. $\Delta=(0x80000000,0x80000000,...)$. 
-\\Ein solches $x+Delta$ ist keine gültige Eingabe für eine Salsa20-Kern Funktion (sofern $x$ eine ist) und wird daher in der Praxis nie vorkommen. 
+auf das in einer anderen Arbeit\cite{onTheSalsa20Core} hingewiesen wurde.\\
+Das Kollisionsproblem besagt, dass:
+\begin{gather*} Salsa20(x) = Salsa20(x + \Delta) \text{  mit z.B.  } \Delta=(0x80000000,0x80000000,...) \end{gather*} 
+Ein solches $x+\Delta$ ist keine gültige Eingabe für eine Salsa20-Kern Funktion (sofern $x$ eine gültige Eingabe ist) und wird daher in der Praxis nie vorkommen. 
 Das Gleiche gilt für andere Beispiele von Kollisionen, die in dieser Arbeit auftauchen.
 
 
@@ -197,6 +197,5 @@ Der Counter ist keine Eingabe des Salsa20/20 Verschlüsselungsverfahren, sondern
 % Beispiel: CR2 ist ein Register der x86-Architektur~\cite{intel2017man}.
 \bibliographystyle{plain}
 \bibliography{Ausarbeitung}{}
-\cite{intel2017man}
 
 \end{document}
