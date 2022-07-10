@@ -20,18 +20,23 @@
 
 \section{Einleitung}
 \subsection{Einführung}
-Sei es beim Herstellen einer Verbindung mit einem Server oder das Chatten mit Freunden und Bekannten rund um den Globus, nie genoss die Kryptographie mehr Relevanz als jetzt.
-Man möchte nicht, dass die Nachrichten, die man an seine Geliebten versendet, von einer dritten Person mitgelesen werden können. Darum existieren kryptographische Verfahren zur Verschlüsselung von Informationen.
-Eines dieser Verschlüsselungsverfahren ist Salsa20/20, welches es zu implementieren galt.
+Sei es beim Herstellen einer Verbindung mit einem Server oder das Chatten mit Freunden und Bekannten rund um 
+den Globus, nie genoss die Kryptographie mehr Relevanz als jetzt. Man möchte nicht, dass die Nachrichten, 
+die man an seine Geliebten versendet, von einer dritten Person mitgelesen werden können. Darum existieren 
+kryptographische Verfahren zur Verschlüsselung von Informationen. Eines dieser Verschlüsselungsverfahren ist 
+Salsa20/20, welches es zu implementieren galt.
 
 \subsection{Funktionsweise Salsa20/20}
-Salsa 20/20 ist eine Stromchiffre basierend auf einem sogenannten Add-Rotate-XOR-Schema, ins Leben gerufen von David J. Bernstein.
-\\Salsa20/20 verwendet einen Kern, eine 4$\times$4 Matrix bestehend aus vorzeichenlosen 32-bit Little-Endian-Ganzzahlen, welcher durch Add, Rotate und XOR Operationen auf bestimmen Startwerten erzeugt wird.
-Auf diesem generierten Kern wird dann mit der zu verschlüsselnden Nachricht Byte für Byte eine XOR-Operation ausgeführt.
+Salsa20/20 ist eine Stromchiffre basierend auf einem sogenannten Add-Rotate-XOR-Schema, ins Leben gerufen von 
+David J. Bernstein.
+\\Salsa20/20 verwendet eine 4$\times$4 Matrix bestehend aus vorzeichenlosen 32-bit Little-Endian-Ganzzahlen, 
+welche durch Add, Rotate und XOR Operationen aus bestimmen Startwerten erzeugt wird.
+Auf dieser generierten Matrix wird dann mit der zu verschlüsselnden Nachricht Byte für Byte eine XOR-Operation ausgeführt.
 
 \subsubsection{Der Salsa20-Kern:}
-Der Salsa20-Kern ist eine Funktion, welche einen 64-Byte Block generiert, mit dem wie oben beschrieben auf der zu verschlüsselnden Nachricht Byte für Byte eine XOR-Operation augeführt wird.
-Der 64-Byte-Block wird in 20 sogenannten Runden aus einem 256-Bit-Key, einer 64-Bit Nonce und einem 64-Bit Counter generiert.
+Der Salsa20-Kern ist eine Funktion, welche einen 64-Byte Block generiert, auf dem, wie oben beschrieben, auf 
+der zu verschlüsselnden Nachricht Byte für Byte eine Add-Rotate-XOR-Operation ausgeführt wird. Der 64-Byte-Block wird in 20 
+sogenannten Runden aus einem 256-Bit-Key, einer 64-Bit Nonce und einem 64-Bit Counter generiert.
 
 \subsection{Aufgabenstellung}
 \subsubsection{Theoretischer Teil:}
