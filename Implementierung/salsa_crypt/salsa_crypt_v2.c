@@ -17,8 +17,8 @@ void salsa_crypt_v2(size_t mlen, const uint8_t msg[mlen], uint8_t cipher[mlen], 
     in[5] = 0x3320646e;
     in[6] = __builtin_bswap32(iv >> 32);
     in[7] = __builtin_bswap32(iv & 0xffffffff);
-    in[8] = 0;
-    in[9] = 0;
+    in[8] = UINT32_MAX;
+    in[9] = UINT32_MAX;
     in[10] = 0x79622d32;
     in[11] = __builtin_bswap32(key[4]);
     in[12] = __builtin_bswap32(key[5]);
@@ -26,55 +26,50 @@ void salsa_crypt_v2(size_t mlen, const uint8_t msg[mlen], uint8_t cipher[mlen], 
     in[14] = __builtin_bswap32(key[7]);
     in[15] = 0x6b206574;
 
-    uint32_t out[16];
-    salsa_core_v2(out, in);
-
-    size_t i = 0;
-    size_t index = 0;
-
-    // uint8_t stream of keystream in little endian order
-    const uint8_t *stream = ((uint8_t *)out);
-
-    // xor msg with keystream
-    for (i = 0; i < mlen; i += 16)
+    uint32_t hash[16]; // output array
+    uint64_t i = 0;
+    // use one hash to encode 64 bytes of msg
+    for (; i < mlen / 64; i++)
     {
-        if (mlen - i < 16)
+
+        // set counter
+        if (in[8] == UINT32_MAX && in[9] == UINT32_MAX)
         {
-            goto non_vectorized;
+            in[8] = 0;
+            in[9] = 0;
+        }
+        else if (in[8] == UINT32_MAX)
+        {
+            in[9] += 1;
+            in[8] = 0;
+        }
+        else
+        {
+            in[8] += 1;
         }
 
-        __m128i bytes_of_msg = _mm_lddqu_si128((__m128i *)(msg + i));
-        __m128i bytes_of_stream = _mm_lddqu_si128(((__m128i *)stream) + index);
+        // get 64byte hash
+        salsa_core_v2(hash, in);
 
-        __m128i result = _mm_xor_si128(bytes_of_msg, bytes_of_stream);
-
-        _mm_storeu_si128((__m128i *)(cipher + i), result);
-
-        if (index == 4)
+        for (uint8_t j = 0; j < 4; j++)
         {
-            index = 0;
-            if (in[8] == UINT32_MAX && in[9] == UINT32_MAX)
-            {
-                in[8] = 0;
-                in[9] = 0;
-            }
-            else if (in[8] == UINT32_MAX)
-            {
-                in[9] += 1;
-                in[8] = 0;
-            }
-            else
-            {
-                in[8] += 1;
-            }
 
-            salsa_core_v2(out, in);
-            stream = ((uint8_t *)out);
+            // load 16 bytes of hash
+            __m128i h = _mm_loadu_si128((__m128i *)(hash + 4 * j));
+
+            // load hash
+            __m128i m = _mm_loadu_si128((__m128i *)(msg + 64 * i + 16 * j));
+
+            // perform xor
+            __m128i c = _mm_xor_si128(h, m);
+
+            // store
+            _mm_storeu_si128((__m128i *)(cipher + 64 * i + 16 * j), c);
         }
-        index++;
     }
 
-non_vectorized:
+    // -- finish up --
+    // set counter
     if (in[8] == UINT32_MAX && in[9] == UINT32_MAX)
     {
         in[8] = 0;
@@ -90,11 +85,15 @@ non_vectorized:
         in[8] += 1;
     }
 
-    salsa_core_v2(out, in);
-    stream = ((uint8_t *)out);
+    // get 64byte hash
+    salsa_core_v2(hash, in);
 
-    for (size_t j = 0; i < mlen; j++, i++)
-    {
-        cipher[i] = msg[i] ^ (*(stream + j));
-    }
+    i *= 64;
+
+    // transform it to byte-array
+    uint8_t *h = ((uint8_t *)hash);
+
+    // go byte by byte through hash and msg, xor to cipher
+    for (uint8_t j = 0; j < 64 && i + j < mlen; j++)
+        cipher[i + j] = (h[j]) ^ msg[i + j];
 }
