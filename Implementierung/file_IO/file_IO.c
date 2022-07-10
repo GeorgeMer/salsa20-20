@@ -74,8 +74,8 @@ void write_file(const char *path, uint8_t *cipher)
         }
     }
 
-    // writing cipher to output file as string of hexadecimals
-    // linebreak every 76 characters
+    // // writing cipher to output file as string of hexadecimals
+    // // linebreak every 76 characters
     size_t linebreak = 0;
     for (size_t i = 0; i < mlen; i++)
     {
@@ -115,6 +115,10 @@ void write_file(const char *path, uint8_t *cipher)
         linebreak += 2;
     }
     // close successfully written file
+    // if (!fwrite((void *)cipher, 1, strlen((const char *)cipher), file))
+    // {
+    //     perror("Error writing to file");
+    // }
     fclose(file);
     return;
 

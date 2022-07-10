@@ -30,47 +30,71 @@ void salsa_crypt_v2(size_t mlen, const uint8_t msg[mlen], uint8_t cipher[mlen], 
     salsa_core_v2(out, in);
 
     size_t i = 0;
+    size_t index = 0;
 
     // uint8_t stream of keystream in little endian order
     const uint8_t *stream = ((uint8_t *)out);
 
-    // xor msg with keystream and increment counter after 64 bytes
-    for (i = 0; i < mlen; i += 64)
+    // xor msg with keystream
+    for (i = 0; i < mlen; i += 16)
     {
-        if (mlen - i < 63)
+        if (mlen - i < 31)
         {
             goto non_vectorized;
         }
 
-        __m128i bytes_of_msg = _mm_lddqu_si128(((__m128i *)msg + i));
-        __m128i bytes_of_stream = _mm_lddqu_si128(((__m128i *)stream + i));
+        __m128i bytes_of_msg = _mm_lddqu_si128((__m128i *)(msg + i));
+        __m128i bytes_of_stream = _mm_lddqu_si128(((__m128i *)stream) + index);
 
         __m128i result = _mm_xor_si128(bytes_of_msg, bytes_of_stream);
 
-        _mm_storeu_si128(((__m128i *)cipher + i), result);
+        _mm_storeu_si128((__m128i *)(cipher + i), result);
 
-        if (in[8] == UINT32_MAX && in[9] == UINT32_MAX)
+        if (index == 4)
         {
-            in[8] = 0;
-            in[9] = 0;
-        }
-        else if (in[8] == UINT32_MAX)
-        {
-            in[9] += 1;
-            in[8] = 0;
-        }
-        else
-        {
-            in[8] += 1;
-        }
+            index = 0;
+            if (in[8] == UINT32_MAX && in[9] == UINT32_MAX)
+            {
+                in[8] = 0;
+                in[9] = 0;
+            }
+            else if (in[8] == UINT32_MAX)
+            {
+                in[9] += 1;
+                in[8] = 0;
+            }
+            else
+            {
+                in[8] += 1;
+            }
 
-        salsa_core_v2(out, in);
-        stream = ((uint8_t *)out);
+            salsa_core_v2(out, in);
+            stream = ((uint8_t *)out);
+        }
+        index++;
     }
 
 non_vectorized:
-    for (; i < mlen; i++)
+    if (in[8] == UINT32_MAX && in[9] == UINT32_MAX)
     {
-        cipher[i] = msg[i] ^ (*(stream + i));
+        in[8] = 0;
+        in[9] = 0;
+    }
+    else if (in[8] == UINT32_MAX)
+    {
+        in[9] += 1;
+        in[8] = 0;
+    }
+    else
+    {
+        in[8] += 1;
+    }
+
+    salsa_core_v2(out, in);
+    stream = ((uint8_t *)out);
+
+    for (size_t j = 0; i < mlen; j++, i++)
+    {
+        cipher[i] = msg[i] ^ (*(stream + j));
     }
 }
