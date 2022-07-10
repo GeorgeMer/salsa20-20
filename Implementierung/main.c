@@ -206,7 +206,8 @@ int main(int argc, char **argv)
     }
 
     // free input pointer and write to output file
-    free((void *)message);
     write_file(output_file, cipher);
+    free((void *)message);
+    free((void *)cipher);
     return EXIT_SUCCESS;
 }

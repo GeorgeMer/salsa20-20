@@ -1,5 +1,5 @@
 # Add additional compiler flags here 
-CFLAGS=-O0 -std=c11 -g -Wall -Wextra -Wpedantic
+CFLAGS=-O0 -std=c11 -g -Wall -Wextra -Wpedantic -fsanitize=address -static-libasan
 
 .PHONY: all 
 all: main 
