@@ -20,20 +20,31 @@
 
 \section{Einleitung}
 \subsection{Einführung}
-Sei es beim Herstellen einer Verbindung mit einem Server oder das Chatten mit Freunden und Bekannten rund um den Globus, nie genoss die Kryptographie mehr Relevanz als jetzt.
-Man möchte nicht, dass die Nachrichten, die man an seine Geliebten versendet, von einer dritten Person mitgelesen werden können. Darum existieren kryptographische Verfahren zur Verschlüsselung von Informationen.
-Eines dieser Verschlüsselungsverfahren ist Salsa20/20, welches es zu implementieren galt.
+Sei es beim Herstellen einer Verbindung mit einem Server oder das Chatten mit Freunden und Bekannten rund um 
+den Globus, nie genoss die Kryptographie mehr Relevanz als jetzt. Man möchte nicht, dass die Nachrichten, 
+die man an seine Geliebten versendet, von einer dritten Person mitgelesen werden können. Darum existieren 
+kryptographische Verfahren zur Verschlüsselung von Informationen. Eines dieser Verschlüsselungsverfahren ist 
+Salsa20/20, welches es zu implementieren galt.
 
 \subsection{Funktionsweise Salsa20/20}
-Salsa 20/20 ist eine Stromchiffre basierend auf einem sogenannten Add-Rotate-XOR-Schema, ins Leben gerufen von David J. Bernstein.
-\\Salsa20/20 verwendet einen Kern, eine 4$\times$4 Matrix bestehend aus vorzeichenlosen 32-bit Little-Endian-Ganzzahlen, welcher durch Add, Rotate und XOR Operationen auf bestimmen Startwerten erzeugt wird.
-Auf diesem generierten Kern wird dann mit der zu verschlüsselnden Nachricht Byte für Byte eine XOR-Operation ausgeführt.
+Salsa20/20 ist eine Stromchiffre basierend auf einem sogenannten Add-Rotate-XOR-Schema (kurz: ARX-Schema), ins Leben gerufen von 
+David J. Bernstein.
+\\Salsa20/20 verwendet eine 4$\times$4 Matrix bestehend aus vorzeichenlosen 32-bit Little-Endian-Ganzzahlen, 
+welche durch Add, Rotate und XOR Operationen aus bestimmen Startwerten erzeugt wird.
+Auf dieser generierten Matrix wird dann mit der zu verschlüsselnden Nachricht Byte für Byte eine XOR-Operation ausgeführt.
 
 \subsubsection{Der Salsa20-Kern:}
-Der Salsa20-Kern ist eine Funktion, welche einen 64-Byte Block generiert, mit dem wie oben beschrieben auf der zu verschlüsselnden Nachricht Byte für Byte eine XOR-Operation augeführt wird.
-Der 64-Byte-Block wird in 20 sogenannten Runden aus einem 256-Bit-Key, einer 64-Bit Nonce und einem 64-Bit Counter generiert.
+Der Salsa20-Kern ist eine Funktion, welche einen 64-Byte Block generiert, auf dem, wie oben beschrieben, auf 
+der zu verschlüsselnden Nachricht Byte für Byte eine ARX-Operation ausgeführt wird. Es werden bei jeder Operation 
+zwei Werte der Matrix aufaddiert, links-rotiert und mit dem Eintrag exklusiv verodert, welcher dann durch das Ergebnis 
+dieser Operationen ersetzt wird. 
+Der 64-Byte-Block wird in 20 sogenannten Runden aus einem 256-Bit-Key, einer 64-Bit Nonce und einem 64-Bit 
+Counter generiert. Die zwanzig Runden bestehen jeweils aus vier Viertelrunden. Die Viertelrunden unterscheiden sich 
+durch die Anzahl der Rotation, die für jede ARX-Operation ausgeführt werden und durch die Matrix-Einträge, auf die 
+diese Operationen angewandt werden.
 
 \subsection{Aufgabenstellung}
+
 \subsubsection{Theoretischer Teil:}
 Folgende theoretische Fragen waren zu beantworten:
 \begin{itemize}
@@ -41,29 +52,103 @@ Folgende theoretische Fragen waren zu beantworten:
     \item Was bedeuten die Werte an der Diagonalen des Startzustands?
     \item Erklären der Funktionsweise einer Stromchiffre anhand eines Beispiels. Warum kann man dieselbe Funktion zum Ver- und Entschlüsseln verwenden? Wie müssen die Parameter gewählt werden, damit dies funktioniert? Warum ist der Counter keine Eingabe des Verschlüsselungsalgorithmus?
 \end{itemize}
+
 \subsubsection{Praktischer Teil:}
 Zu implementieren  war folgende Funktionalität: 
 \begin{itemize}
-    \item Ein Rahmenprogramm welches I$\backslash$O-Operationen unterstützt, mithilfe derer man eine ganze Datei in den Speicher einlesen und als Pointer an eine Unterfunktion übergeben kann. Selbiges soll auch zum Schreiben eines Speicherbereiches mit bekannter Länge in eine Datei möglich sein.
-    \item \textcolor{blue}{void} salsa20\_core(\textcolor{blue} {uint32\_t} output[16] \textcolor{blue}{const uint32\_t} input[16]) \\
+    \item Ein Rahmenprogramm welches I/O-Operationen unterstützt, mithilfe derer man eine ganze Datei in den Speicher einlesen und als Pointer an eine Unterfunktion übergeben kann. Selbiges soll auch zum Schreiben eines Speicherbereiches mit bekannter Länge in eine Datei möglich sein.
+    \item \textcolor{blue}{void} salsa20\_core (\textcolor{blue} {uint32\_t} output[16] \textcolor{blue}{const uint32\_t} input[16]) \\
     welche den oben beschriebenen Salsa20-Kern implementiert. input bezeichnet den Startzustand des Kerns, output den finalen 64-Byte-Block. \\
-    \item \textcolor{blue} {void} salsa20\_crypt(\textcolor{blue}{size\_t} mlen, \textcolor {blue} {const uint8\_t} msg[mlen], \textcolor{blue}{uint8\_t} cipher [mlen], \textcolor{blue}{uint32\_t} key[8], \textcolor {blue} {uint64\_t} iv) \\
+    \item \textcolor{blue} {void} salsa20\_crypt (\textcolor{blue}{size\_t} mlen, \textcolor{blue} {const uint8\_t} msg[mlen], \textcolor{blue}{uint8\_t} cipher [mlen], \textcolor{blue}{uint32\_t} key[8], \textcolor{blue} {uint64\_t} iv) \\
     welche eine Nachricht msg der Länge mlen mit einem gegebenen Schlüssel und Nonce (iv) verschlüsselt und das Ergebnis in cipher schreibt.
 \end{itemize}
-% TODO: implementation description
+
 
 
 \section{Lösungsansatz}
 \subsection{Theoretischer Teil}
 \subsubsection{Transponieren}
-Das Transponieren der Matrix ist Teil des Salsa20-Kern Algorithmus, aber ist nicht sonderlich performant. Um ihn weiter zu optimieren, 
-kann man anstatt 20 Runden von der Kern Funktion auszuführen und nach jeder Runde die Matrix zu transponieren, nur 10 Mal durch die Schleife iterieren
-und in jedem Schleifendurchlauf zwei Runden nacheinander ausführen, aber mit den ``transponierten'' Indexen der Matrix.   
+
+Das Transponieren der Matrix ist Teil des Salsa20-Kern Algorithmus, ist aber nicht sonderlich performant. 
+Um ihn weiter zu optimieren, kann man anstatt zwanzig Runden, die jeweils eine Transposition enthalten, zehn sogenannte Doppelrunden 
+ausführen, die jeweils aus einer sogenannten Spaltenrunde und einer Reihenrunde bestehen. Eine Spaltenrunde ist identisch zu einer 
+Runde wie oben definiert, während eine Reihenrunde die Indizes bei Matrixzugriffen so wählt, dass die Matrix behandelt wird
+als wäre sie transponiert.  
+
 \subsubsection{Werte an der Diagonale}
+
+Die Werte an der Diagonale haben eine wichtige Bedeutung für die Sicherheit des Salsa20/20 Algorithmus, insbesondere der Salsa20-Kern Funktion.
+\vspace{1mm}
+\\Angenommen eine Matrix und die folgende Transformation dieser Matrix:
+\begin{gather*}
+    x =
+    \begin{pmatrix}
+    A_0 & B_0 & C_0 & D_0\\
+    A_1 & B_1 & C_1 & D_1\\
+    A_2 & B_2 & C_2 & D_2\\
+    A_3 & B_3 & C_3 & D_3\\
+    \end{pmatrix}  
+\quad \quad tr(x) = 
+    \begin{pmatrix}
+        D_3 & D_2 & D_1 & D_0\\
+        C_3 & A_0 & B_0 & C_0\\
+        B_3 & A_1 & B_1 & C_1\\
+        A_3 & A_2 & B_2 & C_2
+    \end{pmatrix}
+\end{gather*}
+Wir bekommen die folgende Eigenschaft:
+\begin{gather*}
+Salsa20( tr(x) ) = tr( Salsa20(x) )
+\end{gather*}
+Diese Transformation ist nicht nur invertierbar, sondern bleibt sie auch durch die Anwendung der Salsa-Funktion erhalten.\cite{salsa20security} 
+\vspace{1mm}
+\\Nehmen wir an, es handelt sich um dieselbe Matrix wie oben, aber nun mit der folgenden Transformation:
+\begin{gather*}
+R(x) =
+    \begin{pmatrix}
+        r(A_0) & r(B_0) & r(C_0) & r(D_0)\\
+        r(A_1) & r(B_1) & r(C_1) & r(D_1)\\
+        r(A_2) & r(B_2) & r(C_2) & r(D_2)\\
+        r(A_3) & r(B_3) & r(C_3) & r(D_3)\\
+    \end{pmatrix}
+\end{gather*}
+wobei $r(y)$ die Rechtsrotation des 4Byte großen $y$ um ein Bit ist.
+\vspace{1mm}
+\\Dann erhalten wir eine gleiche Eigenschaft:
+\begin{gather*}
+Salsa20(R(x)) = R(Salsa20(x))
+\end{gather*}
+Diese Transformation ist ebenfalls invertierbar und bleibt auch (meistens) nach Anwendung der Funktion Salsa20 erhalten.\cite{salsa20security}
+\vspace{1mm}
+\\Da diese Matrixverschiebungen und Rechtsrotationen \textbf{beide} sowohl invertierbar sind als auch mit der Anwendung von der Salsa20-Kern Funktion erhalten bleiben, 
+kann man eine Vielzahl von \textbf{beiden} auf die ursprüngliche Matrix anwenden und am Ende der Salsa20-Kern Funktion dasselbe Ergebnis kriegen, 
+wenn man diese Vielzahl erneut anwendet, auch egal in welcher Reihenfolge.
+\vspace{1mm}
+\\Diese Eigenschaften bedeuten nichts Gutes, wenn wir die Salsa20-Kern direkt mit beliebigen Matrizen verwenden. 
+Bei der Kryptographie geht es normalerweise darum, die Struktur zu zerstören, sodass ein Angriff sie nicht wiederherstellen kann. 
+Doch die Verschiebungen und Bitrotationen werden von der Funktion in keiner Weise beeinflusst.
+\vspace{1mm}
+\\An dieser Stelle kommen die Konstanten auf der Diagonale ins Spiel:
+\vspace{2mm}
+\\Durch die Einführung dieser Konstanten wird sichergestellt, dass keine Menge Verschiebungen oder Rotationen die ursprüngliche Diagonale wiederherstellen kann, 
+außer im trivialen Fall von 0 Verschiebungen und Rotationen. Das bedeutet, dass keine zwei verschiedenen Schlüssel- oder Nonce-Eingaben 
+jemals die gleiche Matrix haben werden, egal wie viele Transformationen angewendet werden.\cite{salsa20security}
+\vspace{1mm}
+\\Natürlich sind nicht alle Werte geeignet, denn es gibt einige Beispiele für Konstanten, 
+wo die Diagonale nach einer bestimmten Anzahl von Verschiebungen/Drehungen mit der originale übereinstimmt.
+\vspace{1mm}
+\\Außerdem stellt der Ersteller des Algorithmus fest\cite{ResponseOnTheSalsa20Core}, dass die Konstanten das Kollisionsproblem beseitigen, 
+auf das in einer anderen Arbeit\cite{onTheSalsa20Core} hingewiesen wurde, 
+nämlich dass $Salsa20(x) = Salsa20(x + \Delta)$ mit z.B. $\Delta=(0x80000000,0x80000000,...)$. 
+\\Ein solches $x+Delta$ ist keine gültige Eingabe für eine Salsa20-Kern Funktion (sofern $x$ eine ist) und wird daher in der Praxis nie vorkommen. 
+Das Gleiche gilt für andere Beispiele von Kollisionen, die in dieser Arbeit auftauchen.
+
+
 \subsubsection{Funktionsweise einer Stromchiffre}
 Eine Stromchiffre ist ein symmetrischer kryptographischer Algorithmus, der für Ver- und Entschlüsselung von Daten verwendet wird. 
-Dieser Algorithmus nimmt einen Klartext und ein Schlüsselstrom und führt eine bitweise XOR-Operation aus und gibt am Ende einen Geheimtext zurück. 
-Man kann durch Benutzung von demselben Schlüsselstrom wieder den Klartext erhalten, wenn man dem Algorithmus den Geheimtext übergibt.
+Dieser Algorithmus nimmt einen Klartext und ein Schlüsselstrom entgegen und führt eine bitweise XOR-Operation aus und gibt am Ende 
+einen Geheimtext zurück. 
+Man kann durch Benutzung desselben Schlüsselstroms wieder den Klartext erhalten, indem man dem Algorithmus den Geheimtext übergibt.
 % TODO: Beispiel von Klartext, Strom und Cipher
 Aufgrund der Symmetrie der XOR-Operation gilt folgendes:
 \begin{table}[!h]
@@ -113,4 +198,5 @@ Der Counter ist keine Eingabe des Salsa20/20 Verschlüsselungsverfahren, sondern
 \bibliographystyle{plain}
 \bibliography{Ausarbeitung}{}
 \cite{intel2017man}
+
 \end{document}
