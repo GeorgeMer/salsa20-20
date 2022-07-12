@@ -191,33 +191,37 @@ int main(int argc, char **argv)
         }
 
         // printing the result to the console
-        printf("The runtime for implementation "
+        printf("\n\nThe runtime for implementation "
                "%" PRIu64 " with "
                "%" PRIu64 " function calls amounts to "
-               "%f seconds.\n",
+               "%f seconds.\n\n",
                implementation_number, number_of_iterations, gettime_in_seconds(start, end));
     }
-    else
-    {
-        switch (implementation_number)
-        {
-        case 0:
-            salsa_crypt(mlen, message, cipher, key, iv);
-            break;
-        case 1:
-            salsa_crypt_v1(mlen, message, cipher, key, iv);
-            break;
-        case 2:
-            salsa_crypt_v2(mlen, message, cipher, key, iv);
-            break;
-        default:
-            break;
-        }
-    }
 
+    /*if run_tests is set to true, run the tests comparing implementation (given by 1st argument) with reference,
+        run as many random tests as specified by the 2nd argument in addition to that.
+
+     -- All tests run with randomly generated keys and nonces --
+    */
     if (run_tests)
     {
         test_correctness(implementation_number, random_tests);
+    }
+
+    // run one iteration of the algorithm
+    switch (implementation_number)
+    {
+    case 0:
+        salsa_crypt(mlen, message, cipher, key, iv);
+        break;
+    case 1:
+        salsa_crypt_v1(mlen, message, cipher, key, iv);
+        break;
+    case 2:
+        salsa_crypt_v2(mlen, message, cipher, key, iv);
+        break;
+    default:
+        break;
     }
 
     // free input pointer and write to output file

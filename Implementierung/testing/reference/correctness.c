@@ -1,5 +1,7 @@
 #include <stddef.h>
 #include <stdint.h>
+#include <stdlib.h>
+#include <time.h>
 #include "reference.h"
 #include "../../salsa_crypt/salsa_crypt_v0.h"
 #include "../../salsa_crypt/salsa_crypt_v1.h"
@@ -9,8 +11,9 @@
 #include "../random_generation/random_numbers.h"
 #include "../random_generation/random_msg_key_iv.h"
 
-void run_testcase(uint64_t implementation, size_t mlen, const uint8_t msg[mlen])
+bool run_testcase(uint64_t implementation, size_t mlen, const uint8_t msg[mlen])
 {
+    srand(mlen + msg[0] + time(NULL));
     uint32_t key[8];
     uint64_t iv;
     uint8_t cipher[mlen];
@@ -23,7 +26,7 @@ void run_testcase(uint64_t implementation, size_t mlen, const uint8_t msg[mlen])
     print_char_arr(mlen, msg);
     printf("Key: ");
     print_arr_32bit(8, key);
-    printf("Nonce: %lx", iv);
+    printf("Nonce: %lx\n\n", iv);
 
     switch (implementation)
     {
@@ -44,16 +47,17 @@ void run_testcase(uint64_t implementation, size_t mlen, const uint8_t msg[mlen])
     print_arr_8bit(mlen, cipher);
     printf("Cipher from reference:\n");
     print_arr_8bit(mlen, cipher_reference);
-    assertEqualsArrays_8bit(mlen, cipher_reference, mlen, cipher);
+    printf("\n");
+    return assertEqualsArrays_8bit(mlen, cipher_reference, mlen, cipher);
 }
 
-void execute_random(uint64_t implementation)
+bool execute_random(uint64_t implementation)
 {
-    size_t mlen = randomInt(10, 80);
+    size_t mlen = randomInt(10, 1025);
     uint8_t msg[mlen];
     randomMsg(mlen, msg);
 
-    run_testcase(implementation, mlen, msg);
+    return run_testcase(implementation, mlen, msg);
 }
 
 void test_correctness(uint64_t implementation, uint64_t random_tests)
@@ -76,17 +80,35 @@ void test_correctness(uint64_t implementation, uint64_t random_tests)
     };
 
     uint8_t msg_exactly64[] = {
-        69, 105, 110, 101, 32, 78, 97, 99, 104, 114, 105, 99, 104, 116, 44, 32, 100, 105,
-        101, 32, 105, 115, 116, 32, 115, 111, 32, 97, 110, 103, 101, 112, 97, 115, 115, 116,
-        44, 32, 100, 97, 115, 32, 115, 105, 101, 32, 103, 101, 110, 97, 117, 32, 54, 52, 32,
-        98, 105, 116, 115, 32, 105, 115, 116, 33};
+        69, 105, 110, 101, 32, 78, 97, 99, 104, 114, 105, 99, 104, 116, 44, 32, 100, 105, 101, 32, 105, 115, 116, 32,
+        115, 111, 32, 97, 110, 103, 101, 112, 97, 115, 115, 116, 44, 32, 100, 97, 115, 32, 115, 105, 101, 32, 103, 101, 110, 97, 117,
+        32, 54, 52, 32, 98, 121, 116, 101, 115, 32, 105, 115, 116};
 
-    run_testcase(implementation, sizeof(msg_lessthan64), msg_lessthan64);
-    run_testcase(implementation, sizeof(msg_morethan64), msg_morethan64);
-    run_testcase(implementation, sizeof(msg_exactly64), msg_exactly64);
+    printf("\n\n\n--- TESTS: ---\n\n");
+    printf("\n\n-- Test 1:\n\n");
+    if (!run_testcase(implementation, sizeof(msg_lessthan64), msg_lessthan64))
+    {
+        exit(EXIT_FAILURE);
+    }
+    printf("\n\n-- Test 2:\n\n");
+    if (!run_testcase(implementation, sizeof(msg_morethan64), msg_morethan64))
+    {
+        exit(EXIT_FAILURE);
+    }
+    printf("\n\n-- Test 3:\n\n");
+    if (!run_testcase(implementation, sizeof(msg_exactly64), msg_exactly64))
+    {
+        exit(EXIT_FAILURE);
+    }
 
     for (uint64_t i = 0; i < random_tests; i++)
     {
-        execute_random(implementation);
+        printf("\n\n-- Random Test %lu:\n\n", i + 1);
+        if (!execute_random(implementation))
+        {
+            exit(EXIT_FAILURE);
+        }
     }
+
+    printf("\n\n--- END OF TESTS ---\n\n\n");
 }
