@@ -6,9 +6,9 @@
 #include <stdio.h>
 #include <stdbool.h>
 
-bool assertEqualsArrays_8bit(uint8_t expected[], uint64_t xlen, uint8_t actual[], uint64_t alen);
-bool assertEqualsArrays_16bit(uint16_t expected[], uint64_t xlen, uint16_t actual[], uint64_t alen);
-bool assertEqualsArrays_32bit(uint32_t expected[], uint64_t xlen, uint32_t actual[], uint64_t alen);
-bool assertEqualsArrays_64bit(uint64_t expected[], uint64_t xlen, uint64_t actual[], uint64_t alen);
+bool assertEqualsArrays_8bit(uint64_t xlen, uint8_t expected[xlen], uint64_t alen, uint8_t actual[alen]);
+bool assertEqualsArrays_16bit(uint64_t xlen, uint16_t expected[xlen], uint64_t alen, uint16_t actual[alen]);
+bool assertEqualsArrays_32bit(uint64_t xlen, uint32_t expected[xlen], uint64_t alen, uint32_t actual[alen]);
+bool assertEqualsArrays_64bit(uint64_t xlen, uint64_t expected[xlen], uint64_t alen, uint64_t actual[alen]);
 
 #endif

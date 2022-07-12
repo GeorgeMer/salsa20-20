@@ -12,6 +12,8 @@
 #include "salsa_crypt/salsa_crypt_v1.h"
 #include "salsa_crypt/salsa_crypt_v2.h"
 
+#include "testing/reference/correctness.h"
+
 static struct option long_options[] =
     {
         {"help", no_argument, 0, 'h'},
@@ -20,9 +22,9 @@ static struct option long_options[] =
 size_t mlen = 0;
 
 const char *usage_msg =
-    "Usage: %s [-V X | -B X | -k K | -i I | -o P | -h | --help] file_path    Encrypt a file with Salsa20 encryption\n"
-    "   or: %s -h                                                            Show help message and exit\n"
-    "   or: %s --help                                                        Show help message and exit\n";
+    "Usage: %s [-V X | -B X | -T X | -k K | -i I | -o P | -h | --help] file_path    Encrypt a file with Salsa20 encryption\n"
+    "   or: %s -h                                                                   Show help message and exit\n"
+    "   or: %s --help                                                               Show help message and exit\n";
 
 const char *help_msg =
     "Positional arguments:\n"
@@ -32,6 +34,8 @@ const char *help_msg =
     "  -V X   The implementation to be used (default: X = 0)\n"
     "  -B X   If set, runtime of chosen implementation will be measured and output.\n"
     "         X represents the number of repetition of function calls (default: No runtime measurement)\n"
+    "  -T X   If set, tests will be executed that compare the chosen implementation with the reference implementation.\n"
+    "         X represents the number of random tests in addition to the set tests that will be executed. (default: No tests are run)\n"
     "  -k K   K resembles the key (default: K = 2^256 - 1883)\n"
     "  -i I   I resembles the initialization vector (default: I = 2^59 - 427)\n"
     "  -o P   P is the path to the output file\n"
@@ -66,6 +70,8 @@ int main(int argc, char **argv)
     // default values
     uint64_t implementation_number = 0;
     uint64_t number_of_iterations = 0;
+    uint64_t random_tests = 0;
+    bool run_tests = false;
     bool measure_runtime = false;
     uint32_t key[8];
     key[0] = 0x10000001;
@@ -80,7 +86,7 @@ int main(int argc, char **argv)
     const char *output_file = NULL;
 
     // option parsing
-    while ((opt = getopt_long(argc, argv, "V:B:k:i:o:h", long_options, NULL)) != -1)
+    while ((opt = getopt_long(argc, argv, "V:B:T:k:i:o:h", long_options, NULL)) != -1)
     {
         switch (opt)
         {
@@ -97,6 +103,10 @@ int main(int argc, char **argv)
         case 'B':
             number_of_iterations = convert_string_to_uint64_t(optarg);
             measure_runtime = true;
+            break;
+        case 'T':
+            random_tests = convert_string_to_uint64_t(optarg);
+            run_tests = true;
             break;
         case 'k':;
             convert_string_to_uint32_t_array(optarg, key);
@@ -203,6 +213,11 @@ int main(int argc, char **argv)
         default:
             break;
         }
+    }
+
+    if (run_tests)
+    {
+        test_correctness(implementation_number, random_tests);
     }
 
     // free input pointer and write to output file

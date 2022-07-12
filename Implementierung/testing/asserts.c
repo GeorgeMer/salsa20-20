@@ -3,13 +3,12 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdlib.h>
-#include <assert.h>
 
-bool assertEqualsArrays_8bit(uint8_t expected[], uint64_t xlen, uint8_t actual[], uint64_t alen)
+bool assertEqualsArrays_8bit(uint64_t xlen, uint8_t expected[xlen], uint64_t alen, uint8_t actual[alen])
 {
     if (xlen != alen)
     {
-        printf("Lengths don't match: %u != %u", xlen, alen);
+        printf("Lengths don't match: %lu != %lu", xlen, alen);
         return false;
     }
 
@@ -17,7 +16,7 @@ bool assertEqualsArrays_8bit(uint8_t expected[], uint64_t xlen, uint8_t actual[]
     {
         if (expected[i] != actual[i])
         {
-            printf("Expected: %u \nActual: %u \nAt: %u \nLenght: %u\n", expected[i], actual[i], i, xlen);
+            printf("Expected: %u \nActual: %u \nAt: %lu \nLenght: %lu\n", expected[i], actual[i], i, xlen);
             return false;
         }
     }
@@ -25,11 +24,11 @@ bool assertEqualsArrays_8bit(uint8_t expected[], uint64_t xlen, uint8_t actual[]
     return true;
 }
 
-bool assertEqualsArrays_16bit(uint16_t expected[], uint64_t xlen, uint16_t actual[], uint64_t alen)
+bool assertEqualsArrays_16bit(uint64_t xlen, uint16_t expected[xlen], uint64_t alen, uint16_t actual[alen])
 {
     if (xlen != alen)
     {
-        printf("Lengths don't match: %u != %u", xlen, alen);
+        printf("Lengths don't match: %lu != %lu", xlen, alen);
         return false;
     }
 
@@ -37,7 +36,7 @@ bool assertEqualsArrays_16bit(uint16_t expected[], uint64_t xlen, uint16_t actua
     {
         if (expected[i] != actual[i])
         {
-            printf("Expected: %u \nActual: %u \nAt: %u \nLenght: %u\n", expected[i], actual[i], i, xlen);
+            printf("Expected: %u \nActual: %u \nAt: %lu \nLenght: %lu\n", expected[i], actual[i], i, xlen);
             return false;
         }
     }
@@ -45,11 +44,11 @@ bool assertEqualsArrays_16bit(uint16_t expected[], uint64_t xlen, uint16_t actua
     return true;
 }
 
-bool assertEqualsArrays_32bit(uint32_t expected[], uint64_t xlen, uint32_t actual[], uint64_t alen)
+bool assertEqualsArrays_32bit(uint64_t xlen, uint32_t expected[xlen], uint64_t alen, uint32_t actual[alen])
 {
     if (xlen != alen)
     {
-        printf("Lengths don't match: %u != %u", xlen, alen);
+        printf("Lengths don't match: %lu != %lu", xlen, alen);
         return false;
     }
 
@@ -57,7 +56,7 @@ bool assertEqualsArrays_32bit(uint32_t expected[], uint64_t xlen, uint32_t actua
     {
         if (expected[i] != actual[i])
         {
-            printf("Expected: %u \nActual: %u \nAt: %u \nLenght: %u\n", expected[i], actual[i], i, xlen);
+            printf("Expected: %u \nActual: %u \nAt: %lu \nLenght: %lu\n", expected[i], actual[i], i, xlen);
             return false;
         }
     }
@@ -65,11 +64,11 @@ bool assertEqualsArrays_32bit(uint32_t expected[], uint64_t xlen, uint32_t actua
     return true;
 }
 
-bool assertEqualsArrays_64bit(uint64_t expected[], uint64_t xlen, uint64_t actual[], uint64_t alen)
+bool assertEqualsArrays_64bit(uint64_t xlen, uint64_t expected[xlen], uint64_t alen, uint64_t actual[alen])
 {
     if (xlen != alen)
     {
-        printf("Lengths don't match: %u != %u", xlen, alen);
+        printf("Lengths don't match: %lu != %lu", xlen, alen);
         return false;
     }
 
@@ -77,7 +76,7 @@ bool assertEqualsArrays_64bit(uint64_t expected[], uint64_t xlen, uint64_t actua
     {
         if (expected[i] != actual[i])
         {
-            printf("Expected: %u \nActual: %u \nAt: %u \nLenght: %u\n", expected[i], actual[i], i, xlen);
+            printf("Expected: %lu \nActual: %lu \nAt: %lu \nLenght: %lu\n", expected[i], actual[i], i, xlen);
             return false;
         }
     }
