@@ -58,21 +58,11 @@ uint32_t convert_string_to_uint32_t(const char *string, int base)
 
 void convert_string_to_uint32_t_array(const char *string, uint32_t key[8])
 {
-    if (*(string) == '-')
-    {
-        fprintf(stderr, "Negative numbers are not allowed as options.\n");
-        exit(EXIT_FAILURE);
-    }
-
-    // converting 256 bit string input number into 8 element uint_32t array
-    uint8_t index = 0;
-    uint8_t count = 0;
-    char current_string[9];
-    int base = 10;
-
+    // given string is interpreted as a hex number
     if (*(string) == '0' && *(string + 1) == 'x')
     {
-        base = 16;
+        printf("Key was interpreted as hex: ");
+        int base = 16;
         uint8_t start = 2;
         if (strlen(string) > 66)
         {
@@ -96,9 +86,10 @@ void convert_string_to_uint32_t_array(const char *string, uint32_t key[8])
                               *(string + i - 3), *(string + i - 2), *(string + i - 1), *(string + i)};
             key[k] = convert_string_to_uint32_t(hexnum, base);
         }
+
+        char *lastnum = malloc(i + 2);
         if (i != 0)
         {
-            char *lastnum = malloc(i + 2);
             if (lastnum == NULL)
             {
                 fprintf(stderr, "Couldn't allocate memory\n");
@@ -115,8 +106,6 @@ void convert_string_to_uint32_t_array(const char *string, uint32_t key[8])
         }
         else
         {
-
-            char *lastnum = malloc(2);
             if (lastnum == NULL)
             {
                 fprintf(stderr, "Couldn't allocate memory\n");
@@ -127,46 +116,65 @@ void convert_string_to_uint32_t_array(const char *string, uint32_t key[8])
             key[k] = convert_string_to_uint32_t(lastnum, base);
             free(lastnum);
         }
-        for (int i = 0; i < 8; i++)
+
+        printf("0x");
+        for (size_t i = 0; i < 8; i++)
         {
-            printf("%08x ", key[i]);
+            printf("%08x", key[i]);
         }
     }
 
+    // key is interpreted as a string
+    /*
+        (eg: "HelloWorld" will be interpreted as
+        key[7] = 48 65 6C 6C
+        key[6] = 6F 57 6F 72
+        key[5] = 6C 64 00 00
+        key 4 to 0 will be padded with 0s
+    */
     else
     {
-
-        if (strlen(string) > 77)
+        printf("Key was interpreted as string: ");
+        uint8_t chars[4];
+        size_t i = 0, j = 0, k = 8;
+        for (; i < strlen(string) && k > 0; i++, j++)
         {
-            fprintf(stderr, "The key entered does not fit in 256 bit.\n");
-            exit(EXIT_FAILURE);
+
+            // every four bytes convert to a key element ()
+            if (j == 4)
+            {
+                key[k - 1] = ((chars[0]) << 24) | ((chars[1]) << 16) | ((chars[2]) << 8) | ((chars[3]));
+
+                k--;
+                j = 0;
+            }
+
+            chars[j] = *(string + i);
+        }
+
+        for (size_t jcnt = 0; jcnt < j && k > 0; jcnt++)
+        {
+            key[k - 1] |= (chars[jcnt]) << (24 - 8 * jcnt);
+        }
+
+        for (; j < 4 && k > 0; j++)
+        {
+            key[k - 1] |= (0) << (24 - 8 * j);
+        }
+
+        if (k != 0)
+            k--;
+
+        for (; k > 0; k--)
+        {
+            key[k - 1] = 0;
+        }
+
+        for (i = 8; i > 0; i--)
+        {
+            printf("%c%c%c%c", (key[i - 1] >> 24) & 0xFF, (key[i - 1] >> 16) & 0xFF, (key[i - 1] >> 8) & 0xFF, (key[i - 1] >> 0) & 0xFF);
         }
     }
 
-    while (*(string) != '\0')
-    {
-        current_string[count++] = *(string);
-        string += 1;
-        if (count == 8)
-        {
-            current_string[count] = '\0';
-            count = 0;
-            key[index++] = convert_string_to_uint32_t(current_string, base);
-        }
-    }
-
-    if (count != 0)
-    {
-        while (count < 8)
-        {
-            current_string[count++] = '0';
-        }
-        current_string[count] = '\0';
-        key[index++] = convert_string_to_uint32_t(current_string, base);
-    }
-
-    for (int i = index; i < 8; i++)
-    {
-        key[i] = 0x0;
-    }
+    printf("\n\n");
 }

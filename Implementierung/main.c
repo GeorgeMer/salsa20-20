@@ -36,6 +36,7 @@ const char *help_msg =
     "         X represents the number of repetition of function calls (default: No runtime measurement)\n"
     "  -T X   If set, tests will be executed that compare the chosen implementation with the reference implementation.\n"
     "         X represents the number of random tests in addition to the set tests that will be executed. (default: No tests are run)\n"
+    "         (all tests run with random keys and nonces, random tests also have random messages)\n"
     "  -k K   K resembles the key (default: K = 2^256 - 1883)\n"
     "  -i I   I resembles the initialization vector (default: I = 2^59 - 427)\n"
     "  -o P   P is the path to the output file\n"
@@ -151,6 +152,16 @@ int main(int argc, char **argv)
         return EXIT_FAILURE;
     }
 
+    /*if run_tests is set to true, run the tests comparing implementation (given by 1st argument) with reference,
+    run as many random tests as specified by the 2nd argument in addition to that.
+
+    -- All tests run with randomly generated keys and nonces --
+    */
+    if (run_tests)
+    {
+        test_correctness(implementation_number, random_tests);
+    }
+
     // if measure_runtime == true then measure runtime with function being called number_of_iterations times
     if (measure_runtime)
     {
@@ -198,16 +209,6 @@ int main(int argc, char **argv)
                implementation_number, number_of_iterations, gettime_in_seconds(start, end));
     }
 
-    /*if run_tests is set to true, run the tests comparing implementation (given by 1st argument) with reference,
-        run as many random tests as specified by the 2nd argument in addition to that.
-
-     -- All tests run with randomly generated keys and nonces --
-    */
-    if (run_tests)
-    {
-        test_correctness(implementation_number, random_tests);
-    }
-
     // run one iteration of the algorithm
     switch (implementation_number)
     {
@@ -224,7 +225,7 @@ int main(int argc, char **argv)
         break;
     }
 
-    // free input pointer and write to output file
+    // free input and cipher pointer and write to output file
     write_file(output_file, cipher);
     free((void *)message);
     free((void *)cipher);
