@@ -84,18 +84,18 @@ void test_correctness(uint64_t implementation, uint64_t random_tests)
         115, 111, 32, 97, 110, 103, 101, 112, 97, 115, 115, 116, 44, 32, 100, 97, 115, 32, 115, 105, 101, 32, 103, 101, 110, 97, 117,
         32, 54, 52, 32, 98, 121, 116, 101, 115, 32, 105, 115, 116};
 
-    printf("\n\n\n--- TESTS: ---\n\n");
-    printf("\n\n-- Test 1:\n\n");
+    printf("\n\n\n-- Correctness tests: --\n\n");
+    printf("\n\n- Test 1:\n\n");
     if (!run_testcase(implementation, sizeof(msg_lessthan64), msg_lessthan64))
     {
         exit(EXIT_FAILURE);
     }
-    printf("\n\n-- Test 2:\n\n");
+    printf("\n\n- Test 2:\n\n");
     if (!run_testcase(implementation, sizeof(msg_morethan64), msg_morethan64))
     {
         exit(EXIT_FAILURE);
     }
-    printf("\n\n-- Test 3:\n\n");
+    printf("\n\n- Test 3:\n\n");
     if (!run_testcase(implementation, sizeof(msg_exactly64), msg_exactly64))
     {
         exit(EXIT_FAILURE);
@@ -103,13 +103,12 @@ void test_correctness(uint64_t implementation, uint64_t random_tests)
 
     for (uint64_t i = 0; i < random_tests; i++)
     {
-        printf("\n\n-- Random Test %lu:\n\n", i + 1);
+        printf("\n\n- Random Test %lu:\n\n", i + 1);
         if (!execute_random(implementation))
         {
             exit(EXIT_FAILURE);
         }
     }
 
-    printf("\n\nExecuted all tests successfully!");
-    printf("\n\n--- END OF TESTS ---\n\n\n");
+    printf("\n\n-- Executed all correctness tests successfully!--\n\n");
 }

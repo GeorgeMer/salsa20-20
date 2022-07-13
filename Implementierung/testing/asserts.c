@@ -20,7 +20,7 @@ bool assertEqualsArrays_8bit(uint64_t xlen, uint8_t expected[xlen], uint64_t ale
             return false;
         }
     }
-    printf("Arrays match\n");
+    printf("Arrays match\n\n\n");
     return true;
 }
 
@@ -40,7 +40,7 @@ bool assertEqualsArrays_16bit(uint64_t xlen, uint16_t expected[xlen], uint64_t a
             return false;
         }
     }
-    printf("Arrays match\n");
+    printf("Arrays match\n\n\n");
     return true;
 }
 
@@ -60,7 +60,7 @@ bool assertEqualsArrays_32bit(uint64_t xlen, uint32_t expected[xlen], uint64_t a
             return false;
         }
     }
-    printf("Arrays match\n");
+    printf("Arrays match\n\n\n");
     return true;
 }
 
@@ -80,6 +80,6 @@ bool assertEqualsArrays_64bit(uint64_t xlen, uint64_t expected[xlen], uint64_t a
             return false;
         }
     }
-    printf("Arrays match\n");
+    printf("Arrays match\n\n\n");
     return true;
 }
