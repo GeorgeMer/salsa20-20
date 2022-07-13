@@ -110,5 +110,6 @@ void test_correctness(uint64_t implementation, uint64_t random_tests)
         }
     }
 
+    printf("\n\nExecuted all tests successfully!");
     printf("\n\n--- END OF TESTS ---\n\n\n");
 }
