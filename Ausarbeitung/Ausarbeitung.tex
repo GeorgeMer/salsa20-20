@@ -1,7 +1,10 @@
 % Diese Zeile bitte -nicht- aendern.
 \documentclass[course=erap]{aspdoc}
+
+% Packages
 \usepackage{amssymb}
 \usepackage{xcolor}
+\usepackage{pgfplots}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% TODO: Ersetzen Sie in den folgenden Zeilen die entsprechenden -Texte-
@@ -20,16 +23,16 @@
 
 \section{Einleitung}
 \subsection{Einführung}
-Sei es beim Herstellen einer Verbindung mit einem Server oder das Chatten mit Freunden und Bekannten rund um 
-den Globus, nie genoss die Kryptographie mehr Relevanz als jetzt. Man möchte nicht, dass die Nachrichten, 
-die man an seine Geliebten versendet, von einer dritten Person mitgelesen werden können. Darum existieren 
-kryptographische Verfahren zur Verschlüsselung von Informationen. Eines dieser Verschlüsselungsverfahren ist 
+Sei es beim Herstellen einer Verbindung mit einem Server oder das Chatten mit Freunden und Bekannten rund um
+den Globus, nie genoss die Kryptographie mehr Relevanz als jetzt. Man möchte nicht, dass die Nachrichten,
+die man an seine Geliebten versendet, von einer dritten Person mitgelesen werden können. Darum existieren
+kryptographische Verfahren zur Verschlüsselung von Informationen. Eines dieser Verschlüsselungsverfahren ist
 Salsa20/20, welches es zu implementieren galt.
 
 \subsection{Funktionsweise Salsa20/20}
-Salsa20/20 ist eine Stromchiffre basierend auf einem sogenannten Add-Rotate-XOR-Schema (kurz: ARX-Schema), ins Leben gerufen von 
+Salsa20/20 ist eine Stromchiffre basierend auf einem sogenannten Add-Rotate-XOR-Schema (kurz: ARX-Schema), ins Leben gerufen von
 David J. Bernstein.
-\\Salsa20/20 verwendet eine 4$\times$4 Matrix bestehend aus vorzeichenlosen 32-bit Little-Endian-Ganzzahlen, 
+\\Salsa20/20 verwendet eine 4$\times$4 Matrix bestehend aus vorzeichenlosen 32-bit Little-Endian-Ganzzahlen,
 welche durch Add, Rotate und XOR Operationen aus bestimmen Startwerten erzeugt wird.
 Auf dieser generierten Matrix wird dann mit der zu verschlüsselnden Nachricht Byte für Byte eine XOR-Operation ausgeführt.
 
@@ -68,7 +71,7 @@ Folgende theoretische Fragen waren zu beantworten:
 \end{itemize}
 
 \subsubsection{Praktischer Teil:}
-Zu implementieren  war folgende Funktionalität: 
+Zu implementieren  war folgende Funktionalität:
 \begin{itemize}
     \item Ein Rahmenprogramm welches I/O-Operationen unterstützt, mithilfe derer man eine ganze Datei in den Speicher einlesen und als Pointer an eine Unterfunktion übergeben kann. Selbiges soll auch zum Schreiben eines Speicherbereiches mit bekannter Länge in eine Datei möglich sein.
     \item \textcolor{blue}{void} salsa20\_core (\textcolor{blue} {uint32\_t} output[16] \textcolor{blue}{const uint32\_t} input[16]) \\
@@ -83,17 +86,12 @@ Zu implementieren  war folgende Funktionalität:
 \subsection{Theoretischer Teil}
 \subsubsection{Transponieren}
 
-Das Transponieren der Matrix ist Teil des Salsa20-Kern Algorithmus, ist aber nicht sonderlich performant. 
-Um ihn weiter zu optimieren, kann man anstatt zwanzig Runden, die jeweils eine Transposition enthalten, zehn sogenannte Doppelrunden 
-ausführen, die jeweils aus einer sogenannten Spaltenrunde und einer Reihenrunde bestehen. Eine Spaltenrunde ist identisch zu einer 
+Das Transponieren der Matrix ist Teil des Salsa20-Kern Algorithmus, ist aber nicht sonderlich performant.
+Um ihn weiter zu optimieren, kann man anstatt zwanzig Runden, die jeweils eine Transposition enthalten, zehn sogenannte Doppelrunden
+ausführen, die jeweils aus einer sogenannten Spaltenrunde und einer Reihenrunde bestehen. Eine Spaltenrunde ist identisch zu einer
 Runde wie oben definiert, während eine Reihenrunde die Indizes bei Matrixzugriffen so wählt, dass die Matrix behandelt wird
-<<<<<<< Updated upstream
-als wäre sie transponiert.  
+als wäre sie transponiert.
 
-=======
-als wäre sie transponiert. 
- 
->>>>>>> Stashed changes
 \subsubsection{Werte an der Diagonale}
 
 Die Werte an der Diagonale haben eine wichtige Bedeutung für die Sicherheit des Salsa20/20 Algorithmus, insbesondere der Salsa20-Kern Funktion.
@@ -102,71 +100,71 @@ Die Werte an der Diagonale haben eine wichtige Bedeutung für die Sicherheit des
 \begin{gather*}
     x =
     \begin{pmatrix}
-    A_0 & B_0 & C_0 & D_0\\
-    A_1 & B_1 & C_1 & D_1\\
-    A_2 & B_2 & C_2 & D_2\\
-    A_3 & B_3 & C_3 & D_3\\
-    \end{pmatrix}  
-\quad \quad tr(x) = 
+        A_0 & B_0 & C_0 & D_0 \\
+        A_1 & B_1 & C_1 & D_1 \\
+        A_2 & B_2 & C_2 & D_2 \\
+        A_3 & B_3 & C_3 & D_3 \\
+    \end{pmatrix}
+    \quad \quad tr(x) =
     \begin{pmatrix}
-        D_3 & D_2 & D_1 & D_0\\
-        C_3 & A_0 & B_0 & C_0\\
-        B_3 & A_1 & B_1 & C_1\\
+        D_3 & D_2 & D_1 & D_0 \\
+        C_3 & A_0 & B_0 & C_0 \\
+        B_3 & A_1 & B_1 & C_1 \\
         A_3 & A_2 & B_2 & C_2
     \end{pmatrix}
 \end{gather*}
 Dann erhalten wir die folgende Eigenschaft:
 \begin{gather*}
-Salsa20( tr(x) ) = tr( Salsa20(x) )
+    Salsa20( tr(x) ) = tr( Salsa20(x) )
 \end{gather*}
-Diese Transformation der Matrix $x$ ist nicht nur invertierbar, sondern bleibt auch durch die Anwendung der Salsa-Funktion erhalten.\cite{salsa20security} 
+Diese Transformation der Matrix $x$ ist nicht nur invertierbar, sondern bleibt auch durch die Anwendung der Salsa-Funktion erhalten.\cite{salsa20security}
 \vspace{1mm}
 \\Nehmen wir nun die folgende Transformation der oben beschriebenen Matrix $x$:
 \begin{gather*}
-R(x) =
+    R(x) =
     \begin{pmatrix}
-        r(A_0) & r(B_0) & r(C_0) & r(D_0)\\
-        r(A_1) & r(B_1) & r(C_1) & r(D_1)\\
-        r(A_2) & r(B_2) & r(C_2) & r(D_2)\\
-        r(A_3) & r(B_3) & r(C_3) & r(D_3)\\
+        r(A_0) & r(B_0) & r(C_0) & r(D_0) \\
+        r(A_1) & r(B_1) & r(C_1) & r(D_1) \\
+        r(A_2) & r(B_2) & r(C_2) & r(D_2) \\
+        r(A_3) & r(B_3) & r(C_3) & r(D_3) \\
     \end{pmatrix}
 \end{gather*}
 wobei $r(y)$ die Rechtsrotation des 4Byte großen $y$ um ein Bit darstellt.
 \vspace{1mm}
 \\Dann erhalten wir eine äquivalente Eigenschaft wie schon mit $tr(x)$:
 \begin{gather*}
-Salsa20(R(x)) = R(Salsa20(x))
+    Salsa20(R(x)) = R(Salsa20(x))
 \end{gather*}
 Diese Transformation ist ebenfalls invertierbar und bleibt auch, in den meisten Fällen, nach Anwendung der Funktion Salsa20 erhalten.\cite{salsa20security}
 \vspace{1mm}
-\\Da diese Matrixverschiebungen und Rechtsrotationen \textbf{beide} sowohl invertierbar sind als auch mit der Anwendung von der Salsa20-Kern Funktion erhalten bleiben, 
+\\Da diese Matrixverschiebungen und Rechtsrotationen \textbf{beide} sowohl invertierbar sind als auch mit der Anwendung von der Salsa20-Kern Funktion erhalten bleiben,
 kann man eine Vielzahl von \textbf{beiden} auf die ursprüngliche Matrix anwenden und am Ende der Salsa20-Kern Funktion, unabhängig von der Reihenfolge des Anwendens, immer noch dasselbe Ergebnis erhalten.
 \vspace{1mm}
-\\Beim verwenden der Salsa20-Kern Funktion mit beliebigen Matrizen stellen diese Eigenschaften ein großes Sicherheitsrisikio dar. 
-Bei kryptographischen Verfahren ist das Ziel normalerweise, eine Struktur so zu zerstören, dass ein Angriff sie nicht wiederherstellen kann. 
+\\Beim verwenden der Salsa20-Kern Funktion mit beliebigen Matrizen stellen diese Eigenschaften ein großes Sicherheitsrisikio dar.
+Bei kryptographischen Verfahren ist das Ziel normalerweise, eine Struktur so zu zerstören, dass ein Angriff sie nicht wiederherstellen kann.
 Die Verschiebungen und Bitrotationen werden von der Funktion jedoch in keiner Weise beeinflusst.
 \vspace{1mm}
 \\An dieser Stelle kommen die Konstanten auf der Diagonale ins Spiel:
 \vspace{2mm}
-\\Durch die Einführung dieser Konstanten wird sichergestellt, dass keine Anzahl an Verschiebungen oder Rotationen die ursprüngliche Diagonale wiederherstellen kann, 
-außer im trivialen Fall von 0 Verschiebungen und Rotationen. Das bedeutet, dass keine zwei verschiedenen Schlüssel- oder Nonce-Eingaben 
+\\Durch die Einführung dieser Konstanten wird sichergestellt, dass keine Anzahl an Verschiebungen oder Rotationen die ursprüngliche Diagonale wiederherstellen kann,
+außer im trivialen Fall von 0 Verschiebungen und Rotationen. Das bedeutet, dass keine zwei verschiedenen Schlüssel- oder Nonce-Eingaben
 jemals die gleiche Matrix haben werden, egal wie viele Transformationen angewendet werden.\cite{salsa20security}
 \vspace{1mm}
-\\Natürlich sind nicht alle Werte geeignet, denn es gibt einige Beispiele für Konstanten, 
+\\Natürlich sind nicht alle Werte geeignet, denn es gibt einige Beispiele für Konstanten,
 wo die Diagonale nach einer bestimmten Anzahl von Verschiebungen/Rotationen mit der Originalen übereinstimmt.
 \vspace{1mm}
-\\Außerdem stellt der Ersteller des Algorithmus fest\cite{ResponseOnTheSalsa20Core}, dass die Konstanten das Kollisionsproblem beseitigen, 
+\\Außerdem stellt der Ersteller des Algorithmus fest\cite{ResponseOnTheSalsa20Core}, dass die Konstanten das Kollisionsproblem beseitigen,
 auf das in einer anderen Arbeit\cite{onTheSalsa20Core} hingewiesen wurde.\\
 Das Kollisionsproblem besagt, dass:
-\begin{gather*} Salsa20(x) = Salsa20(x + \Delta) \text{  mit z.B.  } \Delta=(0x80000000,0x80000000,...) \end{gather*} 
-Ein solches $x+\Delta$ ist keine gültige Eingabe für eine Salsa20-Kern Funktion (sofern $x$ eine gültige Eingabe ist) und wird daher in der Praxis nie vorkommen. 
+\begin{gather*} Salsa20(x) = Salsa20(x + \Delta) \text{  mit z.B.  } \Delta=(0x80000000,0x80000000,...) \end{gather*}
+Ein solches $x+\Delta$ ist keine gültige Eingabe für eine Salsa20-Kern Funktion (sofern $x$ eine gültige Eingabe ist) und wird daher in der Praxis nie vorkommen.
 Das Gleiche gilt für andere Beispiele von Kollisionen, die in dieser Arbeit auftauchen.
 
 
 \subsubsection{Funktionsweise einer Stromchiffre}
-Eine Stromchiffre ist ein symmetrischer kryptographischer Algorithmus, der für Ver- und Entschlüsselung von Daten verwendet wird. 
-Dieser Algorithmus nimmt einen Klartext und ein Schlüsselstrom entgegen und führt eine bitweise XOR-Operation aus und gibt am Ende 
-einen Geheimtext zurück. 
+Eine Stromchiffre ist ein symmetrischer kryptographischer Algorithmus, der für Ver- und Entschlüsselung von Daten verwendet wird.
+Dieser Algorithmus nimmt einen Klartext und ein Schlüsselstrom entgegen und führt eine bitweise XOR-Operation aus und gibt am Ende
+einen Geheimtext zurück.
 Man kann durch Benutzung desselben Schlüsselstroms wieder den Klartext erhalten, indem man dem Algorithmus den Geheimtext übergibt.
 % TODO: Beispiel von Klartext, Strom und Cipher
 Aufgrund der Symmetrie der XOR-Operation gilt folgendes:
@@ -175,20 +173,20 @@ Aufgrund der Symmetrie der XOR-Operation gilt folgendes:
         \hline
         Klartext & Schlüsselstrom & Geheimtext \\
         \hline
-        0 & 0 & 0  \\
-        0 & 1 & 1  \\
-        1 & 0 & 1  \\
-        1 & 1 & 0  \\
+        0        & 0              & 0          \\
+        0        & 1              & 1          \\
+        1        & 0              & 1          \\
+        1        & 1              & 0          \\
         \hline
     \end{tabular}
     \begin{tabular}{|c|c|c|}
         \hline
         Geheimtext & Schlüsselstrom & Klartext \\
         \hline
-         0 & 0 & 0 \\
-         1 & 1 & 0 \\
-         1 & 0 & 1 \\
-         0 & 1 & 1 \\
+        0          & 0              & 0        \\
+        1          & 1              & 0        \\
+        1          & 0              & 1        \\
+        0          & 1              & 1        \\
         \hline
     \end{tabular}
 \end{table}
@@ -196,7 +194,7 @@ Aufgrund der Symmetrie der XOR-Operation gilt folgendes:
 Wie man sehen kann, führt der Geheimtext als Eingabe unter Verwendung desselben Schlüsselstroms wieder zum Klartext.
 \vspace{3mm}
 \\
-Damit man also für einen durch Salsa20/20 erstellten Geheimtext den dazugehörigen Klartext zurückerhält, 
+Damit man also für einen durch Salsa20/20 erstellten Geheimtext den dazugehörigen Klartext zurückerhält,
 muss man denselben Schlüsselstrom sowie denselben Initalisierungsvektor, mit dem Geheimtext als zu verschlüsselnde Nachricht, übergeben.
 \\
 Der Counter ist keine Eingabe des Salsa20/20 Verschlüsselungsverfahren, sondern dient dazu den generierten 64-Byte-Block sicherer gegen Angriffe zu machen. Alle 64 verschlüsselte Bytes, wird der Counter um 1 inkrementiert und der Kern neu berechnet. Das macht es schwer, den Kern vorherzusagen und bietet somit mehr Sicherheit für das Verschlüsselungsverfahren und schützt den Geheimtext gegen Angriffe.
@@ -266,7 +264,46 @@ Zuvor werden die XOR-Operationen mit der Berechnung des korrekten Index innerhal
 \section{Korrektheit}
 
 \section{Performanzanalyse}
+\subsection{Vergleich der Implementierungen}
+Während sich zwischen der Hauptimplementierung und der ersten optimierten Version nur geringe bis zu vernachlässigbar kleine
+Performanzunterschiede zeigen, ist die zweite, mit SIMD-Instruktion umgesetzte, Version deutlich langsamer.
+Dies wird in folgendem Diagramm veranschaulicht:
 
+\begin{center}
+\begin{tikzpicture}[trim axis left, trim axis right]
+    \begin{axis}[
+            symbolic x coords={O0, O2, O3, Ofast},
+            xtick = {O0, O2, O3, Ofast},
+            legend style={at={(0.5,-0.15)},
+                    anchor=north,legend columns=-1},
+            ybar,
+            ymin=0,
+            ymajorgrids=true,
+            ylabel=Seconds per iteration,
+            bar width=5mm,
+            width=90mm,
+            enlarge x limits=0.2,
+            nodes near coords,
+            every node near coord/.append style={font = {\fontsize{7 pt}{12 pt}\selectfont},color=black},
+        ]
+        \addplot[blue,fill=blue!30]
+        coordinates {(O0,13.55) (O2,6.01)
+                (O3,5.87) (Ofast,5.94) };
+
+        \addplot[red,fill=red!30]
+        coordinates {(O0,12.41) (O2,6.02)
+                (O3,5.47) (Ofast,5.49) };
+
+        \addplot [violet,fill=violet!30]
+        coordinates {(O0,33.08) (O2,7.81)
+                (O3,7.77) (Ofast,7.81) };
+        \legend{V0,V1,V2}
+    \end{axis}
+\end{tikzpicture}
+\end{center}
+
+Es wurden pro GCC-Optimierungsstufe und Implementierungsversion 5 Iterationen des Verfahrens auf einer 1GB großen Datei ausgeführt.
+Die Tests wurden auf einem Notebook ausgestattet mit
 
 \section{Zusammenfassung und Ausblick}
 
