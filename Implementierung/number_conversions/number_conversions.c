@@ -1,4 +1,5 @@
 #include "number_conversions.h"
+#include "../testing/print_tests.h"
 
 uint64_t convert_string_to_uint64_t(const char *string)
 {
@@ -61,7 +62,12 @@ void convert_string_to_uint32_t_array(const char *string, uint32_t key[8])
     // given string is interpreted as a hex number
     if (*(string) == '0' && *(string + 1) == 'x')
     {
-        printf("Key was interpreted as hex: ");
+
+        for (size_t i = 0; i < 8; i++)
+        {
+            key[i] = 0;
+        }
+
         int base = 16;
         uint8_t start = 2;
         if (strlen(string) > 66)
@@ -74,53 +80,54 @@ void convert_string_to_uint32_t_array(const char *string, uint32_t key[8])
 
             if (strlen(string + start) > 64)
             {
-                fprintf(stderr, "The key entered does not fit in 256 bit.\n");
+                fprintf(stderr, "The key entered does not fit in 256 bits.\n");
                 exit(EXIT_FAILURE);
             }
         }
         string += start;
-        size_t i = strlen(string) - 1, k = 0;
-        for (; i >= 8; i -= 8, k++)
+
+        size_t i = strlen(string), j = 0, k = 0;
+        uint8_t hexnum[8];
+        for (; i > 0; i--, j++)
         {
-            char hexnum[8] = {*(string + i - 7), *(string + i - 6), *(string + i - 5), *(string + i - 4),
-                              *(string + i - 3), *(string + i - 2), *(string + i - 1), *(string + i)};
-            key[k] = convert_string_to_uint32_t(hexnum, base);
+            // every 8 characters of the string are converted to one key
+            if (j == 8)
+            {
+                uint8_t inv[8];
+                for (size_t ii = 0, jj = 7; ii < 8; ii++, jj--)
+                {
+                    inv[ii] = hexnum[jj];
+                }
+
+                key[k] = convert_string_to_uint32_t(inv, base);
+                k++;
+                j = 0;
+            }
+
+            hexnum[j] = *(string + i - 1);
         }
 
-        char *lastnum = malloc(i + 2);
-        if (i != 0)
+        for (; j <= 8; j++)
         {
-            if (lastnum == NULL)
+            if (j == 8)
             {
-                fprintf(stderr, "Couldn't allocate memory\n");
-                exit(EXIT_FAILURE);
+                uint8_t inv[8];
+                for (size_t ii = 0, jj = 7; ii < 8; ii++, jj--)
+                {
+                    inv[ii] = hexnum[jj];
+                }
+                key[k] = convert_string_to_uint32_t(inv, base);
+                break;
             }
-            for (size_t j = 0; j <= i; j++)
-            {
-                *(lastnum + j) = *(string + j);
-            }
-            *(lastnum + i + 1) = '\0';
-            key[k] = convert_string_to_uint32_t(lastnum, base);
 
-            free(lastnum);
-        }
-        else
-        {
-            if (lastnum == NULL)
-            {
-                fprintf(stderr, "Couldn't allocate memory\n");
-                exit(EXIT_FAILURE);
-            }
-            *lastnum = *string;
-            *(lastnum + 1) = '\0';
-            key[k] = convert_string_to_uint32_t(lastnum, base);
-            free(lastnum);
+            hexnum[j] = '0';
         }
 
+        printf("Key was interpreted as hex: ");
         printf("0x");
-        for (size_t i = 0; i < 8; i++)
+        for (size_t i = 8; i > 0; i--)
         {
-            printf("%08x", key[i]);
+            printf("%08x", key[i - 1]);
         }
     }
 
@@ -134,13 +141,12 @@ void convert_string_to_uint32_t_array(const char *string, uint32_t key[8])
     */
     else
     {
-        printf("Key was interpreted as string: ");
         uint8_t chars[4];
         size_t i = 0, j = 0, k = 8;
         for (; i < strlen(string) && k > 0; i++, j++)
         {
 
-            // every four bytes convert to a key element ()
+            // every four bytes convert to a key element
             if (j == 4)
             {
                 key[k - 1] = ((chars[0]) << 24) | ((chars[1]) << 16) | ((chars[2]) << 8) | ((chars[3]));
@@ -170,6 +176,7 @@ void convert_string_to_uint32_t_array(const char *string, uint32_t key[8])
             key[k - 1] = 0;
         }
 
+        printf("Key was interpreted as string: ");
         for (i = 8; i > 0; i--)
         {
             printf("%c%c%c%c", (key[i - 1] >> 24) & 0xFF, (key[i - 1] >> 16) & 0xFF, (key[i - 1] >> 8) & 0xFF, (key[i - 1] >> 0) & 0xFF);
