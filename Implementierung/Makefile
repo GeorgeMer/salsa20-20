@@ -1,6 +1,10 @@
-# Add additional compiler flags here 
+#define C-Compiler
 CC=gcc
+
+#defines extra Flags for the compiler
 CFLAGS=-O2 -std=c11 -msse4.1
+
+#defines extra Flags for debugging
 CFLAGS_DEBUG = -g3 -Wall -Wextra -Wpedantic -Wshadow -Wdouble-promotion -Wformat=2 -Wformat-truncation -Wundef -fno-common -Wmisleading-indentation -fsanitize=address -fsanitize=undefined -fsanitize=leak -static-libasan
 
 all: main 
