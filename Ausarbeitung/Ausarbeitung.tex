@@ -87,8 +87,13 @@ Das Transponieren der Matrix ist Teil des Salsa20-Kern Algorithmus, ist aber nic
 Um ihn weiter zu optimieren, kann man anstatt zwanzig Runden, die jeweils eine Transposition enthalten, zehn sogenannte Doppelrunden 
 ausführen, die jeweils aus einer sogenannten Spaltenrunde und einer Reihenrunde bestehen. Eine Spaltenrunde ist identisch zu einer 
 Runde wie oben definiert, während eine Reihenrunde die Indizes bei Matrixzugriffen so wählt, dass die Matrix behandelt wird
+<<<<<<< Updated upstream
 als wäre sie transponiert.  
 
+=======
+als wäre sie transponiert. 
+ 
+>>>>>>> Stashed changes
 \subsubsection{Werte an der Diagonale}
 
 Die Werte an der Diagonale haben eine wichtige Bedeutung für die Sicherheit des Salsa20/20 Algorithmus, insbesondere der Salsa20-Kern Funktion.
@@ -167,14 +172,14 @@ Man kann durch Benutzung desselben Schlüsselstroms wieder den Klartext erhalten
 Aufgrund der Symmetrie der XOR-Operation gilt folgendes:
 \begin{table}[!h]
     \begin{tabular}{|c|c|c|}
-    \hline
-    Klartext & Schlüsselstrom & Geheimtext \\
-    \hline
-    0 & 0 & 0  \\
-    0 & 1 & 1  \\
-    1 & 0 & 1  \\
-    1 & 1 & 0  \\
-    \hline
+        \hline
+        Klartext & Schlüsselstrom & Geheimtext \\
+        \hline
+        0 & 0 & 0  \\
+        0 & 1 & 1  \\
+        1 & 0 & 1  \\
+        1 & 1 & 0  \\
+        \hline
     \end{tabular}
     \begin{tabular}{|c|c|c|}
         \hline
@@ -185,7 +190,7 @@ Aufgrund der Symmetrie der XOR-Operation gilt folgendes:
          1 & 0 & 1 \\
          0 & 1 & 1 \\
         \hline
-        \end{tabular}
+    \end{tabular}
 \end{table}
 \\
 Wie man sehen kann, führt der Geheimtext als Eingabe unter Verwendung desselben Schlüsselstroms wieder zum Klartext.
