@@ -13,6 +13,7 @@
 #include "salsa_crypt/salsa_crypt_v2.h"
 
 #include "testing/reference/correctness.h"
+#include "testing/key_tests.h"
 
 static struct option long_options[] =
     {
@@ -167,7 +168,10 @@ int main(int argc, char **argv)
     */
     if (run_tests)
     {
+        printf("\n\n\n--- TESTS: ---\n\n");
         test_correctness(implementation_number, random_tests);
+        test_keys();
+        printf("\n\n--- END OF TESTS ---\n\n\n");
     }
 
     // if measure_runtime == true then measure runtime with function being called number_of_iterations times

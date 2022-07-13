@@ -1,5 +1,4 @@
 #include "number_conversions.h"
-#include "../testing/print_tests.h"
 
 uint64_t convert_string_to_uint64_t(const char *string)
 {
@@ -59,14 +58,14 @@ uint32_t convert_string_to_uint32_t(const char *string, int base)
 
 void convert_string_to_uint32_t_array(const char *string, uint32_t key[8])
 {
+    for (size_t i = 0; i < 8; i++)
+    {
+        key[i] = 0;
+    }
+
     // given string is interpreted as a hex number
     if (*(string) == '0' && *(string + 1) == 'x')
     {
-
-        for (size_t i = 0; i < 8; i++)
-        {
-            key[i] = 0;
-        }
 
         int base = 16;
         uint8_t start = 2;
@@ -161,11 +160,6 @@ void convert_string_to_uint32_t_array(const char *string, uint32_t key[8])
         for (size_t jcnt = 0; jcnt < j && k > 0; jcnt++)
         {
             key[k - 1] |= (chars[jcnt]) << (24 - 8 * jcnt);
-        }
-
-        for (; j < 4 && k > 0; j++)
-        {
-            key[k - 1] |= (0) << (24 - 8 * j);
         }
 
         if (k != 0)
