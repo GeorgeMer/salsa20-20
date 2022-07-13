@@ -259,7 +259,7 @@ Anschließend wird mithilfe eines Pointercasts des output Pointers (\textcolor{b
 da \textcolor{blue}{uint8\_t} keine strengeren alignment Anforderungen hat als \textcolor{blue}{uint32\_t}. Desweiteren liefert der Pointercast die Bytes der output Matrix für die XOR-Operation, genau wie vorgesehen, in Little-Endian-Reihenfolge.
 Anschließend werden nun die XOR-Operationen auf der message mit der output Matrix ausgeführt und in cipher gespeichert. Alle 64 XOR-Operationen wird der Counter inkrementiert und der Kern neu berechnet. Für V1 wird nur für die letzten $\leq 64$ Bytes mit dem Pointercast gearbeitet.
 Zuvor werden die XOR-Operationen mit der Berechnung des korrekten Index innerhalb der Matrix, der cipher und der message durchgeführt. Das reicht jedoch bereits für einen Signifikanten Speedup, dazu mehr in Abschnitt 4.
-
+Die Implementierung V2 basiert nahezu vollständig auf der Implementierung von V1, nur mit zusätzlicher Vektorisierung der XOR-Operation mithilfe von SIMD Operationen.
 
 
 \section{Korrektheit}
