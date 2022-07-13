@@ -34,14 +34,28 @@ welche durch Add, Rotate und XOR Operationen aus bestimmen Startwerten erzeugt w
 Auf dieser generierten Matrix wird dann mit der zu verschlüsselnden Nachricht Byte für Byte eine XOR-Operation ausgeführt.
 
 \subsubsection{Der Salsa20-Kern:}
-Der Salsa20-Kern ist eine Funktion, welche einen 64-Byte Block generiert, auf dem, wie oben beschrieben, auf 
-der zu verschlüsselnden Nachricht Byte für Byte eine ARX-Operation ausgeführt wird. Es werden bei jeder Operation 
-zwei Werte der Matrix aufaddiert, links-rotiert und mit dem Eintrag exklusiv verodert, welcher dann durch das Ergebnis 
-dieser Operationen ersetzt wird. 
+Der Salsa20-Kern ist eine Funktion, welche einen 64-Byte Block generiert, auf dem, wie oben beschrieben, mit 
+der zu verschlüsselnden Nachricht Byte für Byte eine XOR-Operation ausgeführt wird. Es werden bei jeder Operation 
+zwei Werte der Matrix aufaddiert, links-rotiert und auf diesem Ergebnis mit einem Eintrag $a_{ij}$ der Matrix eine XOR-Operation ausgeführt.
+Der Matrix eintrag $a_{ij}$ wird dann mit dem Ergebnis dieser XOR-Operation überschrieben.
 Der 64-Byte-Block wird in 20 sogenannten Runden aus einem 256-Bit-Key, einer 64-Bit Nonce und einem 64-Bit 
 Counter generiert. Die zwanzig Runden bestehen jeweils aus vier Viertelrunden. Die Viertelrunden unterscheiden sich 
 durch die Anzahl der Rotationen, die für jede ARX-Operation ausgeführt werden und durch die Matrix-Einträge, auf die 
-diese Operationen angewandt werden.
+diese Operationen angewandt werden. Am Ende jeder Runde wird die Matrix transponiert.
+Den Startzustand $S$ für den generierten 64-Byte-Block bildet folgende 4$\times$4 Matrix, wobei $K_i$ den $i$-ten Teil
+des Schlüssels bezeichnet. ($K_0$ steht also für die ersten 4 Bytes in Little-Endian-Reihenfolge des Schlüssels, dasselbe gilt analog für die
+Nonce $N_i$ und den Counter $C_i$).
+\[
+    \begin{pmatrix}
+    0\text{x}61707865 & K_0 & K_1 & K_2\\
+    K_3 & 0\text{x}3320646\text{e} & N_0 & N_1\\
+    C_0 & C_1 & 0\text{x}79622\text{d}32 & K_4\\
+    K_5 & K_6 & K_7 & 0\text{x}6\text{b}206574
+    \end{pmatrix}
+\]
+Die Konstanten auf der Diagonalen sind für jeden Key und jede Nonce dieselben.
+Den zum Schluss ausgegebenen 64-Byte-Block erhält man duch das aufaddieren des 
+Ergebnisses der 20 Runden auf den Startzustand $S$.
 
 \subsection{Aufgabenstellung}
 
@@ -58,9 +72,9 @@ Zu implementieren  war folgende Funktionalität:
 \begin{itemize}
     \item Ein Rahmenprogramm welches I/O-Operationen unterstützt, mithilfe derer man eine ganze Datei in den Speicher einlesen und als Pointer an eine Unterfunktion übergeben kann. Selbiges soll auch zum Schreiben eines Speicherbereiches mit bekannter Länge in eine Datei möglich sein.
     \item \textcolor{blue}{void} salsa20\_core (\textcolor{blue} {uint32\_t} output[16] \textcolor{blue}{const uint32\_t} input[16]) \\
-    welche den oben beschriebenen Salsa20-Kern implementiert. input bezeichnet den Startzustand des Kerns, output den finalen 64-Byte-Block. \\
+    Diese Funktion implementiert den oben beschriebenen Salsa20-Kern. input bezeichnet dabei den Startzustand des Kerns, output den finalen 64-Byte-Block. \\
     \item \textcolor{blue} {void} salsa20\_crypt (\textcolor{blue}{size\_t} mlen, \textcolor{blue} {const uint8\_t} msg[mlen], \textcolor{blue}{uint8\_t} cipher [mlen], \textcolor{blue}{uint32\_t} key[8], \textcolor{blue} {uint64\_t} iv) \\
-    welche eine Nachricht msg der Länge mlen mit einem gegebenen Schlüssel und Nonce (iv) verschlüsselt und das Ergebnis in cipher schreibt.
+    Diese Funktion verschlüsselt eine Nachricht msg der Länge mlen mit einem gegebenen Schlüssel Key und einer Nonce (iv) und schreibt das Ergebnis in cipher.
 \end{itemize}
 
 
@@ -184,8 +198,52 @@ Der Counter ist keine Eingabe des Salsa20/20 Verschlüsselungsverfahren, sondern
 
 
 \subsection{Praktischer Teil}
-\section{Korrektheit}
+\subsubsection{Das Rahmenprogramm}
+Im Rahmenprogramm finden die von der Aufgabenstellung erforderlichen I/O-Operationen, sowie das Parsen von Programmargumenten statt.
+Für das Einlesen des Eingabe Files wurden die von C bereitgestellten Funktionen zur File I/O verwendet. Das Einlesen der Programmargumente stellte nur für den 256bit Schlüssel
+ein Problem dar, da für so große Eingabe Zahlen keine von C bereitgestellte sichere Funktion (wie z.B. strtoull für unsigned long long Zahlen) existiert.
+Um diesen Problem nachzugehen wurde folgender Ansatz gewählt:
+Der Key lässt sich entweder als Hexadezimalzahl eingeben, indem man das Präfix 0x anfügt, oder alternativ ohne Präfix, wo jeder Eingabecharacter als sein Zugehöriger numerischer Wert
+nach ASCII-Codierung interpretiert wird.
+\\Die Eingabe 
+\begin{center}
+    ./salsa -k 0x48656C6C6F20576F726C64  some\_path 
+\end{center} 
+wäre also äquivalent zur Eingabe
+\begin{center}
+    ./salsa -k Hello World some\_path
+\end{center}
+Diese Designentscheidung wurde getroffen, da z.B. eine Eingabe als dezimale Zahlen zu erlauben sehr aufwändig gewesen wäre, denn zusätzlich zur maximalen Länge wäre auf over- bzw. underflows und diverse andere Probleme wie zum
+Beispiel führende Nullen oder unerlaubte Zeichen zu prüfen gewesen. Hexadezimalzahlen lassen sich jedoch sehr leicht konvertieren, genauso wie Strings interpretiert als ihre zugehörigen numerischen ASCII-Code Werte.
+\\Das schreiben ins Output file findet statt als die respektiven Bytes der cipher aneinandergehängt ausgegeben in Hexadezimaler Form, mit einer neuen Zeile alle 76 Zeichen (orientiert an den automatisch generierten Files von udev/random, die ebenfalls alle 76 Zeichen eine neue Zeile haben).
+Jedoch kann per Option auch eine Ausgabe als ASCII-Characters stattfinden, wobei hier darauf zu achten ist, dass nicht ins ASCII-Format konvertierbare Character dementsprechend nicht richtig ausgebenen werden können, und hierfür keine Fehlerbehandlung stattfindet. Diese Designentscheidung wurde getroffen, 
+ da eine Ausgabe in Hexadezimaler Form sehr viel besser lesbar ist, als undefinierte Symbole. Die Option zum Ausgeben als ASCII-Characters wurde für die Entschlüsselung eingeführt, um Klartexte nicht als Hexadezimalzahl zu erhalten. Jedoch wurde auf eine interne Überprüfung, ob die Bytes der cipher
+ASCII repräsentierbar sind verzichtet, da die Laufzeit sich dadurch deutlich spürbar verschlechtert hätte. Die Ausgabe der cipher in Hexadezimaler Form kostet zwar auch sehr viel mehr Laufzeit als eine simpler Aufruf der fwrite Funktion, jedoch lohnt sich hier der Trade-off durchaus, 
+denn für den Fall das manche Zeichen nicht im ASCII-Format repräsentierbar sind, wäre die Ausgabe unbrauchbar.
+\\Beispiel: Bezeichne im folgenden some\_path den Pfad eines Text-Files mit folgendem Inhalt:
+\begin{center}
+    Hallo ich soll verschluesselt werden.
+\end{center}
+Dann liefer folgender Aufruf
+\begin{center}
+    ./salsa some\_path
+\end{center}
+als Ergebnis im neu erstellen File result.txt
+\begin{center}
+    8444881893099052ce65bf7480b2c49eef490b1f4ae168cef688f4fe31de09beaad0296a95
+\end{center}
+Sei path\_of\_result der Pfad des gerade erstellten Files result.txt. Dann liefert der Aufruf
+\begin{center}
+    ./salsa -e path\_of\_result
+\end{center}
+das Egebnis (wieder in result.txt, da kein Pfad vom Benutzer angegeben wurde)
+\begin{center}
+    Hallo ich soll verschluesselt werden.
+\end{center}
 
+\subsubsection{salsa20\_core}
+Lololol
+\section{Korrektheit}
 
 \section{Performanzanalyse}
 
