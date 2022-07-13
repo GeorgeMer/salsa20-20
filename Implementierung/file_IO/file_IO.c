@@ -58,8 +58,8 @@ void write_file(const char *path, uint8_t *cipher)
     // error handling
     if (path == NULL)
     {
-        // create txt file "encrypted" if no path to output file was given
-        if (!(file = fopen("encrypted.txt", "w")))
+        // create txt file "result" if no path to output file was given
+        if (!(file = fopen("result.txt", "w")))
         {
             perror("Error creating file ");
             exit(EXIT_FAILURE);
