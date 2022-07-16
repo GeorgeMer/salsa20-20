@@ -1,10 +1,11 @@
 .vscode
 Implementierung/.testing
 Implementierung/test
-
 Implementierung/salsa
-*.txt
 
 Ausarbeitung/*.pdf
+*.txt
 
-performance.csv
+*.csv
+*.data
+*.data.old
