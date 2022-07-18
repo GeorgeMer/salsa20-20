@@ -108,22 +108,15 @@ void convert_string_to_uint32_t_array(const char *string, uint32_t key[8])
 
             hexnum[j] = '0';
         }
-
-        printf("Key was interpreted as hex: ");
-        printf("0x");
-        for (size_t i = 0; i < 8; i++)
-        {
-            printf("%08x", key[i]);
-        }
     }
 
     // key is interpreted as a string
     /*
         (eg: "HelloWorld" will be interpreted as
-        key[7] = 48 65 6C 6C
-        key[6] = 6F 57 6F 72
-        key[5] = 6C 64 00 00
-        key 4 to 0 will be padded with 0s
+        key[0] = 48 65 6C 6C
+        key[1] = 6F 57 6F 72
+        key[2] = 6C 64 00 00
+        key 3 to 7 will be padded with 0s
     */
     else
     {
@@ -148,21 +141,5 @@ void convert_string_to_uint32_t_array(const char *string, uint32_t key[8])
         {
             key[k] |= (chars[jcnt]) << (24 - 8 * jcnt);
         }
-
-        // if (k != 0)
-        //     k--;
-
-        // for (; k > 0; k--)
-        // {
-        //     key[k - 1] = 0;
-        // }
-
-        printf("Key was interpreted as string: ");
-        for (i = 0; i < 8; i++)
-        {
-            printf("%c%c%c%c", (key[i] >> 24) & 0xFF, (key[i] >> 16) & 0xFF, (key[i] >> 8) & 0xFF, (key[i] >> 0) & 0xFF);
-        }
     }
-
-    printf("\n\n");
 }

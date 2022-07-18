@@ -1,7 +1,5 @@
-#include <stddef.h>
-#include <stdint.h>
-#include <stdio.h>
 #include <immintrin.h>
+
 #include "../salsa_core/salsa_core_v2.h"
 
 void salsa_crypt_v2(size_t mlen, const uint8_t msg[mlen], uint8_t cipher[mlen], uint32_t key[8], uint64_t iv)

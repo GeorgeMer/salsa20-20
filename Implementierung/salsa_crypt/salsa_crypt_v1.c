@@ -1,6 +1,4 @@
 #include <stddef.h>
-#include <stdint.h>
-#include <stdio.h>
 
 #include "../salsa_core/salsa_core_v1.h"
 

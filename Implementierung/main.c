@@ -3,6 +3,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include <time.h>
+#include <stddef.h>
 #include <inttypes.h>
 
 #include "file_IO/file_IO.h"
@@ -42,9 +43,8 @@ const char *help_msg =
     "         (all tests run with random keys and nonces, random tests also have random messages)\n"
     "  -k K   K resembles the 256bit long key (default: K = 2^256 - 1883)\n"
     "         The key can be either given as a hex with the '0x' prefix (it shouldn't be greater than 2^256-1, but can have leading zeroes),\n"
-    "         or as a sequence of characters(bytes). The resulting key will have it's highest byte mapped to the first character\n"
-    "         and will be padded with '\0' if the given string is smaller than 256bit. If the given string is greater than 256bit,\n"
-    "         the first 32 characters will be the key, the others thrown away."
+    "         or as a sequence of characters(bytes). If the given string is smaller than 256bit, it will be padded with '0' bytes\n."
+    "         If the given string is greater than 256bit, only the first 32 characters will make up the key.\n"
     "  -i I   I resembles the initialization vector (default: I = 2^59 - 427)\n"
     "         Can be given as a hex with the prefix '0x' or as a decimal number. Leading zeroes are allowed.\n"
     "  -o P   P is the path to the output file\n"
