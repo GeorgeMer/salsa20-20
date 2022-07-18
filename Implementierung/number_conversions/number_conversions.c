@@ -128,39 +128,39 @@ void convert_string_to_uint32_t_array(const char *string, uint32_t key[8])
     else
     {
         uint8_t chars[4];
-        size_t i = 0, j = 0, k = 8;
-        for (; i < strlen(string) && k > 0; i++, j++)
+        size_t i = 0, j = 0, k = 0;
+        for (; i < strlen(string) && k < 8; i++, j++)
         {
 
             // every four bytes convert to a key element
             if (j == 4)
             {
-                key[k - 1] = ((chars[0]) << 24) | ((chars[1]) << 16) | ((chars[2]) << 8) | ((chars[3]));
+                key[k] = ((chars[0]) << 24) | ((chars[1]) << 16) | ((chars[2]) << 8) | ((chars[3]));
 
-                k--;
+                k++;
                 j = 0;
             }
 
             chars[j] = *(string + i);
         }
 
-        for (size_t jcnt = 0; jcnt < j && k > 0; jcnt++)
+        for (size_t jcnt = 0; jcnt < j && k < 8; jcnt++)
         {
-            key[k - 1] |= (chars[jcnt]) << (24 - 8 * jcnt);
+            key[k] |= (chars[jcnt]) << (24 - 8 * jcnt);
         }
 
-        if (k != 0)
-            k--;
+        // if (k != 0)
+        //     k--;
 
-        for (; k > 0; k--)
-        {
-            key[k - 1] = 0;
-        }
+        // for (; k > 0; k--)
+        // {
+        //     key[k - 1] = 0;
+        // }
 
         printf("Key was interpreted as string: ");
-        for (i = 8; i > 0; i--)
+        for (i = 0; i < 8; i++)
         {
-            printf("%c%c%c%c", (key[i - 1] >> 24) & 0xFF, (key[i - 1] >> 16) & 0xFF, (key[i - 1] >> 8) & 0xFF, (key[i - 1] >> 0) & 0xFF);
+            printf("%c%c%c%c", (key[i] >> 24) & 0xFF, (key[i] >> 16) & 0xFF, (key[i] >> 8) & 0xFF, (key[i] >> 0) & 0xFF);
         }
     }
 
