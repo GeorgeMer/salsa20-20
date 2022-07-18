@@ -5,6 +5,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <stdbool.h>
 
 extern size_t mlen;
 const uint8_t *read_file(const char *path);

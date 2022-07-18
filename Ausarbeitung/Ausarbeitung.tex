@@ -5,6 +5,7 @@
 \usepackage{amssymb}
 \usepackage{xcolor}
 \usepackage{pgfplots}
+\usepackage[utf8]{inputenc}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% TODO: Ersetzen Sie in den folgenden Zeilen die entsprechenden -Texte-
@@ -214,7 +215,7 @@ nach ASCII-Codierung interpretiert wird.
 \end{center} 
 wäre also äquivalent zur Eingabe
 \begin{center}
-    ./salsa -k Hello World some\_path
+    ./salsa -k ``Hello World'' some\_path
 \end{center}
 Diese Designentscheidung wurde getroffen, da z.B. eine Eingabe als dezimale Zahlen zu erlauben sehr aufwändig gewesen wäre, denn zusätzlich zur maximalen Länge wäre auf over- bzw. underflows und diverse andere Probleme wie zum
 Beispiel führende Nullen oder unerlaubte Zeichen zu prüfen gewesen. Hexadezimalzahlen lassen sich jedoch sehr leicht konvertieren, genauso wie Strings interpretiert als ihre zugehörigen numerischen ASCII-Code Werte.

@@ -94,7 +94,7 @@ int main(int argc, char **argv)
     const char *output_file = NULL;
 
     // option parsing
-    while ((opt = getopt_long(argc, argv, "V:B:t:k:i:o:eh", long_options, NULL)) != -1)
+    while ((opt = getopt_long(argc, argv, "V:B:t:k:i:o:h", long_options, NULL)) != -1)
     {
         switch (opt)
         {
@@ -124,9 +124,6 @@ int main(int argc, char **argv)
             break;
         case 'o':
             output_file = optarg;
-            break;
-        case 'e':
-            // TODO: arrange input to be hex and output to be char
             break;
         case 'h':
             print_help(progname);

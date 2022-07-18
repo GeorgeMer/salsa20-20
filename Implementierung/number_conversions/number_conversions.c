@@ -121,20 +121,17 @@ void convert_string_to_uint32_t_array(const char *string, uint32_t key[8])
     else
     {
         uint8_t chars[4];
-        size_t i = 0, j = 0, k = 0;
-        for (; i < strlen(string) && k < 8; i++, j++)
+        size_t j = 0, k = 0;
+        for (size_t i = 0; i < strlen(string) && k < 8; i++)
         {
-
             // every four bytes convert to a key element
             if (j == 4)
             {
-                key[k] = ((chars[0]) << 24) | ((chars[1]) << 16) | ((chars[2]) << 8) | ((chars[3]));
-
-                k++;
+                key[k++] = ((chars[0]) << 24) | ((chars[1]) << 16) | ((chars[2]) << 8) | ((chars[3]));
                 j = 0;
             }
 
-            chars[j] = *(string + i);
+            chars[j++] = *(string + i);
         }
 
         for (size_t jcnt = 0; jcnt < j && k < 8; jcnt++)
