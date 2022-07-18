@@ -45,7 +45,7 @@ const uint8_t *read_file(const char *path)
     return (const uint8_t *)message;
 
     // label to jump to if error occured reading input file
-    // closes file and ends the program by returning EXIT_FAILURE
+    // closes file and ends the program returning EXIT_FAILURE
 error:
     fclose(file);
     exit(EXIT_FAILURE);
@@ -74,11 +74,11 @@ void write_file(const char *path, uint8_t *cipher)
         }
     }
 
-    // // writing cipher to output file as string of hexadecimals
-    // // linebreak every 76 characters
+    // writing cipher to output file as string of hexadecimals
     size_t linebreak = 0;
     for (size_t i = 0; i < mlen; i++)
     {
+        // linebreak every 76 characters
         if (linebreak == 76)
         {
             if (fprintf(file, "\n") < 0)
@@ -88,37 +88,13 @@ void write_file(const char *path, uint8_t *cipher)
             linebreak = 0;
         }
 
-        if (*(cipher + i) == 0)
+        if (fprintf(file, "%02x", *(cipher + i)) < 0)
         {
-            // writing 0 to output file as 00
-            if (fprintf(file, "00") < 0)
-            {
-                goto cleanup;
-            }
-        }
-        else if (*(cipher + i) <= 15)
-        {
-            // writing single digit hex to output file as 0z
-            if (fprintf(file, "0%x", *(cipher + i)) < 0)
-            {
-                goto cleanup;
-            }
-        }
-        else
-        {
-            // writing double digit hex to output file
-            if (fprintf(file, "%x", *(cipher + i)) < 0)
-            {
-                goto cleanup;
-            }
+            goto cleanup;
         }
         linebreak += 2;
     }
     // close successfully written file
-    // if (!fwrite((void *)cipher, 1, strlen((const char *)cipher), file))
-    // {
-    //     perror("Error writing to file");
-    // }
     fclose(file);
     return;
 

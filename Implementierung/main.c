@@ -23,7 +23,7 @@ static struct option long_options[] =
 size_t mlen = 0;
 
 const char *usage_msg =
-    "Usage: %s [-V X | -B X | -T X | -k K | -i I | -o P | -h | --help] file_path    Encrypt a file with Salsa20 encryption\n"
+    "Usage: %s [-V X | -B X | -t X | -k K | -i I | -o P | -h | --help] file_path    Encrypt a file with Salsa20 encryption\n"
     "   or: %s -h                                                                   Show help message and exit\n"
     "   or: %s --help                                                               Show help message and exit\n";
 
@@ -33,13 +33,15 @@ const char *help_msg =
     "\n"
     "Optional arguments:\n"
     "  -V X   The implementation to be used (default: X = 0)\n"
+    "         Can be given as a hex with the prefix '0x' or as a decimal number. Leading zeroes are allowed.\n"
     "  -B X   If set, runtime of chosen implementation will be measured and output.\n"
     "         X represents the number of repetition of function calls (default: No runtime measurement)\n"
-    "  -T X   If set, tests will be executed that compare the chosen implementation with the reference implementation.\n"
+    "         Can be given as a hex with the prefix '0x' or as a decimal number. Leading zeroes are allowed.\n"
+    "  -t X   If set, tests will be executed that compare the chosen implementation with the reference implementation.\n"
     "         X represents the number of random tests in addition to the set tests that will be executed. (default: No tests are run)\n"
     "         (all tests run with random keys and nonces, random tests also have random messages)\n"
     "  -k K   K resembles the 256bit long key (default: K = 2^256 - 1883)\n"
-    "         The key can be either given as a hex with the '0x' prefix (it shouldnt be greater than 2^256-1, but can have leading zeroes),\n"
+    "         The key can be either given as a hex with the '0x' prefix (it shouldn't be greater than 2^256-1, but can have leading zeroes),\n"
     "         or as a sequence of characters(bytes). The resulting key will have it's highest byte mapped to the first character\n"
     "         and will be padded with '\0' if the given string is smaller than 256bit. If the given string is greater than 256bit,\n"
     "         the first 32 characters will be the key, the others thrown away."
@@ -48,7 +50,6 @@ const char *help_msg =
     "  -o P   P is the path to the output file\n"
     "  -h     Show help message (this text) and exit\n"
     "  --help Same effect as -h\n"
-    "  All numbers can be input as decimal (no prefix) or hexadecimal (0x prefix)\n"
     "  Negative Numbers are not allowed.";
 
 void print_usage(const char *progname) { fprintf(stderr, usage_msg, progname, progname, progname); }
@@ -93,7 +94,7 @@ int main(int argc, char **argv)
     const char *output_file = NULL;
 
     // option parsing
-    while ((opt = getopt_long(argc, argv, "V:B:T:k:i:o:eh", long_options, NULL)) != -1)
+    while ((opt = getopt_long(argc, argv, "V:B:t:k:i:o:eh", long_options, NULL)) != -1)
     {
         switch (opt)
         {
@@ -111,7 +112,7 @@ int main(int argc, char **argv)
             number_of_iterations = convert_string_to_uint64_t(optarg);
             measure_runtime = true;
             break;
-        case 'T':
+        case 't':
             random_tests = convert_string_to_uint64_t(optarg);
             run_tests = true;
             break;
