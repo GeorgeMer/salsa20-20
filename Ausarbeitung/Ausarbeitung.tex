@@ -288,7 +288,8 @@ mit V1 und die mit SIMD-Instruktionen optimierte Implementierung mit V2 bezeichn
             ymajorgrids=true,
             ylabel=Seconds per iteration,
             bar width=5mm,
-            width=90mm,
+            width=110mm,
+            height=\axisdefaultheight,
             enlarge x limits=0.2,
             nodes near coords,
             every node near coord/.append style={font = {\fontsize{7 pt}{12 pt}\selectfont},color=black},
@@ -319,36 +320,38 @@ den gleichen Testbedingungen als zuvor, mit der Änderung, dass nur mit O3 kompi
 \begin{center}
     \begin{tikzpicture}[trim axis left, trim axis right]
         \begin{axis}[
-                symbolic x coords={__vfprintf_internal, salsa_core, rowRound, columRound, rotateLeft, salsa_crypt},
-                xtick = {__vfprintf_internal, salsa_core, rowRound, columRound, rotateLeft, salsa_crypt},
-                legend style={at={(0.5,-0.15)},
+                symbolic x coords={\_\_vfprintf\_internal, salsa\_core, rowRound, columRound, rotateLeft, salsa\_crypt},
+                xtick = {\_\_vfprintf\_internal, salsa\_core, rowRound, columRound, rotateLeft, salsa\_crypt},
+                x tick label style={rotate=45, anchor=east, align=center},
+                legend style={at={(0.5,-0.45)},
                         anchor=north,legend columns=-1},
                 ybar,
                 ymin=0,
                 ymajorgrids=true,
                 ylabel=Seconds per iteration,
-                bar width=5mm,
-                width=90mm,
-                enlarge x limits=0.2,
+                bar width=5.5mm,
+                width=150mm,
+                height=\axisdefaultheight,
+                enlarge x limits=0.1,
                 nodes near coords,
                 every node near coord/.append style={font = {\fontsize{7 pt}{12 pt}\selectfont},color=black},
             ]
             \addplot[blue,fill=blue!30]
-            coordinates {(__vfprintf_internal,39.40) (salsa_core,13.64)
-                    (rowRound,0) (columRound,0) (rotateLeft,11.72) (salsa_crypt,4.59)};
+            coordinates {(\_\_vfprintf\_internal,39.40) (salsa\_core,13.64)
+                    (rowRound,0) (columRound,0) (rotateLeft,11.72) (salsa\_crypt,4.59)};
     
             \addplot[red,fill=red!30]
-            coordinates {(__vfprintf_internal,39.40) (salsa_core,13.64)
-                    (rowRound,0) (columRound,0) (rotateLeft,11.72) (salsa_crypt,4.59)};
-
+            coordinates {(\_\_vfprintf\_internal,40.27) (salsa\_core,3.47)
+                    (rowRound,3.78) (columRound,3.61) (rotateLeft,12.24) (salsa\_crypt,5.85)};
+    
             \addplot[violet,fill=violet!30]
-            coordinates {(__vfprintf_internal,39.40) (salsa_core,13.64)
-                    (rowRound,0) (columRound,0) (rotateLeft,11.72) (salsa_crypt,4.59)};
+            coordinates {(\_\_vfprintf\_internal,26.71) (salsa\_core,1.55)
+                    (rowRound,3.88) (columRound,3.77) (rotateLeft,42.49) (salsa\_crypt,0.71)};
     
             \legend{V0,V1,V2}
         \end{axis}
     \end{tikzpicture}
-\end{center}
+    \end{center}
 
 \section{Zusammenfassung und Ausblick}
 
