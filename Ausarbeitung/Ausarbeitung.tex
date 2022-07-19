@@ -295,16 +295,16 @@ Kompiliert wurde mit GCC 12.1.1.
             every node near coord/.append style={font = {\fontsize{7 pt}{12 pt}\selectfont},color=black},
         ]
         \addplot[blue,fill=blue!30]
-        coordinates {(O0,13.55) (O2,6.01)
-                (O3,5.87) (Ofast,5.94) };
+        coordinates {(O0,25,39) (O2,6.21)
+                (O3,6.43) (Ofast,6.76) };
 
         \addplot[red,fill=red!30]
-        coordinates {(O0,12.41) (O2,6.02)
-                (O3,5.47) (Ofast,5.49) };
+        coordinates {(O0,13.26) (O2,6.33)
+                (O3,5.81) (Ofast,5.77) };
 
         \addplot [violet,fill=violet!30]
-        coordinates {(O0,33.08) (O2,7.81)
-                (O3,7.77) (Ofast,7.81) };
+        coordinates {(O0,33.03) (O2,7.86)
+                (O3,7.89) (Ofast,7.82) };
         \legend{V0,V1,V2}
     \end{axis}
 \end{tikzpicture}
@@ -313,7 +313,7 @@ Kompiliert wurde mit GCC 12.1.1.
 
 \subsection{Analyse der Performanzmessungen}
 Durch Analyse der drei Implementierung mit dem Tool \emph{perf} - unter 
-den gleichen Testbedingungen als zuvor, mit der Änderung, dass nur mit O3 kompiliert wurde 
+den gleichen Testbedingungen als zuvor, mit der Änderung, dass nur mit O0 kompiliert wurde 
 - zeigt sich, warum V1 etwas schneller als V0 ist und warum V2 langsamer ist.
 Um eine übersichtliche Dartstellung zu ermöglichen, wurden die Funktionen salsa\_core,
 rowRound und columRound zu salsa\_core zusammengefasst.
@@ -329,7 +329,7 @@ rowRound und columRound zu salsa\_core zusammengefasst.
                 ybar,
                 ymin=0,
                 ymajorgrids=true,
-                ylabel=Anteil an Gesamtlaufzeit in \%,
+                ylabel=Sekunden pro Iteration,
                 bar width=6mm,
                 width=110mm,
                 height=\axisdefaultheight,
@@ -338,16 +338,16 @@ rowRound und columRound zu salsa\_core zusammengefasst.
                 every node near coord/.append style={font = {\fontsize{7 pt}{12 pt}\selectfont},color=black},
             ]
             \addplot[blue,fill=blue!30]
-            coordinates {(\_\_vfprintf\_internal,39.40) (salsa\_core,13.64)
-            (rotateLeft,11.72) (salsa\_crypt,4.59)};
+            coordinates {(\_\_vfprintf\_internal,5.34) (salsa\_core,1.85)
+            (rotateLeft,1.59) (salsa\_crypt,0.62)};
     
             \addplot[red,fill=red!30]
-            coordinates {(\_\_vfprintf\_internal,40.27) (salsa\_core,10.86)
-                    (rotateLeft,12.24) (salsa\_crypt,5.85)};
+            coordinates {(\_\_vfprintf\_internal,5.02) (salsa\_core,1.35)
+                    (rotateLeft,1.52) (salsa\_crypt,0.73)};
     
             \addplot[violet,fill=violet!30]
-            coordinates {(\_\_vfprintf\_internal,26.71) (salsa\_core,9.2)
-                    (rotateLeft,42.49) (salsa\_crypt,0.71)};
+            coordinates {(\_\_vfprintf\_internal,8.83) (salsa\_core,3.04)
+                    (rotateLeft,14.05) (salsa\_crypt,0.23)};
     
             \legend{V0,V1,V2}
         \end{axis}
