@@ -286,8 +286,8 @@ mit V1 und die mit SIMD-Instruktionen optimierte Implementierung mit V2 bezeichn
             ybar,
             ymin=0,
             ymajorgrids=true,
-            ylabel=Seconds per iteration,
-            bar width=5mm,
+            ylabel=Sekunden pro Iteration,
+            bar width=6mm,
             width=110mm,
             height=\axisdefaultheight,
             enlarge x limits=0.2,
@@ -328,8 +328,8 @@ den gleichen Testbedingungen als zuvor, mit der Änderung, dass nur mit O3 kompi
                 ybar,
                 ymin=0,
                 ymajorgrids=true,
-                ylabel=Seconds per iteration,
-                bar width=5.5mm,
+                ylabel=Anteil an Gesamtlaufzeit in \%,
+                bar width=6mm,
                 width=150mm,
                 height=\axisdefaultheight,
                 enlarge x limits=0.1,
@@ -338,7 +338,7 @@ den gleichen Testbedingungen als zuvor, mit der Änderung, dass nur mit O3 kompi
             ]
             \addplot[blue,fill=blue!30]
             coordinates {(\_\_vfprintf\_internal,39.40) (salsa\_core,13.64)
-                    (rowRound,0) (columRound,0) (rotateLeft,11.72) (salsa\_crypt,4.59)};
+            (rowRound,0) (columRound,0) (rotateLeft,11.72) (salsa\_crypt,4.59)};
     
             \addplot[red,fill=red!30]
             coordinates {(\_\_vfprintf\_internal,40.27) (salsa\_core,3.47)
@@ -352,6 +352,7 @@ den gleichen Testbedingungen als zuvor, mit der Änderung, dass nur mit O3 kompi
         \end{axis}
     \end{tikzpicture}
     \end{center}
+
 
 \section{Zusammenfassung und Ausblick}
 
