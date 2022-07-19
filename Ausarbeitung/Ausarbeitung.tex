@@ -267,10 +267,14 @@ Die Implementierung V2 basiert nahezu vollständig auf der Implementierung von V
 
 \section{Performanzanalyse}
 \subsection{Vergleich der Implementierungen}
-Während sich zwischen der Hauptimplementierung und der ersten optimierten Version 
-nur geringe bis zu vernachlässigbar kleine Performanzunterschiede zeigen, ist die 
-zweite, mit SIMD-Instruktion umgesetzte, Version deutlich langsamer.
-Dies wird in folgendem Diagramm veranschaulicht:
+Es wurden pro GCC-Optimierungsstufe und Implementierungsversion 5 
+Iterationen des Verfahrens auf einer 1GB großen Datei ausgeführt.
+Die Laufzeiten wurden vom Rahmenprogramm selbst durch setzen des -B Flags
+gemessen. Getestet wurde auf einem Notebook mit einem AMD Ryzen 7 5800H, 
+4.4GHz, 16 GiB Arbeitsspeicher, Fedora 36, 64 Bit, Linux Kernel 5.18.11.
+Kompiliert wurde mit GCC 12.1.1.
+Im Folgenden wird die Hauptimplementierung mit V0, die erste optimierte Implementierung
+mit V1 und die mit SIMD-Instruktionen optimierte Implementierung mit V2 bezeichnet.
 
 \begin{center}
 \begin{tikzpicture}[trim axis left, trim axis right]
@@ -304,13 +308,47 @@ Dies wird in folgendem Diagramm veranschaulicht:
     \end{axis}
 \end{tikzpicture}
 \end{center}
+Während sich zwischen V0 und V1 nur geringe bis zu vernachlässigbar kleine 
+Performanzunterschiede zeigen, ist die V2 deutlich langsamer.
 
-Es wurden pro GCC-Optimierungsstufe und Implementierungsversion 5 
-Iterationen des Verfahrens auf einer 1GB großen Datei ausgeführt.
-Die Laufzeiten wurden vom Rahmenprogramm selbst durch setzen des -B Flags
-gemessen. Getestet wurde auf einem Notebook mit einem AMD Ryzen 7 5800H, 
-4.4GHz, 16 GiB Arbeitsspeicher, Fedora 36, 64 Bit, Linux Kernel 5.18.11.
-Kompiliert wurde mit GCC 12.1.1.
+\subsection{Analyse der Performanzmessungen}
+Durch Analyse der drei Implementierung mit dem Tool perf - unter 
+den gleichen Testbedingungen als zuvor, mit der Änderung, dass nur mit O3 kompiliert wurde 
+- zeigt sich, warum V1 etwas schneller als V0 ist und warum V2 langsamer ist.
+
+\begin{center}
+    \begin{tikzpicture}[trim axis left, trim axis right]
+        \begin{axis}[
+                symbolic x coords={__vfprintf_internal, salsa_core, rowRound, columRound, rotateLeft, salsa_crypt},
+                xtick = {__vfprintf_internal, salsa_core, rowRound, columRound, rotateLeft, salsa_crypt},
+                legend style={at={(0.5,-0.15)},
+                        anchor=north,legend columns=-1},
+                ybar,
+                ymin=0,
+                ymajorgrids=true,
+                ylabel=Seconds per iteration,
+                bar width=5mm,
+                width=90mm,
+                enlarge x limits=0.2,
+                nodes near coords,
+                every node near coord/.append style={font = {\fontsize{7 pt}{12 pt}\selectfont},color=black},
+            ]
+            \addplot[blue,fill=blue!30]
+            coordinates {(__vfprintf_internal,39.40) (salsa_core,13.64)
+                    (rowRound,0) (columRound,0) (rotateLeft,11.72) (salsa_crypt,4.59)};
+    
+            \addplot[red,fill=red!30]
+            coordinates {(__vfprintf_internal,39.40) (salsa_core,13.64)
+                    (rowRound,0) (columRound,0) (rotateLeft,11.72) (salsa_crypt,4.59)};
+
+            \addplot[violet,fill=violet!30]
+            coordinates {(__vfprintf_internal,39.40) (salsa_core,13.64)
+                    (rowRound,0) (columRound,0) (rotateLeft,11.72) (salsa_crypt,4.59)};
+    
+            \legend{V0,V1,V2}
+        \end{axis}
+    \end{tikzpicture}
+\end{center}
 
 \section{Zusammenfassung und Ausblick}
 
