@@ -7,6 +7,9 @@
 \usepackage{pgfplots}
 \usepackage[utf8]{inputenc}
 
+% Definitions
+\renewcommand{\figurename}{Abbildung}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% TODO: Ersetzen Sie in den folgenden Zeilen die entsprechenden -Texte-
 %% mit den richtigen Werten.
@@ -285,23 +288,26 @@ Die Implementierung V2 basiert nahezu vollständig auf der Implementierung von V
 
 
 \section{Korrektheit}
+Im Folgenden wird auf die Korrektheit der Hauptimplementierung eingegangen.
+Es wird \textbf{nicht} auf die Genauigkeit des Programms eingegangen, da es bei Ver\-schlüsse\-lungsverfahren
+nur richtig oder falsch und eben kein ``ungenau'' gibt.
 
 \section{Performanzanalyse}
 \subsection{Vergleich der Implementierungen}
-Während sich zwischen V0 und V1 nur geringe bis zu vernachlässigbar kleine 
-Performanzunterschiede zeigen, ist die V2 deutlich langsamer.
-Es wurden pro GCC-Optimierungsstufe und Implementierungsversion 5 
-Iterationen des Verfahrens auf einer 1GB großen Datei ausgeführt.
+Es wurden pro GCC-Optimierungsstufe und Implementierungsversion 25 
+Iterationen des Verfahrens auf einer 100MB großen Datei ausgeführt. Die Datei
+wurde durch den Befehl \texttt{base64 /dev/urandom | head -c 100000000 > 100mb.txt}
+erzeugt.
 Die Laufzeiten wurden vom Rahmenprogramm selbst durch setzen des -B Flags
 gemessen. Getestet wurde auf einem Notebook mit einem AMD Ryzen 7 5800H, 
 4.4GHz, 16 GiB Arbeitsspeicher, Fedora 36, 64 Bit, Linux Kernel 5.18.11.
-Kompiliert wurde mit GCC 12.1.1.
+Kompiliert wurde mit GCC 12.1.1 mit den Optionen \texttt{O0}, \texttt{O2} und \texttt{O3}.
 
 \begin{center}
 \begin{tikzpicture}[trim axis left, trim axis right]
     \begin{axis}[
-            symbolic x coords={O0, O2, O3, Ofast},
-            xtick = {O0, O2, O3, Ofast},
+            symbolic x coords={O0, O2, O3},
+            xtick = {O0, O2, O3},
             legend style={at={(0.5,-0.15)},
                     anchor=north,legend columns=-1},
             ybar,
@@ -309,38 +315,42 @@ Kompiliert wurde mit GCC 12.1.1.
             ymajorgrids=true,
             ylabel=Sekunden pro Iteration,
             bar width=6mm,
-            width=110mm,
+            width=100mm,
             height=\axisdefaultheight,
-            enlarge x limits=0.2,
+            enlarge x limits=0.3,
             nodes near coords,
             every node near coord/.append style={font = {\fontsize{7 pt}{12 pt}\selectfont},color=black},
         ]
         \addplot[blue,fill=blue!30]
         coordinates {(O0,25.39) (O2,6.21)
-                (O3,6.43) (Ofast,6.76) };
+                (O3,6.43) };
 
         \addplot[red,fill=red!30]
         coordinates {(O0,13.26) (O2,6.33)
-                (O3,5.81) (Ofast,5.77) };
+                (O3,5.81) };
 
         \addplot [violet,fill=violet!30]
         coordinates {(O0,33.03) (O2,7.86)
-                (O3,7.89) (Ofast,7.82) };
+                (O3,7.89) };
         \legend{V0,V1,V2}
     \end{axis}
 \end{tikzpicture}
 \captionof{figure}{Laufzeiten der Implementierungen}
 \label{diagram1}
 \end{center}
-
+Wie in Abbildung \ref{diagram1} zu sehen ist, gibt es bei Kompilierung mit \texttt{O0} starke
+Unterschiede in den Laufzeiten der drei Implementierungen. V1 ist deutlich schneller als V0 
+und V2 wiederum deutlich langsamer. Durch Kompilierung mit \texttt{O2} beziehungsweise \texttt{O3}
+konnte die Performanz aller drei Implementierungen merkbar verbessert werden und der Laufzeitnachteil
+von V0 minimiert werden.
 
 \subsection{Analyse der Performanzmessungen}
 Durch Analyse der drei Implementierung mit dem Tool \emph{perf} - unter 
-den gleichen Testbedingungen als zuvor, mit der Änderung, dass nur mit O0 kompiliert wurde 
+den gleichen Testbedingungen als zuvor, mit der Änderung, dass nur mit \texttt{O0} kompiliert wurde 
 - zeigt sich, warum V1 etwas schneller als V0 ist und warum V2 langsamer ist.
-Um eine übersichtliche Dartstellung zu ermöglichen, wurden die Funktionen salsa\_core,
-rowRound und columRound zu salsa\_core zusammengefasst. Weiters wird angemerkt, dass
-Funktionssuffixe wie v1 weggelassen werden.
+Um eine übersichtliche Dartstellung zu ermöglichen, wurden die Funktionen \texttt{salsa\_core},
+\texttt{rowRound} und \texttt{columRound} zu \texttt{salsa\_core} zusammengefasst. Weiters wird angemerkt, dass
+Funktionssuffixe wie \texttt{\_v1} weggelassen werden.
 
 \begin{center}
     \begin{tikzpicture}[trim axis left, trim axis right]
@@ -355,7 +365,7 @@ Funktionssuffixe wie v1 weggelassen werden.
                 ymajorgrids=true,
                 ylabel=Anteil an der Ausführungszeit in Prozent,
                 bar width=6mm,
-                width=90mm,
+                width=100mm,
                 height=\axisdefaultheight,
                 enlarge x limits=0.3,
                 nodes near coords,
@@ -385,17 +395,46 @@ Transponieren der Matrix verzichtet wird.
 Die Unterschiede bei \texttt{salsa\_crypt} und \texttt{rotateLeft} sind deutlich geringer und vermutlich dadurch
 entstanden, da der Anteil von \texttt{salsa\_core} in V1 deutlich gesunken ist. V0 und V1 verwenden beide
 dieselbe Implementierung von \texttt{rotateLeft} und \texttt{salsa\_crypt} unterscheidet sich hier auch nur minimal
-wie in Abschnitt \ref{crypt} genauer beschrieben. Während V1 merkbar schneller als V0 ist, ist V2 in Figure 
+wie in Abschnitt \ref{crypt} genauer beschrieben. Während V1 merkbar schneller als V0 ist, ist V2 in Abbildung 
 \ref{diagram1} signifikant langsamer als die beiden anderen Implementierungen. Dies liegt hauptsächlich an \texttt{rotateLeft}, 
 das für V2 mit SIMD-Instruktionen umgesetzt wurde. Durch das Verwenden des \emph{annotate}-Features von 
 \emph{perf}, erkennt man, dass die meiste Zeit der Laufzeit in rotateLeft in V2 für \texttt{mov}-Operationen in 
-\emph{xmm}-Register verwendet wird. Anzumerken ist, dass die XOR-Operation, die in den beiden anderen Implementierungen
-in \texttt{salsa\_core} stattfindet, in V2 in \texttt{rotateLeft} geschieht, was sich aber nur gering auf die Messung auswirkt,
-da laut \emph{perf} die Instruktion \texttt{pxor} nur zu einem geringen Prozentsatz von < 0.1\% zur Laufzeit beiträgt.
-
+\emph{xmm}-Register verwendet wird. Anzumerken ist, dass die XOR-Operationen, die in den beiden anderen Implementierungen
+in \texttt{salsa\_core} stattfinden, in V2 stattdessen in \texttt{rotateLeft} geschehen, was sich aber nur gering 
+auf die Messung auswirkt, da laut \emph{perf} die Instruktion \texttt{pxor} nur zu einem geringen 
+Prozentsatz von < 0.1\% zur Laufzeit beiträgt.
+Dadurch, dass \texttt{rotateLeft} in V2 einen beträchtlichen Teil der Laufzeit in Anspruch nimmt,
+haben \texttt{salsa\_core} und \texttt{salsa\_crypt} wahrscheinlich einen geringeren Anteil an der Laufzeit. Es kann 
+also nicht festgestellt werden, ob die beiden Funktionen optimiert werden konnten.
 
 
 \section{Zusammenfassung und Ausblick}
+Ziel dieses Gruppenprojekts war es, das Salsa20-Verschlüsselungsverfahren in C umzusetzen und zu optimieren.
+
+\subsection{Ansatz}
+Der gewählte Ansatz war zuerst das Rahmenprogramm und die Hauptimplementierung V0 umzusetzen 
+und zwei alternative Implementierungen anzufertigen. Die Hauptimplementierung sollte genau wie 
+in der Aufgabenstellung beschrieben umgesetzt werden.
+Die erste Alternativimplementierung V1 sollte nur die Transposition der $4\times 4$-Matrix aus 
+dem Algorithmus entfernen und durch Verwendung transponierter Indizes ersetzt werden. Die zweite Alternative V2
+sollte denselben Algorithmus wie die erste verwenden, aber zusätzlich wo möglich \emph{SIMD}-Instruktionen verwenden.
+
+\subsection{Ergebnisse}
+V0 konnte erfolgreich umgesetzt werden und V1 konnte 
+diese erfolgreich verbessern. Durch weitere Optimierungen von \emph{GCC} wurde die V0 aber
+genauso performant.
+Eine weitere Performanzsteigerung durch den Einsatz von SIMD-Instruktionen konnte jedoch nicht erreicht werden
+und es wurde sogar eine starke Performanzverminderung von V2 gegenüber der beiden anderen Implementierungen erreicht.
+
+\subsection{Verbesserungspotenzial}
+Durch klügeres und vor allem weniger häufiges Bewegen von Werten in und aus \emph{xmm}-Register heraus
+in V2 hätte vermutlich ein Speedup erreicht werden können, sodass V2 die performanteste Implementierung
+geworden wäre.
+Weiters könnte der I/O-Teil des Rahmenprogramms dahingehend verbessert werden, dass auch Dezimal- und
+Oktalzahlen als Eingabe entgegengenommen werden können. Allgemein hätte das Rahmenprogramm auch mit einem 
+TUI umgesetzt werden können, sodass Optionen graphisch ausgewählt werden können.
+
+
 
 % TODO: Fuegen Sie Ihre Quellen der Datei Ausarbeitung.bib hinzu
 % Referenzieren Sie diese dann mit \cite{}.
