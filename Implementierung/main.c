@@ -15,6 +15,7 @@
 
 #include "testing/reference/correctness.h"
 #include "testing/key_tests.h"
+#include "testing/crypt_tests.h"
 
 static struct option long_options[] =
     {
@@ -169,6 +170,7 @@ int main(int argc, char **argv)
     {
         printf("\n\n\n--- TESTS: ---\n\n");
         test_correctness(implementation_number, random_tests);
+        test_crypt(implementation_number, random_tests);
         test_keys();
         printf("\n\n--- END OF TESTS ---\n\n\n");
     }

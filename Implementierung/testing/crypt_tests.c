@@ -1,67 +1,60 @@
 #include <stddef.h>
 #include <stdint.h>
-#include <stdlib.h>
+#include <stdio.h>
 #include <time.h>
 #include <stdbool.h>
-#include "reference.h"
-#include "../../salsa_crypt/salsa_crypt_v0.h"
-#include "../../salsa_crypt/salsa_crypt_v1.h"
-#include "../../salsa_crypt/salsa_crypt_v2.h"
-#include "../asserts.h"
-#include "../print_tests.h"
-#include "../random_generation/random_numbers.h"
-#include "../random_generation/random_msg_key_iv.h"
+#include "../salsa_crypt/salsa_crypt_v0.h"
+#include "../salsa_crypt/salsa_crypt_v1.h"
+#include "../salsa_crypt/salsa_crypt_v2.h"
+#include "../testing/print_tests.h"
+#include "../testing/asserts.h"
+#include "../testing/random_generation/random_numbers.h"
+#include "../testing/random_generation/random_msg_key_iv.h"
 
-bool run_testcase(uint64_t implementation, size_t mlen, const uint8_t msg[mlen])
+bool run_testcase_crypt(uint64_t implementation, size_t mlen, const uint8_t msg[mlen])
 {
+    uint8_t cipher[mlen], final[mlen];
+
     srand(mlen + msg[0] + time(NULL));
     uint32_t key[8];
     uint64_t iv;
-    uint8_t cipher[mlen];
-    uint8_t cipher_reference[mlen];
-
     randomKey(key);
     iv = randomNonce();
-
-    printf("Message: ");
-    print_char_arr(mlen, msg);
-    printf("Key: ");
-    print_arr_32bit(8, key);
-    printf("Nonce: %lx\n\n", iv);
 
     switch (implementation)
     {
     case 1:
         salsa20_crypt_v1(mlen, msg, cipher, key, iv);
+        salsa20_crypt_v1(mlen, cipher, final, key, iv);
         break;
     case 2:
         salsa20_crypt_v2(mlen, msg, cipher, key, iv);
+        salsa20_crypt_v2(mlen, cipher, final, key, iv);
         break;
     default:
         salsa20_crypt(mlen, msg, cipher, key, iv);
+        salsa20_crypt(mlen, cipher, final, key, iv);
         break;
     }
 
-    salsa_crypt_reference(mlen, msg, cipher_reference, key, iv);
-
-    printf("Cipher from implementation %lu:\n", implementation);
-    print_arr_8bit(mlen, cipher);
-    printf("Cipher from reference:\n");
-    print_arr_8bit(mlen, cipher_reference);
+    printf("Original message: ");
+    print_char_arr(mlen, msg);
+    printf("\nFinal message after two crypt calls: ");
+    print_char_arr(mlen, final);
     printf("\n");
-    return assertEqualsArrays_8bit(mlen, cipher_reference, mlen, cipher);
+    return assertEqualsArrays_8bit(mlen, msg, mlen, final);
 }
 
-bool execute_random(uint64_t implementation)
+bool execute_random_crypt(uint64_t implementation)
 {
     size_t mlen = randomInt(10, 1025);
     uint8_t msg[mlen];
     randomMsg(mlen, msg);
 
-    return run_testcase(implementation, mlen, msg);
+    return run_testcase_crypt(implementation, mlen, msg);
 }
 
-void test_correctness(uint64_t implementation, uint64_t random_tests)
+void test_crypt(uint64_t implementation, uint64_t random_tests)
 {
     uint8_t msg_lessthan64[] = {
         68, 105, 101, 115, 101, 32, 78, 97, 99, 104, 114, 105, 99, 104, 116,
@@ -85,31 +78,31 @@ void test_correctness(uint64_t implementation, uint64_t random_tests)
         115, 111, 32, 97, 110, 103, 101, 112, 97, 115, 115, 116, 44, 32, 100, 97, 115, 32, 115, 105, 101, 32, 103, 101, 110, 97, 117,
         32, 54, 52, 32, 98, 121, 116, 101, 115, 32, 105, 115, 116};
 
-    printf("\n\n\n-- Core tests: --\n\n");
-    printf("\n\n- Test 1:\n\n");
-    if (!run_testcase(implementation, sizeof(msg_lessthan64), msg_lessthan64))
+    printf("\n\n\n-- Crypt tests: --\n\n");
+    printf("\n- Test 1:\n\n");
+    if (!run_testcase_crypt(implementation, sizeof(msg_lessthan64), msg_lessthan64))
     {
         exit(EXIT_FAILURE);
     }
-    printf("\n\n- Test 2:\n\n");
-    if (!run_testcase(implementation, sizeof(msg_morethan64), msg_morethan64))
+    printf("\n- Test 2:\n\n");
+    if (!run_testcase_crypt(implementation, sizeof(msg_morethan64), msg_morethan64))
     {
         exit(EXIT_FAILURE);
     }
-    printf("\n\n- Test 3:\n\n");
-    if (!run_testcase(implementation, sizeof(msg_exactly64), msg_exactly64))
+    printf("\n- Test 3:\n\n");
+    if (!run_testcase_crypt(implementation, sizeof(msg_exactly64), msg_exactly64))
     {
         exit(EXIT_FAILURE);
     }
 
     for (uint64_t i = 0; i < random_tests; i++)
     {
-        printf("\n\n- Random Test %lu:\n\n", i + 1);
-        if (!execute_random(implementation))
+        printf("\n- Random Test %lu:\n\n", i + 1);
+        if (!execute_random_crypt(implementation))
         {
             exit(EXIT_FAILURE);
         }
     }
 
-    printf("\n-- Executed all core tests successfully!--\n\n");
+    printf("\n-- Executed all crypt tests successfully!--\n\n");
 }
