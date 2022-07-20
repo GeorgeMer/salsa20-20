@@ -75,9 +75,9 @@ Folgende theoretische Fragen waren zu beantworten:
 Zu implementieren  war folgende Funktionalität:
 \begin{itemize}
     \item Ein Rahmenprogramm welches I/O-Operationen unterstützt, mithilfe derer man eine ganze Datei in den Speicher einlesen und als Pointer an eine Unterfunktion übergeben kann. Selbiges soll auch zum Schreiben eines Speicherbereiches mit bekannter Länge in eine Datei möglich sein.
-    \item \textcolor{blue}{void} salsa20\_core (\textcolor{blue} {uint32\_t} output[16] \textcolor{blue}{const uint32\_t} input[16]) \\
+    \item \texttt{ \textcolor{blue}{void} salsa20\_core (\textcolor{blue} {uint32\_t} output[16], \textcolor{blue}{const uint32\_t} input[16])} \\
     Diese Funktion implementiert den oben beschriebenen Salsa20-Kern. input bezeichnet dabei den Startzustand des Kerns, output den finalen 64-Byte-Block. \\
-    \item \textcolor{blue} {void} salsa20\_crypt (\textcolor{blue}{size\_t} mlen, \textcolor{blue} {const uint8\_t} msg[mlen], \textcolor{blue}{uint8\_t} cipher [mlen], \textcolor{blue}{uint32\_t} key[8], \textcolor{blue} {uint64\_t} iv) \\
+    \item \texttt{ \textcolor{blue} {void} salsa20\_crypt (\textcolor{blue}{size\_t} mlen, \textcolor{blue} {const uint8\_t} msg[mlen], \textcolor{blue}{uint8\_t} cipher [mlen], \textcolor{blue}{uint32\_t} key[8], \textcolor{blue} {uint64\_t} iv) }\\
     Diese Funktion verschlüsselt eine Nachricht msg der Länge mlen mit einem gegebenen Schlüssel Key und einer Nonce (iv) und schreibt das Ergebnis in cipher.
 \end{itemize}
 
@@ -142,7 +142,7 @@ Diese Transformation ist ebenfalls invertierbar und bleibt auch, in den meisten 
 kann man eine Vielzahl von \textbf{beiden} auf die ursprüngliche Matrix anwenden und am Ende der Salsa20-Kern Funktion, unabhängig von der Reihenfolge des Anwendens, immer noch dasselbe Ergebnis erhalten.
 \vspace{1mm}
 \\Beim verwenden der Salsa20-Kern Funktion mit beliebigen Matrizen stellen diese Eigenschaften ein großes Sicherheitsrisikio dar.
-Bei kryptographischen Verfahren ist das Ziel normalerweise, eine Struktur so zu zerstören, dass ein Angriff sie nicht wiederherstellen kann.
+Bei kryptographischen Verfahren ist das Ziel normalerweise, die Struktur so zu zerstören, dass ein Angriff sie nicht wiederherstellen kann.
 Die Verschiebungen und Bitrotationen werden von der Funktion jedoch in keiner Weise beeinflusst.
 \vspace{1mm}
 \\An dieser Stelle kommen die Konstanten auf der Diagonale ins Spiel:
@@ -158,7 +158,7 @@ wo die Diagonale nach einer bestimmten Anzahl von Verschiebungen/Rotationen mit 
 auf das in einer anderen Arbeit\cite{onTheSalsa20Core} hingewiesen wurde.\\
 Das Kollisionsproblem besagt, dass:
 \begin{gather*} Salsa20(x) = Salsa20(x + \Delta) \text{  mit z.B.  } \Delta=(0x80000000,0x80000000,...) \end{gather*}
-Ein solches $x+\Delta$ ist keine gültige Eingabe für eine Salsa20-Kern Funktion (sofern $x$ eine gültige Eingabe ist) und wird daher in der Praxis nie vorkommen.
+Ein solches $x+\Delta$ ist aber keine gültige Eingabe für eine Salsa20-Kern Funktion (sofern $x$ eine gültige Eingabe ist) und wird daher in der Praxis nie vorkommen.
 Das Gleiche gilt für andere Beispiele von Kollisionen, die in dieser Arbeit auftauchen.
 
 
@@ -211,11 +211,11 @@ Der Key lässt sich entweder als Hexadezimalzahl eingeben, indem man das Präfix
 nach ASCII-Codierung interpretiert wird.
 \\Die Eingabe 
 \begin{center}
-    ./salsa -k 0x48656c6c6f20576f726c64  some\_path 
+  \texttt{./salsa -k 0x48656c6c6f20576f726c64  some\_path}
 \end{center} 
 wäre also äquivalent zur Eingabe
 \begin{center}
-    ./salsa -k ``Hello World'' some\_path
+   \texttt{./salsa -k ``Hello World'' some\_path}
 \end{center}
 Diese Designentscheidung wurde getroffen, da z.B. eine Eingabe als dezimale Zahlen zu erlauben sehr aufwändig gewesen wäre, denn zusätzlich zur maximalen Länge wäre auf over- bzw. underflows und diverse andere Probleme wie zum
 Beispiel führende Nullen oder unerlaubte Zeichen zu prüfen gewesen. Hexadezimalzahlen lassen sich jedoch sehr leicht konvertieren, genauso wie Strings interpretiert als ihre zugehörigen numerischen ASCII-Code Werte.
@@ -238,7 +238,7 @@ als Ergebnis im neu erstellen File result.txt
 \end{center}
 Sei path\_of\_result der Pfad des gerade erstellten Files result.txt. Dann liefert der Aufruf
 \begin{center}
-    ./salsa -e path\_of\_result
+   ./salsa -e path\_of\_result
 \end{center}
 das Egebnis (wieder in result.txt, da kein Pfad vom Benutzer angegeben wurde)
 \begin{center}
@@ -250,14 +250,14 @@ In der Funktion salsa20\_core wird das Verhalten der in Abschnitt 1.2.1 beschrie
 Als Ansatz zur Optimierung wurden hier die 20 Runden auf nur 10 Runden reduziert, in denen man jedoch die doppelte Arbeit verrichtet. Es ist also eine Art loop unrolling mit zusätzlichem einsparen des 
 transponierens der Matrix. Anstatt zu transponieren werden also einfach nochmals alle ARX-Operationen durchgeführt, jedoch werden die Indizes der Matrix so behandelt, als würde man bereits auf
 der transponierten Matrix arbeiten. Somit spart man sich in jedem Schritt das transponieren der Matrix ein, und führt zusätzlich pro Schleifendruchlauf gleich 2 Arbeitsschritte durch. Implementierung V2
-arbeitet auf die gleiche Weise wie Implementierung V1, nur das hier zusätzlich, unter Zuhilfenahme von SIMD Operationen, eine Viertelrunde vektorisiert ausgeführt wird. Eine Viertelrunde bestand zuvor 
+arbeitet auf die gleiche Weise wie Implementierung V1, nur das hier zusätzlich, unter Zuhilfenahme von SIMD Instruktionen, eine Viertelrunde vektorisiert ausgeführt wird. Eine Viertelrunde bestand zuvor 
 aus vier nacheinander ausgeführten ARX-Operationen, die jetzt gleichzeitig vollzogen werden. Auf eine Vektorisierung der Addierung der Ergebnismatrix aus den 10 durchgeführten Runden auf den Startzustand wurde verzichtet,
 da der Overhead der Lade- und Schreiboperationen den Speedup bei der Addition zunichte macht.
 
 \subsubsection{salsa20\_crypt}
 Die salsa20\_crypt Funktion wird in allen Implementierungen erstmal der Startzustand der Matrix initalisiert. Für die Little-Endian-Reihenfolge des Keys, der Nonce und des Counters werden built\_in Funktionen verwendet.
-Anschließend wird mithilfe eines Pointercasts des output Pointers (\textcolor{blue}{uint32\_t}) zu einem \textcolor{blue}{uint8\_t} Pointer die XOR-Operationen durchgeführt. Dieser Pointercast stellt kein Undefined Behaviour dar, 
-da \textcolor{blue}{uint8\_t} keine strengeren alignment Anforderungen hat als \textcolor{blue}{uint32\_t}. Desweiteren liefert der Pointercast die Bytes der output Matrix für die XOR-Operation, genau wie vorgesehen, in Little-Endian-Reihenfolge.
+Anschließend wird mithilfe eines Pointercasts des output Pointers (\texttt{\textcolor{blue}{uint32\_t}}) zu einem \texttt{\textcolor{blue}{uint8\_t}} Pointer die XOR-Operationen durchgeführt. Dieser Pointercast stellt kein Undefined Behaviour dar, 
+da \texttt{\textcolor{blue}{uint8\_t}} keine strengeren alignment Anforderungen hat als \texttt{\textcolor{blue}{uint32\_t}}. Des weiteren liefert der Pointercast die Bytes der output Matrix für die XOR-Operation, genau wie vorgesehen, in Little-Endian-Reihenfolge.
 Anschließend werden nun die XOR-Operationen auf der message mit der output Matrix ausgeführt und in cipher gespeichert. Alle 64 XOR-Operationen wird der Counter inkrementiert und der Kern neu berechnet. Für V1 wird nur für die letzten $\leq 64$ Bytes mit dem Pointercast gearbeitet.
 Zuvor werden die XOR-Operationen mit der Berechnung des korrekten Index innerhalb der Matrix, der cipher und der message durchgeführt. Das reicht jedoch bereits für einen Signifikanten Speedup, dazu mehr in Abschnitt 4.
 Die Implementierung V2 basiert nahezu vollständig auf der Implementierung von V1, nur mit zusätzlicher Vektorisierung der XOR-Operation mithilfe von SIMD Operationen.
