@@ -184,7 +184,7 @@ Ein solches $x+\Delta$ ist aber keine gültige Eingabe für eine Salsa20-Kern Fu
 Das Gleiche gilt für andere Beispiele von Kollisionen, die in dieser Arbeit auftauchen.
 
 
-\subsubsection{Funktionsweise einer Stromchiffre}
+\subsubsection{Funktionsweise einer Stromchiffre} \label{streamcipher}
 Eine Stromchiffre ist ein symmetrischer kryptographischer Algorithmus, der für Ver- und Entschlüsselung von Daten verwendet wird.
 Dieser Algorithmus nimmt einen Klartext und ein Schlüsselstrom entgegen und führt eine bitweise XOR-Operation aus und gibt am Ende
 einen Geheimtext zurück.
@@ -291,6 +291,41 @@ Die Implementierung V2 basiert nahezu vollständig auf der Implementierung von V
 Im Folgenden wird auf die Korrektheit der Hauptimplementierung eingegangen.
 Es wird \textbf{nicht} auf die Genauigkeit des Programms eingegangen, da es bei Ver\-schlüsse\-lungsverfahren
 nur richtig oder falsch und eben kein ``ungenau'' gibt.
+\\
+Die Korrektheit unserer Implementationen des Salsa20/20 kyptographisches Verfahrens haengt von der Korrektheit der Kryptfunktion und der Kernfunktion, sowie vom Einlesen des Schluessels an. (Das Einlesen vom Nonce nutzt Funktionen der standard Bibliothek, von denen wir annehmen können, dass sie korrekt sind).
+
+\subsection{Einlesen vom Schluessel}
+Beim Einlesen es ist unerheblich, ob wir ein hex Nummer oder ein String eingeben, da sie auf die gleiche Weise interpretiert werden, auch wenn sie einen etwas anderen Algorithmus erfordern, um sie in ein Array von uint32\_t zu parsen. [reference to key]
+Um dann die Korrektheit des Parsings der Eingabe zu überprüfen, müssen wir nur einige repräsentative Unit-Tests schreiben, die als Eingabe einen String haben, wie man ihn von der Eingabe als optarg erhalten würde, und vergleichen die Ausgabe der void convert\_string\_to\_uint32\_t\_array(const char *string, uint32\_t key[8]) mit einem erwarteten Array.
+Man kann dazu auch einige Testfaelle schreiben, die die Ergebnisse zwischen gleichwertige Eingabe jeweils in hex und string vergleichen.
+
+
+\subsection{Die Kryptfunktion}
+Die Funktionsweise der Kryptfunktion nutzt XOR Operationen um die message mit der Ausgabe von der Kernfunktion zu Verschluesseln [reference to crypt beschreibung]
+
+Wie bereits im theoretischen (Abschnitt \ref{streamcipher}) und praktischen (Abschnitt \ref{crypt}) Teilen des Loesungsansatzes gezeigt,
+ die XOR Operation ist zum Ver- und Entschluesselung benutzt. 
+ Um also die Korrektheit der Kryptfunktion zu testen, müssen wir nur einige repräsentative manuelle
+  und eine Menge automatisierter Zufallstests schreiben, die die Kryptfunktion zweimal aufrufen.
+  Beim ersten Aufruf ist dann die Eingabe eine message-Array, die Ausgabe ist eine Chiffre, 
+  beim zweiten Aufruf ist die Eingabe diese Chiffre und die Ausgabe ein anderes Array. 
+  Am Ende vergleichen wir das ursprüngliche message-Array mit dem Array, das nach dem zweiten 
+  Funktionsaufruf ausgegeben wird.
+
+
+\subsection{Die Kernfunktion}
+Die Spezifikationen der Kernfunktion werden in dieser Arbeit beschrieben \cite{salsa20specification}
+
+Um unsere Implementierung dieser Funktion zu testen, wurde beschlossen, die vom Autor selbst in C geschriebene Referenzimplementierung zu verwenden \cite{salsa20}
+Der Aufruf dieser Referenzimplementierung für eine Menge von Eingaben und auch eine der Versionen unserer Implementierung mit denselben Eingaben sollte dann dieselbe Chiffre ergeben, wenn die Version tatsächlich korrekt implementiert wurde. 
+Auch hier kann man einige repräsentative manuelle Tests und eine Menge von automatisierten Zufallstests schreiben, um zu pruefen, ob das eigentlich stimmt. 
+
+Es können auch einige manuelle Tests geschrieben werden, die die Kernfunktion direkt aufrufen und dabei die Eingabe und die erwartete Ausgabe aus Abschnitt 8 "Die Salsa20-Hash-Funktion" der Spezifikation verwenden \cite{salsa20specification}.
+
+
+
+Die obengenannten Tests können mit der Option -t X aufgerufen werden, wobei X für die Anzahl der automatisierten Tests steht, die durchgeführt werden. Die manuellen Tests werden in ihrer Gesamtheit durchgeführt, unabhängig davon, was X ist. Um die verschiedene Implementationen zu testen, man kann das Programm mit -V X ausfuehren, wobei X fuer die jeweilige Implementation (0,1 oder 2) steht.
+
 
 \section{Performanzanalyse}
 \subsection{Vergleich der Implementierungen}
