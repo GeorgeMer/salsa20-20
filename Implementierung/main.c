@@ -41,7 +41,7 @@ const char *help_msg =
     "  -t X   If set, tests will be executed that compare the chosen implementation with the reference implementation.\n"
     "         X represents the number of random tests in addition to the set tests that will be executed. (default: No tests are run)\n"
     "         (all tests run with random keys and nonces, random tests also have random messages)\n"
-    "  -k K   K resembles the 256bit long key (default: K = 2^256 - 1883)\n"
+    "  -k K   K resembles the 256bit long key (default: K = 2^237 - 1711)\n"
     "         The key can be either given as a hex with the '0x' prefix (it shouldn't be greater than 2^256-1, but can have leading zeroes),\n"
     "         or as a sequence of characters(bytes). If the given string is smaller than 256bit, it will be padded with '0' bytes\n."
     "         If the given string is greater than 256bit, only the first 32 characters will make up the key.\n"
@@ -82,14 +82,15 @@ int main(int argc, char **argv)
     bool run_tests = false;
     bool measure_runtime = false;
     uint32_t key[8];
-    key[0] = 0x10000001;
-    key[1] = 0xc4a1da00;
-    key[2] = 0x0;
-    key[3] = 0x0;
-    key[4] = 0x0;
-    key[5] = 0x0;
-    key[6] = 0x0;
-    key[7] = 0x0;
+    key[0] = 0xfffff951;
+    key[1] = 0xffffffff;
+    key[2] = 0xffffffff;
+    key[3] = 0xffffffff;
+    key[4] = 0xffffffff;
+    key[5] = 0xffffffff;
+    key[6] = 0xffffffff;
+    key[7] = 0x1fff;
+
     uint64_t iv = 0x7ffffff76b48c40;
     const char *output_file = NULL;
 
