@@ -62,7 +62,7 @@ void rowRound_v2(uint32_t output[16])
                           output[14] + output[13], &output[15]);
 }
 
-void salsa_core_v2(uint32_t output[16], const uint32_t input[16])
+void salsa20_core_v2(uint32_t output[16], const uint32_t input[16])
 {
     for (uint8_t i = 0; i < 16; i++)
     {

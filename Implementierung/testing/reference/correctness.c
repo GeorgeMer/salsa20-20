@@ -31,13 +31,13 @@ bool run_testcase(uint64_t implementation, size_t mlen, const uint8_t msg[mlen])
     switch (implementation)
     {
     case 1:
-        salsa_crypt_v1(mlen, msg, cipher, key, iv);
+        salsa20_crypt_v1(mlen, msg, cipher, key, iv);
         break;
     case 2:
-        salsa_crypt_v2(mlen, msg, cipher, key, iv);
+        salsa20_crypt_v2(mlen, msg, cipher, key, iv);
         break;
     default:
-        salsa_crypt(mlen, msg, cipher, key, iv);
+        salsa20_crypt(mlen, msg, cipher, key, iv);
         break;
     }
 
