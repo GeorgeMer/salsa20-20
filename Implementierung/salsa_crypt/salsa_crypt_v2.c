@@ -2,7 +2,7 @@
 
 #include "../salsa_core/salsa_core_v2.h"
 
-void salsa_crypt_v2(size_t mlen, const uint8_t msg[mlen], uint8_t cipher[mlen], uint32_t key[8], uint64_t iv)
+void salsa20_crypt_v2(size_t mlen, const uint8_t msg[mlen], uint8_t cipher[mlen], uint32_t key[8], uint64_t iv)
 {
     uint32_t in[16];
 
@@ -47,7 +47,7 @@ void salsa_crypt_v2(size_t mlen, const uint8_t msg[mlen], uint8_t cipher[mlen], 
         }
 
         // get 64byte hash
-        salsa_core_v2(hash, in);
+        salsa20_core_v2(hash, in);
 
         for (uint8_t j = 0; j < 4; j++)
         {
@@ -84,7 +84,7 @@ void salsa_crypt_v2(size_t mlen, const uint8_t msg[mlen], uint8_t cipher[mlen], 
     }
 
     // get 64byte hash
-    salsa_core_v2(hash, in);
+    salsa20_core_v2(hash, in);
 
     i *= 64;
 
