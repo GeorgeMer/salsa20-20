@@ -8,14 +8,14 @@ const uint8_t *read_file(const char *path)
     // error handling
     if (file == NULL)
     {
-        perror("Error opening file ");
+        perror("Error opening file");
         exit(EXIT_FAILURE);
     }
 
     struct stat statbuf;
     if (fstat(fileno(file), &statbuf))
     {
-        perror("Error retrieving file stats ");
+        perror("Error retrieving file stats");
         goto error;
     }
 
@@ -33,7 +33,7 @@ const uint8_t *read_file(const char *path)
 
     if (!fread(message, 1, statbuf.st_size, file))
     {
-        perror("Error reading file ");
+        perror("Error reading file");
         free(message);
         goto error;
     }
@@ -91,7 +91,7 @@ void write_file(const char *path, uint8_t *cipher)
         // create txt file "result" if no path to output file was given
         if (!(file = fopen("result.txt", "w")))
         {
-            perror("Error creating file ");
+            perror("Error creating file");
             exit(EXIT_FAILURE);
         }
     }
@@ -99,7 +99,7 @@ void write_file(const char *path, uint8_t *cipher)
     {
         if (!(file = fopen(path, "w")))
         {
-            perror("Error opening output file ");
+            perror("Error opening output file");
             exit(EXIT_FAILURE);
         }
     }

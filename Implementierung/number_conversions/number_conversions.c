@@ -58,9 +58,16 @@ uint32_t convert_string_to_uint32_t(const char *string, int base)
 
 void convert_string_to_uint32_t_array(const char *string, uint32_t key[8])
 {
+    key[0] = 0;
+    key[1] = 0;
     // given string is interpreted as a hex number
     if (*(string) == '0' && *(string + 1) == 'x')
     {
+
+        for (size_t i = 0; i < 8; i++)
+        {
+            key[i] = 0;
+        }
 
         int base = 16;
         uint8_t start = 2;
@@ -80,33 +87,48 @@ void convert_string_to_uint32_t_array(const char *string, uint32_t key[8])
         }
         string += start;
 
-        size_t j = 0, k = 0;
-        size_t length = strlen(string);
-        char hexnum[9];
-
-        for (size_t i = 0; i < length; i++, j++)
+        size_t i = strlen(string), j = 0, k = 0;
+        uint8_t hexnum[8];
+        for (; i > 0; i--, j++)
         {
-            // every 8 characters of the string are converted to one 32 bit number and written into the key array
+            // every 8 characters of the string are converted to one key
             if (j == 8)
             {
-                hexnum[8] = '\0';
-                key[k++] = convert_string_to_uint32_t(hexnum, base);
+                uint8_t inv[8];
+                for (size_t ii = 0, jj = 7; ii < 8; ii++, jj--)
+                {
+                    inv[ii] = hexnum[jj];
+                }
+
+                key[k] = convert_string_to_uint32_t(inv, base);
+                k++;
                 j = 0;
             }
 
-            hexnum[j] = *(string + i);
+            hexnum[j] = *(string + i - 1);
         }
 
-        for (; j <= 8 && j > 0; j++)
+        for (; j <= 8; j++)
         {
             if (j == 8)
             {
-                hexnum[8] = '\0';
-                key[k] = convert_string_to_uint32_t(hexnum, base);
+                uint8_t inv[8];
+                for (size_t ii = 0, jj = 7; ii < 8; ii++, jj--)
+                {
+                    inv[ii] = hexnum[jj];
+                }
+                key[k] = convert_string_to_uint32_t(inv, base);
                 break;
             }
 
             hexnum[j] = '0';
+        }
+
+        printf("Key was interpreted as hex: ");
+        printf("0x");
+        for (size_t i = 8; i > 0; i--)
+        {
+            printf("%08x", key[i - 1]);
         }
     }
 
@@ -122,21 +144,43 @@ void convert_string_to_uint32_t_array(const char *string, uint32_t key[8])
     {
         uint8_t chars[4];
         size_t j = 0, k = 0;
-        for (size_t i = 0; i < strlen(string) && k < 8; i++)
+        for (size_t i = strlen(string); i > 0 && k < 8; i--)
         {
             // every four bytes convert to a key element
             if (j == 4)
             {
-                key[k++] = ((chars[0]) << 24) | ((chars[1]) << 16) | ((chars[2]) << 8) | ((chars[3]));
+                key[k++] = ((chars[3])) | ((chars[2]) << 8) | ((chars[1]) << 16) | ((chars[0]) << 24);
                 j = 0;
             }
 
-            chars[j++] = *(string + i);
+            chars[j++] = *(string + i - 1);
         }
 
         for (size_t jcnt = 0; jcnt < j && k < 8; jcnt++)
         {
             key[k] |= (chars[jcnt]) << (24 - 8 * jcnt);
         }
+
+        printf("Key was interpreted as string: ");
+        for (size_t i = 0; i < 8; i++)
+        {
+            printf("%c%c%c%c", (key[i] >> 24) & 0xFF, (key[i] >> 16) & 0xFF, (key[i] >> 8) & 0xFF, (key[i] >> 0) & 0xFF);
+        }
+        printf("\n");
+        for (size_t i = 8; i > 0; i--)
+        {
+            printf("%08x", key[i - 1]);
+        }
+        printf("\n");
+        printf("\nkey[0] = %08x", key[0]);
+        printf("\nkey[1] = %08x", key[1]);
+        printf("\nkey[2] = %08x", key[2]);
+        printf("\nkey[3] = %08x", key[3]);
+        printf("\nkey[4] = %08x", key[4]);
+        printf("\nkey[5] = %08x", key[5]);
+        printf("\nkey[6] = %08x", key[6]);
+        printf("\nkey[7] = %08x", key[7]);
+
+        printf("\n");
     }
 }

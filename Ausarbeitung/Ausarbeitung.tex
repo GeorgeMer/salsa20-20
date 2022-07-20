@@ -30,6 +30,11 @@ die man an seine Geliebten versendet, von einer dritten Person mitgelesen werden
 kryptographische Verfahren zur Verschlüsselung von Informationen. Eines dieser Verschlüsselungsverfahren ist
 Salsa20/20, welches es zu implementieren galt.
 
+\subsection{Definitionen}
+Im Folgenden bezeichne: 
+\\ \hspace*{5mm} 1. $x \lll y$ die Linksrotation von $x$ um $y$ Bit. 
+\\ \hspace*{5mm} 2. $\oplus$ den Binären XOR-Operator.
+
 \subsection{Funktionsweise Salsa20/20}
 Salsa20/20 ist eine Stromchiffre basierend auf einem sogenannten Add-Rotate-XOR-Schema (kurz: ARX-Schema), ins Leben gerufen von
 David J. Bernstein.
@@ -40,12 +45,18 @@ Auf dieser generierten Matrix wird dann mit der zu verschlüsselnden Nachricht B
 \subsubsection{Der Salsa20-Kern:}
 Der Salsa20-Kern ist eine Funktion, welche einen 64-Byte Block generiert, auf dem, wie oben beschrieben, mit 
 der zu verschlüsselnden Nachricht Byte für Byte eine XOR-Operation ausgeführt wird. Es werden bei jeder Operation 
-zwei Werte der Matrix aufaddiert, links-rotiert und auf diesem Ergebnis mit einem Eintrag $a_{ij}$ der Matrix eine XOR-Operation ausgeführt.
-Der Matrix eintrag $a_{ij}$ wird dann mit dem Ergebnis dieser XOR-Operation überschrieben.
+zwei Werte der Matrix aufaddiert, links-rotiert und auf diesem Ergebnis mit einem Eintrag $a_{i,j}$ der Matrix eine XOR-Operation ausgeführt.
+Der Matrixeintrag $a_{i,j}$ wird dann mit dem Ergebnis dieser XOR-Operation überschrieben.
 Der 64-Byte-Block wird in 20 sogenannten Runden aus einem 256-Bit-Key, einer 64-Bit Nonce und einem 64-Bit 
 Counter generiert. Die zwanzig Runden bestehen jeweils aus vier Viertelrunden. Die Viertelrunden unterscheiden sich 
-durch die Anzahl der Rotationen, die für jede ARX-Operation ausgeführt werden und durch die Matrix-Einträge, auf die 
-diese Operationen angewandt werden. Am Ende jeder Runde wird die Matrix transponiert.
+durch die Anzahl der Rotationen, die für jede ARX-Operation ausgeführt werden und durch die Matrixeinträge, auf die 
+diese Operationen angewandt werden. 
+Zur Veranschaulichung, die erste Viertelrunde der Kernfunktion:
+\[a_{2,1} = ((a_{1,1} + a_{4,1}) \lll 7) \oplus a_{2,1}\]
+\[a_{3,2} = ((a_{2,2} + a_{1,2}) \lll 7) \oplus a_{3,2}\] 
+\[a_{4,3} = ((a_{3,3} + a_{2,3}) \lll 7) \oplus a_{4,3}\] 
+\[a_{1,4} = ((a_{4,4} + a_{3,4}) \lll 7) \oplus a_{1,4}\]
+Am Ende jeder Runde wird die Matrix transponiert.
 Den Startzustand $S$ für den generierten 64-Byte-Block bildet folgende 4$\times$4 Matrix, wobei $K_i$ den $i$-ten Teil
 des Schlüssels bezeichnet. ($K_0$ steht also für die ersten 4 Bytes in Little-Endian-Reihenfolge des Schlüssels, dasselbe gilt analog für die
 Nonce $N_i$ und den Counter $C_i$).
@@ -92,6 +103,14 @@ Um ihn weiter zu optimieren, kann man anstatt zwanzig Runden, die jeweils eine T
 ausführen, die jeweils aus einer sogenannten Spaltenrunde und einer Reihenrunde bestehen. Eine Spaltenrunde ist identisch zu einer
 Runde wie oben definiert, während eine Reihenrunde die Indizes bei Matrixzugriffen so wählt, dass die Matrix behandelt wird
 als wäre sie transponiert.
+Wenn man zum Beispiel die erste ARX-Operation der Kernfunktion betrachtet:
+\[
+    a_{2,1} = ((a_{1,1} + a_{4,1}) \lll 7) \oplus a_{2,1} 
+\]
+Dann ist dies äquivalent zu folgender Operation, nachdem die Matrix A transponiert wurde:
+\[
+    a_{1,2} = ((a_{1,1} + a_{1,4}) \lll 7) \oplus a_{1,2}
+\]
 
 \subsubsection{Werte an der Diagonale}
 
@@ -196,9 +215,10 @@ Wie man sehen kann, führt der Geheimtext als Eingabe unter Verwendung desselben
 \vspace{3mm}
 \\
 Damit man also für einen durch Salsa20/20 erstellten Geheimtext den dazugehörigen Klartext zurückerhält,
-muss man denselben Schlüsselstrom sowie denselben Initalisierungsvektor, mit dem Geheimtext als zu verschlüsselnde Nachricht, übergeben.
+muss man denselben Schlüssel sowie denselben Initalisierungsvektor, mit dem Geheimtext als zu verschlüsselnde Nachricht, übergeben.
 \\
-Der Counter ist keine Eingabe des Salsa20/20 Verschlüsselungsverfahren, sondern dient dazu den generierten 64-Byte-Block sicherer gegen Angriffe zu machen. Alle 64 verschlüsselte Bytes, wird der Counter um 1 inkrementiert und der Kern neu berechnet. Das macht es schwer, den Kern vorherzusagen und bietet somit mehr Sicherheit für das Verschlüsselungsverfahren und schützt den Geheimtext gegen Angriffe.
+Der Counter ist keine Eingabe des Salsa20/20 Verschlüsselungsverfahren, sondern dient dazu den generierten 64-Byte-Block sicherer gegen Angriffe zu machen. 
+Alle 64 verschlüsselte Bytes, wird der Counter um 1 inkrementiert und der Kern neu berechnet. Das macht es schwerer, den Kern vorherzusagen und bietet somit mehr Sicherheit für das Verschlüsselungsverfahren und schützt den Geheimtext gegen Angriffe.
 
 
 \subsection{Praktischer Teil}
@@ -253,9 +273,10 @@ der transponierten Matrix arbeiten. Somit spart man sich in jedem Schritt das tr
 arbeitet auf die gleiche Weise wie Implementierung V1, nur das hier zusätzlich, unter Zuhilfenahme von SIMD Operationen, eine Viertelrunde vektorisiert ausgeführt wird. Eine Viertelrunde bestand zuvor 
 aus vier nacheinander ausgeführten ARX-Operationen, die jetzt gleichzeitig vollzogen werden. Auf eine Vektorisierung der Addierung der Ergebnismatrix aus den 10 durchgeführten Runden auf den Startzustand wurde verzichtet,
 da der Overhead der Lade- und Schreiboperationen den Speedup bei der Addition zunichte macht.
+Ein Beispiel
 
 \subsubsection{salsa20\_crypt}
-Die salsa20\_crypt Funktion wird in allen Implementierungen erstmal der Startzustand der Matrix initalisiert. Für die Little-Endian-Reihenfolge des Keys, der Nonce und des Counters werden built\_in Funktionen verwendet.
+In der salsa20\_crypt Funktion wird in allen Implementierungen erstmal der Startzustand der Matrix initalisiert. Für die Little-Endian-Reihenfolge des Keys, der Nonce und des Counters werden built\_in Funktionen verwendet.
 Anschließend wird mithilfe eines Pointercasts des output Pointers (\textcolor{blue}{uint32\_t}) zu einem \textcolor{blue}{uint8\_t} Pointer die XOR-Operationen durchgeführt. Dieser Pointercast stellt kein Undefined Behaviour dar, 
 da \textcolor{blue}{uint8\_t} keine strengeren alignment Anforderungen hat als \textcolor{blue}{uint32\_t}. Desweiteren liefert der Pointercast die Bytes der output Matrix für die XOR-Operation, genau wie vorgesehen, in Little-Endian-Reihenfolge.
 Anschließend werden nun die XOR-Operationen auf der message mit der output Matrix ausgeführt und in cipher gespeichert. Alle 64 XOR-Operationen wird der Counter inkrementiert und der Kern neu berechnet. Für V1 wird nur für die letzten $\leq 64$ Bytes mit dem Pointercast gearbeitet.
