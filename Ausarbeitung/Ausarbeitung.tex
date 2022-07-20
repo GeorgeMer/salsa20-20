@@ -40,19 +40,19 @@ Im Folgenden bezeichne:
 
 \subsection{Funktionsweise Salsa20/20}
 Salsa20/20, im Folgenden auch Salsa20 genannt, ist eine Stromchiffre basierend auf einem sogenannten 
-\emph{Add-Rotate-XOR-Schema} (kurz: ARX-Schema), ins Leben gerufen von David J. Bernstein.\\
+\emph{Add-Rotate-XOR-Schema} (ARX-Schema), ins Leben gerufen von David J. Bernstein.\\
 Salsa20/20 verwendet eine 4$\times$4-Matrix bestehend aus vorzeichenlosen 32-bit \emph{Little-Endian-Ganzzahlen},
 welche durch \emph{Add}, \emph{Rotate} und \emph{XOR} Operationen aus bestimmten Startwerten erzeugt wird.
 Auf dieser generierten Matrix wird dann mit der zu ver\-schlü\-ssel\-nden Nachricht Byte für 
 Byte eine XOR-Operation ausgeführt.
 
-\subsubsection{Der Salsa20-Kern:}
-Der Salsa20-Kern ist eine Funktion, welche einen 64-Byte Block generiert, auf dem, wie oben beschrieben, mit 
+\subsubsection{Der Salsa20-Kern} \label{salsa20-kern}
+Der \emph{Salsa20-Kern} ist eine Funktion, welche einen 64-Byte \emph{Block} generiert, auf dem, wie oben beschrieben, mit 
 der zu verschlüsselnden Nachricht Byte für Byte eine XOR-Operation ausgeführt wird. Es werden bei jeder Operation 
 zwei Werte der Matrix aufaddiert, links-rotiert und auf diesem Ergebnis mit einem Eintrag $a_{i,j}$ der Matrix eine XOR-Operation ausgeführt.
 Der Matrixeintrag $a_{i,j}$ wird dann mit dem Ergebnis dieser XOR-Operation überschrieben.
-Der 64-Byte-Block wird in 20 sogenannten Runden aus einem 256-Bit-Key, einer 64-Bit Nonce und einem 64-Bit 
-Counter generiert. Die zwanzig Runden bestehen jeweils aus vier Viertelrunden. Die Viertelrunden unterscheiden sich 
+Der 64-Byte-Block wird in 20 sogenannten Runden aus einem \emph{256-Bit-Key}, einer 64-Bit \emph{Nonce} und einem 64-Bit 
+\emph{Counter} generiert. Die zwanzig Runden bestehen jeweils aus vier \emph{Viertelrunden}. Die Viertelrunden unterscheiden sich 
 durch die Anzahl der Rotationen, die für jede ARX-Operation ausgeführt werden und durch die Matrixeinträge, auf die 
 diese Operationen angewandt werden. 
 Zur Veranschaulichung, die erste Viertelrunde der Kernfunktion:
@@ -61,7 +61,7 @@ Zur Veranschaulichung, die erste Viertelrunde der Kernfunktion:
 \[a_{4,3} = ((a_{3,3} + a_{2,3}) \lll 7) \oplus a_{4,3}\] 
 \[a_{1,4} = ((a_{4,4} + a_{3,4}) \lll 7) \oplus a_{1,4}\]
 Am Ende jeder Runde wird die Matrix transponiert.
-Den Startzustand $S$ für den generierten 64-Byte-Block bildet folgende 4$\times$4 Matrix, wobei $K_i$ den $i$-ten Teil
+Den Startzustand $S$ für den generierten 64-Byte-Block bildet folgende 4$\times$4-Matrix, wobei $K_i$ den $i$-ten Teil
 des Schlüssels bezeichnet. ($K_0$ steht also für die ersten 4 Bytes in Little-Endian-Reihenfolge des Schlüssels, dasselbe gilt analog für die
 Nonce $N_i$ und den Counter $C_i$).
 \[
@@ -73,7 +73,7 @@ Nonce $N_i$ und den Counter $C_i$).
     \end{pmatrix}
 \]
 Die Konstanten auf der Diagonalen sind für jeden Key und jede Nonce dieselben.
-Den zum Schluss ausgegebenen 64-Byte-Block erhält man duch das aufaddieren des 
+Den zum Schluss ausgegebenen 64-Byte-Block erhält man duch das Aufaddieren des 
 Ergebnisses der 20 Runden auf den Startzustand $S$.
 
 \subsection{Aufgabenstellung}
@@ -81,7 +81,7 @@ Ergebnisses der 20 Runden auf den Startzustand $S$.
 \subsubsection{Theoretischer Teil:}
 Folgende theoretische Fragen waren zu beantworten:
 \begin{itemize}
-    \item Wie könnte man das im letzten Schritt einer jeden Salsa20-Kern Runde ineffiziente, stattfindende transponieren der Matrix optimieren?
+    \item Wie könnte man das im letzten Schritt einer jeden Salsa20-Kern Runde ineffiziente, stattfindende Transponieren der Matrix optimieren?
     \item Was bedeuten die Werte an der Diagonalen des Startzustands?
     \item Erklären der Funktionsweise einer Stromchiffre anhand eines Beispiels. Warum kann man dieselbe Funktion zum Ver- und Entschlüsseln verwenden? Wie müssen die Parameter gewählt werden, damit dies funktioniert? Warum ist der Counter keine Eingabe des Verschlüsselungsalgorithmus?
 \end{itemize}
@@ -91,9 +91,9 @@ Zu implementieren  war folgende Funktionalität:
 \begin{itemize}
     \item Ein Rahmenprogramm welches I/O-Operationen unterstützt, mithilfe derer man eine ganze Datei in den Speicher einlesen und als Pointer an eine Unterfunktion übergeben kann. Selbiges soll auch zum Schreiben eines Speicherbereiches mit bekannter Länge in eine Datei möglich sein.
     \item \texttt{ \textcolor{blue}{void} salsa20\_core (\textcolor{blue} {uint32\_t} output[16], \textcolor{blue}{const uint32\_t} input[16])} \\
-    Diese Funktion implementiert den oben beschriebenen Salsa20-Kern. input bezeichnet dabei den Startzustand des Kerns, output den finalen 64-Byte-Block. \\
-    \item \texttt{ \textcolor{blue} {void} salsa20\_crypt (\textcolor{blue}{size\_t} mlen, \textcolor{blue} {const uint8\_t} msg[mlen], \textcolor{blue}{uint8\_t} cipher [mlen], \textcolor{blue}{uint32\_t} key[8], \textcolor{blue} {uint64\_t} iv) }\\
-    Diese Funktion verschlüsselt eine Nachricht msg der Länge mlen mit einem gegebenen Schlüssel Key und einer Nonce (iv) und schreibt das Ergebnis in cipher.
+    Diese Funktion implementiert den oben beschriebenen Salsa20-Kern. \texttt{input} bezeichnet dabei den Startzustand des Kerns, \texttt{output} den finalen 64-Byte-Block. \\
+    \item \texttt{ \textcolor{blue} {void} salsa20\_crypt (\textcolor{blue}{size\_t} mlen, \textcolor{blue} {const uint8\_t} msg[mlen], \textcolor{blue}{uint8\_t} \break cipher [mlen], \textcolor{blue}{uint32\_t} key[8], \textcolor{blue} {uint64\_t} iv) }\\
+    Diese Funktion verschlüsselt eine Nachricht \texttt{msg} der Länge \texttt{mlen} mit einem gegebenen Schlüssel \texttt{key} und einer Nonce \texttt{iv} und schreibt das Ergebnis in \texttt{cipher}.
 \end{itemize}
 
 
@@ -102,23 +102,23 @@ Zu implementieren  war folgende Funktionalität:
 \subsection{Theoretischer Teil}
 \subsubsection{Transponieren}
 
-Das Transponieren der Matrix ist Teil des Salsa20-Kern Algorithmus, ist aber nicht sonderlich performant.
-Um ihn weiter zu optimieren, kann man anstatt zwanzig Runden, die jeweils eine Transposition enthalten, zehn sogenannte Doppelrunden
-ausführen, die jeweils aus einer sogenannten Spaltenrunde und einer Reihenrunde bestehen. Eine Spaltenrunde ist identisch zu einer
+Das Transponieren der Matrix ist Teil des Salsa20-Kern-Algorithmus, ist aber nicht sonderlich performant.
+Um an dieser Stelle weiter zu optimieren, kann man anstatt zwanzig Runden, die jeweils eine Transposition enthalten, zehn sogenannte \emph{Doppelrunden}
+ausführen, die jeweils aus einer sogenannten \emph{Spaltenrunde} und einer \emph{Reihenrunde} bestehen. Eine Spaltenrunde ist identisch zu einer
 Runde wie oben definiert, während eine Reihenrunde die Indizes bei Matrixzugriffen so wählt, dass die Matrix behandelt wird
 als wäre sie transponiert.
 Wenn man zum Beispiel die erste ARX-Operation der Kernfunktion betrachtet:
 \[
     a_{2,1} = ((a_{1,1} + a_{4,1}) \lll 7) \oplus a_{2,1} 
 \]
-Dann ist dies äquivalent zu folgender Operation, nachdem die Matrix A transponiert wurde:
+dann ist dies äquivalent zu folgender Operation, nachdem die Matrix transponiert wurde:
 \[
     a_{1,2} = ((a_{1,1} + a_{1,4}) \lll 7) \oplus a_{1,2}
 \]
 
 \subsubsection{Werte an der Diagonale}
 
-Die Werte an der Diagonale haben eine wichtige Bedeutung für die Sicherheit des Salsa20/20 Algorithmus, insbesondere der Salsa20-Kern Funktion.
+Die Werte an der Diagonale haben eine wichtige Bedeutung für die Sicherheit des Salsa20/20-Algorithmus, insbesondere der Salsa20-Kern Funktion.
 \vspace{1mm}
 \\Betrachten wir im Folgenden eine Matrix $x$ und deren Transformation $tr(x)$:
 \begin{gather*}
@@ -142,7 +142,6 @@ Dann erhalten wir die folgende Eigenschaft:
     Salsa20( tr(x) ) = tr( Salsa20(x) )
 \end{gather*}
 Diese Transformation der Matrix $x$ ist nicht nur invertierbar, sondern bleibt auch durch die Anwendung der Salsa-Funktion erhalten.\cite{salsa20security}
-\vspace{1mm}
 \\Nehmen wir nun die folgende Transformation der oben beschriebenen Matrix $x$:
 \begin{gather*}
     R(x) =
@@ -153,40 +152,32 @@ Diese Transformation der Matrix $x$ ist nicht nur invertierbar, sondern bleibt a
         r(A_3) & r(B_3) & r(C_3) & r(D_3) \\
     \end{pmatrix}
 \end{gather*}
-wobei $r(y)$ die Rechtsrotation des 4Byte großen $y$ um ein Bit darstellt.
-\vspace{1mm}
-\\Dann erhalten wir eine äquivalente Eigenschaft wie schon mit $tr(x)$:
+wobei $r(y)$ die Rechtsrotation des 4Byte großen $y$ um ein Bit darstellt. Dann erhalten wir eine äquivalente Eigenschaft wie schon mit $tr(x)$:
 \begin{gather*}
     Salsa20(R(x)) = R(Salsa20(x))
 \end{gather*}
 Diese Transformation ist ebenfalls invertierbar und bleibt auch, in den meisten Fällen, nach Anwendung der Funktion Salsa20 erhalten.\cite{salsa20security}
-\vspace{1mm}
-\\Da diese Matrixverschiebungen und Rechtsrotationen \textbf{beide} sowohl invertierbar sind als auch mit der Anwendung von der Salsa20-Kern Funktion erhalten bleiben,
-kann man eine Vielzahl von \textbf{beiden} auf die ursprüngliche Matrix anwenden und am Ende der Salsa20-Kern Funktion, unabhängig von der Reihenfolge des Anwendens, immer noch dasselbe Ergebnis erhalten.
-\vspace{1mm}
-\\Beim verwenden der Salsa20-Kern Funktion mit beliebigen Matrizen stellen diese Eigenschaften ein großes Sicherheitsrisikio dar.
-Bei kryptographischen Verfahren ist das Ziel normalerweise, die Struktur so zu zerstören, dass ein Angriff sie nicht wiederherstellen kann.
-Die Verschiebungen und Bitrotationen werden von der Funktion jedoch in keiner Weise beeinflusst.
-\vspace{1mm}
+\\Da diese Matrixverschiebungen und Rechtsrotationen \textbf{beide} sowohl invertierbar sind als auch mit der Anwendung von der Salsa20-Kern-Funktion erhalten bleiben,
+kann man eine Vielzahl von \textbf{beiden} auf die ursprüngliche Matrix anwenden und am Ende der Salsa20-Kern-Funktion, unabhängig von der Reihenfolge des Anwendens, immer noch dasselbe Ergebnis erhalten.
+\\Beim Verwenden der Salsa20-Kern Funktion mit beliebigen Matrizen stellen diese Eigenschaften ein großes Sicherheitsrisikio dar.
+Bei kryptographischen Verfahren ist das Ziel normalerweise, die Struktur so zu zerstören, dass ein Angriff sie nicht wie\-der\-her\-ste\-llen kann.
+Die Verschiebungen und Bitrotationen werden von der Funktion jedoch in keinster Weise beeinflusst.
 \\An dieser Stelle kommen die Konstanten auf der Diagonale ins Spiel:
-\vspace{2mm}
-\\Durch die Einführung dieser Konstanten wird sichergestellt, dass keine Anzahl an Verschiebungen oder Rotationen die ursprüngliche Diagonale wiederherstellen kann,
+Durch die Einführung dieser Konstanten wird sichergestellt, dass keine Anzahl an Verschiebungen oder Rotationen die ursprüngliche Diagonale wie\-der\-her\-ste\-llen kann,
 außer im trivialen Fall von 0 Verschiebungen und Rotationen. Das bedeutet, dass keine zwei verschiedenen Schlüssel- oder Nonce-Eingaben
-jemals die gleiche Matrix haben werden, egal wie viele Transformationen angewendet werden.\cite{salsa20security}
-\vspace{1mm}
+jemals die gleiche Matrix haben werden, unabhängig davon wie viele Transformationen angewendet werden.\cite{salsa20security}
 \\Natürlich sind nicht alle Werte geeignet, denn es gibt einige Beispiele für Konstanten,
-wo die Diagonale nach einer bestimmten Anzahl von Verschiebungen/Rotationen mit der Originalen übereinstimmt.
-\vspace{1mm}
-\\Außerdem stellt der Ersteller des Algorithmus fest\cite{ResponseOnTheSalsa20Core}, dass die Konstanten das Kollisionsproblem beseitigen,
+bei denen die Diagonale nach einer bestimmten Anzahl von Verschiebungen be\-ziehungs\-weise Rotationen mit der Originalen übereinstimmt.
+\\Außerdem stellt der Ersteller des Algorithmus fest\cite{ResponseOnTheSalsa20Core}, dass die Konstanten das Kollisions\-problem beseitigen,
 auf das in einer anderen Arbeit\cite{onTheSalsa20Core} hingewiesen wurde.\\
-Das Kollisionsproblem besagt, dass:
+Das Kollisionsproblem besagt:
 \begin{gather*} Salsa20(x) = Salsa20(x + \Delta) \text{  mit z.B.  } \Delta=(0x80000000,0x80000000,...) \end{gather*}
-Ein solches $x+\Delta$ ist aber keine gültige Eingabe für eine Salsa20-Kern Funktion (sofern $x$ eine gültige Eingabe ist) und wird daher in der Praxis nie vorkommen.
+Ein solches $x+\Delta$ ist aber keine gültige Eingabe für eine Salsa20-Kern-Funktion (sofern $x$ eine gültige Eingabe ist) und wird daher in der Praxis nie vorkommen.
 Das Gleiche gilt für andere Beispiele von Kollisionen, die in dieser Arbeit auftauchen.
 
 
 \subsubsection{Funktionsweise einer Stromchiffre} \label{streamcipher}
-Eine Stromchiffre ist ein symmetrischer kryptographischer Algorithmus, der für Ver- und Entschlüsselung von Daten verwendet wird.
+Eine Stromchiffre ist ein symmetrischer, kryptographischer Algorithmus, der für Ver- und Entschlüsselung von Daten verwendet wird.
 Dieser Algorithmus nimmt einen Klartext und ein Schlüsselstrom entgegen und führt eine bitweise XOR-Operation aus und gibt am Ende
 einen Geheimtext zurück.
 Man kann durch Benutzung desselben Schlüsselstroms wieder den Klartext erhalten, indem man dem Algorithmus den Geheimtext übergibt.
@@ -219,21 +210,20 @@ Wie man sehen kann, führt der Geheimtext als Eingabe unter Verwendung desselben
 \vspace{3mm}
 \\
 Damit man also für einen durch Salsa20/20 erstellten Geheimtext den dazugehörigen Klartext zurückerhält,
-muss man denselben Schlüssel sowie denselben Initalisierungsvektor, mit dem Geheimtext als zu verschlüsselnde Nachricht, übergeben.
+muss man denselben Schlüssel sowie denselben Initalisierungs\-vektor, mit dem Geheimtext als zu verschlüsselnde Nachricht, übergeben.
 \\
-Der Counter ist keine Eingabe des Salsa20/20 Verschlüsselungsverfahren, sondern dient dazu den generierten 64-Byte-Block sicherer gegen Angriffe zu machen. 
+Der Counter ist keine Eingabe des Salsa20/20-Verschlüsselungsverfahrens, sondern dient dazu den generierten 64-Byte-Block sicherer gegen Angriffe zu machen. 
 Alle 64 verschlüsselte Bytes, wird der Counter um 1 inkrementiert und der Kern neu berechnet. Das macht es schwerer, den Kern vorherzusagen und bietet somit mehr Sicherheit für das Verschlüsselungsverfahren und schützt den Geheimtext gegen Angriffe.
 
 
 \subsection{Praktischer Teil}
-\subsubsection{Das Rahmenprogramm}
-Im Rahmenprogramm finden die von der Aufgabenstellung erforderlichen I/O-Operationen, sowie das Parsen von Programmargumenten statt.
-Für das Einlesen des Eingabe Files wurden die von C bereitgestellten Funktionen zur File I/O verwendet. Das Einlesen der Programmargumente stellte nur für den 256bit Schlüssel
-ein Problem dar, da für so große Eingabe Zahlen keine von C bereitgestellte sichere Funktion (wie z.B. strtoull für unsigned long long Zahlen) existiert.
-Um diesen Problem nachzugehen wurde folgender Ansatz gewählt:
-Der Key lässt sich entweder als Hexadezimalzahl eingeben, indem man das Präfix 0x anfügt, oder alternativ ohne Präfix, wo jeder Eingabecharacter als sein Zugehöriger numerischer Wert
-nach ASCII-Codierung interpretiert wird.
-\\Die Eingabe 
+\subsubsection{Das Rahmenprogramm} \label{main}
+Im Rahmenprogramm finden, die von der Aufgabenstellung geforderten, I/O-Opera\-tionen, sowie das Parsen von Programmargumenten statt.
+Für das Einlesen der Eingabe\-datei wurden die von C bereitgestellten Funktionen zur File I/O verwendet. Das Einlesen der Programmargumente stellte nur für den 256bit-Schlüssel
+ein Problem dar, da für so große Eingabezahlen keine von C bereitgestellte sichere Funktion (wie z.B. \texttt{strtoull} für \texttt{\textcolor{blue}{unsigned long long}}-Zahlen) existiert.
+Um diesem Problem nachzugehen, wurde folgender Ansatz gewählt:
+Der Key lässt sich entweder als Hexadezimalzahl eingeben, indem man das Präfix \texttt{0x} anfügt, oder alternativ ohne Präfix, wobei jeder Eingabecharacter als sein Zugehöriger numerischer Wert
+nach \emph{ASCII}-Codierung inter\-pre\-tiert wird. Die Eingabe 
 \begin{center}
   \texttt{./salsa -k 0x48656C6C6F576F726C64  some\_path}
 \end{center} 
@@ -241,58 +231,53 @@ wäre also äquivalent zur Eingabe
 \begin{center}
    \texttt{./salsa -k ``Hello World'' some\_path}
 \end{center}
-Diese Designentscheidung wurde getroffen, da z.B. eine Eingabe als dezimale Zahlen zu erlauben sehr aufwändig gewesen wäre, denn zusätzlich zur maximalen Länge wäre auf over- bzw. underflows und diverse andere Probleme wie zum
+Diese Designentscheidung wurde getroffen, da z.B. die Eingabe von Dezimalzahlen zu erlauben sehr aufwändig gewesen wäre, denn zusätzlich zur maximalen Länge wäre auf \emph{Over-} bzw. \emph{Underflows} und diverse andere Probleme wie zum
 Beispiel führende Nullen oder unerlaubte Zeichen zu prüfen gewesen. Hexadezimalzahlen lassen sich jedoch sehr leicht konvertieren, genauso wie Strings interpretiert als ihre zugehörigen numerischen ASCII-Code Werte.
-\\Das schreiben ins Outputfile findet statt, als die respektiven Bytes der cipher aneinandergehängt ausgegeben in hexadezimaler Form, mit einer neuen Zeile alle 76 Zeichen für bessere Lesbarkeit.
-Für den Fall, dass jedes Byte der Cypher einem darstellbaren ASCII Character enstpricht, so findet die Ausgabe in ASCII Charactern statt. Diese Designentscheidung wurde getroffen, 
-da eine Ausgabe mithilfe von fwrite unbrauchbar ist, weil frwite nur die Binärdaten in das Outputfile schreibt, wohingegen eine Ausgabe in hexadezimaler Form tatsächlich lesbar ist.
-Das eine vollständig in ASCII darstellbare cipher auch in ASCII ausgegeben wird, dient der Entschlüsselung von bereits verschlüsselten Files.
-Das führt zwar zu einer längeren Laufzeit, da erst überprüft werden muss ob die cipher als ASCII Character dargstellt werden kann ist aber unverzichtbar um bei der Entschlüsselung Klartexte und keine Hexadezimalzahlen zu erhalten.
-Der Einfachheit halber werden jedoch nur ASCII Characters im Wertebereich von [32;126] akzeptiert, das heißt insbesondere sind Umlaute nicht unterstüzt. Nicht unterstützt bedeutet in diesem Fall dass eine Entschlüsselung von bereits 
-verschlüsselten Klartexten, die einen Wert außerhalb des Wertebereichs enthalten, nicht den ursprünglichen Klartext zurückliefert.
-\\Beispiel: 
-\\Bezeichne im folgenden some\_path den Pfad eines Text-Files mit folgendem Inhalt:
+\\Die Ausgabedatei wird mit den respektiven Bytes der \texttt{cipher} an\-einander\-ge\-hängt in hexadezimaler Form beschrieben, wobei alle 76 Zeichen ein Zeilenumbruch zur besseren Lesbarkeit eingefügt wird.
+Für den Fall, dass jedes Byte der Cypher einem darstellbaren \emph{ASCII-Character} entstpricht, so findet die Ausgabe in ASCII-Charactern statt. Erstere Designentscheidung wurde getroffen, 
+da eine Ausgabe mithilfe von \texttt{frwite} unbrauchbar ist, weil \texttt{frwite} nur die Binärdaten in das Outputfile schreibt, wohingegen eine Ausgabe in hexadezimaler Form tatsächlich lesbar ist.
+Das eine vollständig in ASCII darstellbare \texttt{cipher} auch in ASCII ausgegeben wird, dient der Entschlüsselung von bereits verschlüsselten Files.
+Das führt zwar zu einer längeren Laufzeit, da erst überprüft werden muss, ob die \texttt{cipher} als ASCII-Character dargstellt werden kann, ist aber unverzichtbar um bei der Entschlüsselung Klartexte und keine Hexadezimalzahlen zu erhalten.
+Der Einfachheit halber werden jedoch nur ASCII-Characters im Wertebereich von [32; 126] akzeptiert, das heißt insbesondere sind Umlaute nicht unterstüzt.
+Folgendes Beispiel veranschaulicht den I/O-Prozess:
+\vspace{5mm}
+\\Bezeichne im folgenden \texttt{some\_path} den Pfad eines Text-Files mit folgendem Inhalt:
 \begin{center}
-    Hallo ich soll verschluesselt werden.
+    \texttt{Hallo ich soll verschluesselt werden.}
 \end{center}
-Dann liefer folgender Aufruf
+Dann liefert folgender Aufruf \texttt{./salsa some\_path}
 \begin{center}
-    ./salsa some\_path
+    \small{\texttt{ffaf8cc85945bbe69fb07860173e0f855ebe070b80c82b91922bcab1f0d85208fde3c49610}}
 \end{center}
-als Ergebnis im neu erstellen File result.txt
+als Ergebnis im neu erstellen File \texttt{result.txt}.
+\vspace{5mm}
+\\Sei \texttt{path\_of\_result} der Pfad des gerade erstellten Files \texttt{result.txt}. Dann liefert der Aufruf \texttt{./salsa path\_of\_result}
+das Egebnis (wieder in \texttt{result.txt}, da kein Pfad vom Benutzer angegeben wurde)
 \begin{center}
-    ffaf8cc85945bbe69fb07860173e0f855ebe070b80c82b91922bcab1f0d85208fde3c49610
-\end{center}
-Sei path\_of\_result der Pfad des gerade erstellten Files result.txt. Dann liefert der Aufruf
-\begin{center}
-   ./salsa path\_of\_result
-\end{center}
-das Egebnis (wieder in result.txt, da kein Pfad vom Benutzer angegeben wurde)
-\begin{center}
-    Hallo ich soll verschluesselt werden.
+    \texttt{Hallo ich soll verschluesselt werden.}
 \end{center}
 
 \subsubsection{salsa20\_core}
-In der Funktion salsa20\_core wird das Verhalten der in Abschnitt 1.2.1 beschriebenen Salsa20-Kern Funktion exakt nachempfunden. Für die Implementierung V1 wurden jedoch kleine Änderungen vorgenommen.
-Als Ansatz zur Optimierung wurden hier die 20 Runden auf nur 10 Runden reduziert, in denen man jedoch die doppelte Arbeit verrichtet. Es ist also eine Art loop unrolling mit zusätzlichem einsparen des 
-transponierens der Matrix. Anstatt zu transponieren werden also einfach nochmals alle ARX-Operationen durchgeführt, jedoch werden die Indizes der Matrix so behandelt, als würde man bereits auf
-der transponierten Matrix arbeiten. Somit spart man sich in jedem Schritt das transponieren der Matrix ein, und führt zusätzlich pro Schleifendruchlauf gleich 2 Arbeitsschritte durch. Implementierung V2
-arbeitet auf die gleiche Weise wie Implementierung V1, nur das hier zusätzlich, unter Zuhilfenahme von SIMD Instruktionen, eine Viertelrunde vektorisiert ausgeführt wird. Eine Viertelrunde bestand zuvor 
-aus vier nacheinander ausgeführten ARX-Operationen, die jetzt gleichzeitig vollzogen werden. Auf eine Vektorisierung der Addierung der Ergebnismatrix aus den 10 durchgeführten Runden auf den Startzustand wurde verzichtet,
-da der Overhead der Lade- und Schreiboperationen den Speedup bei der Addition zunichte macht.
-\\Als Standardwerte für Key und Nonce wurde sich, jeweils für den respektiven Wertebereich, für große Primzahlen enschieden. Ein fester Wert für diese beiden Parameter stellt in Realität ein großes Sicherheitsrisiko dar, 
-da ein Angreifer nur diese beiden Werte benötigen würde, um jedes mit diesen Werten verschlüsselte File wieder zu entschlüsseln. In dieser Implementierung wurden jedoch feste Standardwerte verwendet, einerseits aus Gründen
+In der Funktion \texttt{salsa20\_core} wird das Verhalten der in Abschnitt \ref{salsa20-kern} beschriebenen Salsa20-Kern-Funktion exakt nachempfunden. Für die Implementierung V1 wurden jedoch kleine Änderungen vorgenommen.
+Als Ansatz zur Optimierung wurden hier die 20 Runden auf nur 10 Runden reduziert, in denen jedoch die doppelte Arbeit verrichtet wird. Es ist also eine Art \emph{loop unrolling} mit zusätzlichem Einsparen des 
+Transponierens der Matrix. Anstatt zu transponieren werden also einfach nochmals alle ARX-Operationen durchgeführt, jedoch werden die Indizes der Matrix so behandelt, als würde man bereits auf
+der transponierten Matrix arbeiten. Somit spart man sich in jedem Schritt das Transponieren der Matrix und führt zusätzlich pro Schleifendurchlauf gleich 2 Arbeitsschritte durch. Implementierung V2
+arbeitet auf die gleiche Weise wie Implementierung V1, nur das hier zusätzlich, unter Zuhilfenahme von \emph{SIMD}-Instruktionen, eine Viertelrunde vektorisiert ausgeführt wird. Eine Viertelrunde bestand zuvor 
+aus vier nacheinander ausgeführten ARX-Operationen, die jetzt gleichzeitig vollzogen werden. Auf eine Vektorisierung der Addition der Ergebnismatrix aus den 10 durchgeführten Runden auf den Startzustand wurde verzichtet,
+da der \emph{Overhead} der Lade- und Schreiboperationen den \emph{Speedup} bei der Addition zunichte machen würde.
+\\Als Standardwerte für Key und Nonce wurden, jeweils für den respektiven Wertebereich, große Primzahlen gewählt. Ein fester Wert für diese beiden Parameter stellt in Realität ein großes Sicherheitsrisiko dar, 
+da ein Angreifer nur diese beiden Werte benötigen würde, um jedes, mit diesen Werten verschlüsselte, File wieder zu entschlüsseln. In dieser Implementierung wurden jedoch feste Standardwerte verwendet, einerseits aus Gründen
 der Einfachheit, andererseits um besser testen zu können. Man könnte in einer reellen Anwendung zum Beispiel anhand eines vom User eingebenen Passworts, 
 eindeutige Werte für Key und Nonce berechnen, um das File zu verschlüsseln. Wenn der User nun sein File entschlüsseln möchte, kann er sein Passwort eingeben und es werden dieselben Werte für Key und Nonce berechnet, anhand derer
 das File wieder entschlüsselt werden kann.
 
 \subsubsection{salsa20\_crypt} \label{crypt}
-Die salsa20\_crypt Funktion wird in allen Implementierungen erstmal der Startzustand der Matrix initalisiert. Für die Little-Endian-Reihenfolge des Keys, der Nonce und des Counters werden built\_in Funktionen verwendet.
-Anschließend wird mithilfe eines Pointercasts des output Pointers (\texttt{\textcolor{blue}{uint32\_t}}) zu einem \texttt{\textcolor{blue}{uint8\_t}} Pointer die XOR-Operationen durchgeführt. Dieser Pointercast stellt kein Undefined Behaviour dar, 
-da \texttt{\textcolor{blue}{uint8\_t}} keine strengeren alignment Anforderungen hat als \texttt{\textcolor{blue}{uint32\_t}}. Des weiteren liefert der Pointercast die Bytes der output Matrix für die XOR-Operation, genau wie vorgesehen, in Little-Endian-Reihenfolge.
-Anschließend werden nun die XOR-Operationen auf der message mit der output Matrix ausgeführt und in cipher gespeichert. Alle 64 XOR-Operationen wird der Counter inkrementiert und der Kern neu berechnet. Für V1 wird nur für die letzten $\leq 64$ Bytes mit dem Pointercast gearbeitet.
-Zuvor werden die XOR-Operationen mit der Berechnung des korrekten Index innerhalb der Matrix, der cipher und der message durchgeführt. Das reicht jedoch bereits für einen Signifikanten Speedup, dazu mehr in Abschnitt 4.
-Die Implementierung V2 basiert nahezu vollständig auf der Implementierung von V1, nur mit zusätzlicher Vektorisierung der XOR-Operation mithilfe von SIMD Operationen.
+In der \texttt{salsa20\_crypt}-Funktion wird in allen Implementierungen erstmal der Start\-zustand der Matrix initalisiert. Für die Little-Endian-Reihenfolge des Keys, der Nonce und des Counters werden \texttt{built\_in}-Funktionen verwendet.
+Anschließend wird mithilfe eines Pointercasts des \texttt{output} Pointers (\texttt{\textcolor{blue}{uint32\_t}}) zu einem \texttt{\textcolor{blue}{uint8\_t}} Pointer die XOR-Operationen durchgeführt. Dieser Pointercast stellt kein \texttt{Undefined Behaviour} dar, 
+da \texttt{\textcolor{blue}{uint8\_t}} keine strengeren \texttt{alignment}-Anforderungen hat als \texttt{\textcolor{blue}{uint32\_t}}. Des weiteren liefert der Pointercast die Bytes der \texttt{output}-Matrix für die XOR-Operation, genau wie vorgesehen, in Little-Endian-Reihenfolge.
+Anschließend werden nun die XOR-Operationen auf die Nachricht mit der \texttt{output}-Matrix ausgeführt und in \texttt{cipher} gespeichert. Alle 64 XOR-Operationen wird der Counter inkrementiert und der Kern neu berechnet. Für V1 wird nur für die letzten $\leq 64$ Bytes mit dem Pointercast gearbeitet.
+Zuvor werden die XOR-Operationen mit der Berechnung des korrekten Index innerhalb der Matrix, der Chiffre und der Nachricht durchgeführt. Das reicht jedoch bereits für einen signifikanten Speedup, dazu mehr in Abschnitt \ref{perf}.
+Die Implementierung V2 basiert nahezu vollständig auf der Implementierung von V1, nur mit zusätzlicher Vektorisierung der XOR-Operation mithilfe von SIMD-Operationen.
 
 
 \section{Korrektheit}
@@ -300,32 +285,35 @@ Im Folgenden wird auf die Korrektheit der Hauptimplementierung eingegangen.
 Es wird \textbf{nicht} auf die Genauigkeit des Programms eingegangen, da es bei Ver\-schlüsse\-lungsverfahren
 nur richtig oder falsch und eben kein ``ungenau'' gibt.
 \\
-Die Korrektheit unserer Implementationen des Salsa20/20 kyptographisches Verfahrens haengt von der Korrektheit der Kryptfunktion und der Kernfunktion, sowie vom Einlesen des Schluessels an. (Das Einlesen vom Nonce nutzt Funktionen der standard Bibliothek, von denen wir annehmen können, dass sie korrekt sind).
+Die Korrektheit unserer Implementationen des Salsa20/20-Verfahrens hängt von der Korrektheit der Kryptfunktion und der Kernfunktion, sowie vom Einlesen des Schlüssels ab. (Das Einlesen der Nonce nutzt Funktionen der Standard-Bibliothek, von denen wir annehmen können, dass sie korrekt sind).
 
-\subsection{Einlesen vom Schluessel}
-Beim Einlesen es ist unerheblich, ob wir ein hex Nummer oder ein String eingeben, da sie auf die gleiche Weise interpretiert werden, auch wenn sie einen etwas anderen Algorithmus erfordern, um sie in ein Array von uint32\_t zu parsen. [reference to key]
-Um dann die Korrektheit des Parsings der Eingabe zu überprüfen, müssen wir nur einige repräsentative Unit-Tests schreiben, die als Eingabe einen String haben, wie man ihn von der Eingabe als optarg erhalten würde, und vergleichen die Ausgabe der void convert\_string\_to\_uint32\_t\_array(const char *string, uint32\_t key[8]) mit einem erwarteten Array.
-Man kann dazu auch einige Testfaelle schreiben, die die Ergebnisse zwischen gleichwertige Eingabe jeweils in hex und string vergleichen.
+\subsection{Einlesen des Schlüssels}
+Beim Einlesen ist es irrelevant, ob eine Hexzahl oder einen String eingeben wird, da sie auf die gleiche Weise interpretiert werden, 
+auch wenn sie einen etwas anderen Algorithmus erfordern, um sie in ein Array von \texttt{\textcolor{blue}{uint32\_t}} zu parsen. 
+Wie das Parsen des Keys funktioniert wird in Abschnitt \ref{main} genauer erläutert.
+Um dann die Korrektheit der geparsten Eingabe zu überprüfen, müssen nur einige repräsentative Unit-Tests geschrieben werden, 
+die als Eingabe einen String nehmen, wie man ihn von der Eingabe als \texttt{optarg} erhalten würde. Die Ausgabe 
+von \texttt{convert\_string\_to\_uint32\_t\_array} wird dann mit einem Array mit den erwarteten Werten verglichen.
+Es wurden einige Testfälle angefertigt, die die Ergebnisse zwischen gleichwertigen Eingaben jeweils hexadezimal und als String vergleichen.
 
 
 \subsection{Die Kryptfunktion}
-Die Funktionsweise der Kryptfunktion nutzt XOR Operationen um die message mit der Ausgabe von der Kernfunktion zu Verschluesseln [reference to crypt beschreibung]
-
-Wie bereits im theoretischen (Abschnitt \ref{streamcipher}) und praktischen (Abschnitt \ref{crypt}) Teilen des Loesungsansatzes gezeigt,
- die XOR Operation ist zum Ver- und Entschluesselung benutzt. 
- Um also die Korrektheit der Kryptfunktion zu testen, müssen wir nur einige repräsentative manuelle
-  und eine Menge automatisierter Zufallstests schreiben, die die Kryptfunktion zweimal aufrufen.
-  Beim ersten Aufruf ist dann die Eingabe eine message-Array, die Ausgabe ist eine Chiffre, 
-  beim zweiten Aufruf ist die Eingabe diese Chiffre und die Ausgabe ein anderes Array. 
-  Am Ende vergleichen wir das ursprüngliche message-Array mit dem Array, das nach dem zweiten 
-  Funktionsaufruf ausgegeben wird.
+Die Kryptfunktion \texttt{salsa20\_crypt} nutzt XOR-Operationen, um die Nachricht mit der Ausgabe der Kernfunktion \texttt{salsa20\_core} zu verschlüsseln.
+In Abschnitt \ref{crypt} wird die Funktionsweise der Kryptfunktion genauer beschrieben.
+Wie bereits in den theoretischen (Abschnitt \ref{streamcipher}) und in den praktischen (Abschnitt \ref{crypt}) Teilen des Lösungsansatzes gezeigt,
+wird die XOR Operation zum Ver- und Entschlüsseln benutzt. 
+Um also die Korrektheit der Kryptfunktion zu testen, müssen nur einige repräsentative, manuelle
+und viele automatisierte Zufallstests geschrieben werden, die die Kryptfunktion zweimal aufrufen.
+Beim ersten Aufruf ist dann die Eingabe ein Array, das die zu verschlüsselnde Nachricht enthält und die Ausgabe ist eine Chiffre. 
+Beim zweiten Aufruf ist die Eingabe diese Chiffre und die Ausgabe ein anderes Array. 
+Am Ende vergleichen wir das ursprüngliche Array mit dem Array, das nach dem zweiten 
+Funktionsaufruf ausgegeben wird.
 
 
 \subsection{Die Kernfunktion}
-Die Spezifikationen der Kernfunktion werden in dieser Arbeit beschrieben \cite{salsa20specification}
-
-Um unsere Implementierung dieser Funktion zu testen, wurde beschlossen, die vom Autor selbst in C geschriebene Referenzimplementierung zu verwenden \cite{salsa20}
-Der Aufruf dieser Referenzimplementierung für eine Menge von Eingaben und auch eine der Versionen unserer Implementierung mit denselben Eingaben sollte dann dieselbe Chiffre ergeben, wenn die Version tatsächlich korrekt implementiert wurde. 
+Die Spezifikationen der Kernfunktion werden in einem Paper von Daniel J. Bernstein beschrieben. \cite{salsa20specification}
+Die Kernfunktion wurde mit der vom Autor selbst in C geschriebenen Referenzimplementierung verglichen. \cite{salsa20}
+Der Aufruf dieser Referenzimplementierung für eine Menge von Eingaben und auch eine der Versionen unserer Implementierung mit denselben Eingaben ergibt dieselbe Chiffre, wenn die Version tatsächlich korrekt implementiert wurde. 
 Auch hier kann man einige repräsentative manuelle Tests und eine Menge von automatisierten Zufallstests schreiben, um zu pruefen, ob das eigentlich stimmt. 
 
 Es können auch einige manuelle Tests geschrieben werden, die die Kernfunktion direkt aufrufen und dabei die Eingabe und die erwartete Ausgabe aus Abschnitt 8 "Die Salsa20-Hash-Funktion" der Spezifikation verwenden \cite{salsa20specification}.
@@ -335,7 +323,7 @@ Es können auch einige manuelle Tests geschrieben werden, die die Kernfunktion d
 Die obengenannten Tests können mit der Option -t X aufgerufen werden, wobei X für die Anzahl der automatisierten Tests steht, die durchgeführt werden. Die manuellen Tests werden in ihrer Gesamtheit durchgeführt, unabhängig davon, was X ist. Um die verschiedene Implementationen zu testen, man kann das Programm mit -V X ausfuehren, wobei X fuer die jeweilige Implementation (0,1 oder 2) steht.
 
 
-\section{Performanzanalyse}
+\section{Performanzanalyse} \label{perf}
 \subsection{Vergleich der Implementierungen}
 Es wurden pro GCC-Optimierungsstufe und Implementierungsversion 25 
 Iterationen des Verfahrens auf einer 100MB großen Datei ausgeführt. Die Datei
@@ -476,7 +464,7 @@ geworden wäre.
 Weiters könnte der I/O-Teil des Rahmenprogramms dahingehend verbessert werden, dass auch Dezimal- und
 Oktalzahlen als Eingabe entgegengenommen werden können. Allgemein hätte das Rahmenprogramm auch mit einem 
 TUI umgesetzt werden können, sodass Optionen graphisch ausgewählt werden können.
-
+% TODO: key random generieren und ausgeben oder mit passwort umsetzen
 
 
 % TODO: Fuegen Sie Ihre Quellen der Datei Ausarbeitung.bib hinzu
