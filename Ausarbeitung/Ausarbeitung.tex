@@ -295,7 +295,7 @@ Kompiliert wurde mit GCC 12.1.1.
             every node near coord/.append style={font = {\fontsize{7 pt}{12 pt}\selectfont},color=black},
         ]
         \addplot[blue,fill=blue!30]
-        coordinates {(O0,25,39) (O2,6.21)
+        coordinates {(O0,25.39) (O2,6.21)
                 (O3,6.43) (Ofast,6.76) };
 
         \addplot[red,fill=red!30]
@@ -321,33 +321,33 @@ rowRound und columRound zu salsa\_core zusammengefasst.
 \begin{center}
     \begin{tikzpicture}[trim axis left, trim axis right]
         \begin{axis}[
-                symbolic x coords={\_\_vfprintf\_internal, salsa\_core, rotateLeft, salsa\_crypt},
-                xtick = {\_\_vfprintf\_internal, salsa\_core, rotateLeft, salsa\_crypt},
+                symbolic x coords={salsa\_core, salsa\_crypt, rotateLeft},
+                xtick = {salsa\_core, salsa\_crypt, rotateLeft},
                 x tick label style={rotate=45, anchor=east, align=center},
                 legend style={at={(0.5,-0.35)},
                         anchor=north,legend columns=-1},
                 ybar,
                 ymin=0,
                 ymajorgrids=true,
-                ylabel=Sekunden pro Iteration,
+                ylabel=Anteil an der Ausführungszeit in Prozent,
                 bar width=6mm,
-                width=110mm,
+                width=90mm,
                 height=\axisdefaultheight,
-                enlarge x limits=0.2,
+                enlarge x limits=0.3,
                 nodes near coords,
                 every node near coord/.append style={font = {\fontsize{7 pt}{12 pt}\selectfont},color=black},
             ]
             \addplot[blue,fill=blue!30]
-            coordinates {(\_\_vfprintf\_internal,5.34) (salsa\_core,1.85)
-            (rotateLeft,1.59) (salsa\_crypt,0.62)};
+            coordinates {(salsa\_core,13.61)
+            (rotateLeft,13.27) (salsa\_crypt,4.26)};
     
             \addplot[red,fill=red!30]
-            coordinates {(\_\_vfprintf\_internal,5.02) (salsa\_core,1.35)
-                    (rotateLeft,1.52) (salsa\_crypt,0.73)};
+            coordinates {(salsa\_core,9.63)
+                    (rotateLeft,11.98) (salsa\_crypt,5.58)};
     
             \addplot[violet,fill=violet!30]
-            coordinates {(\_\_vfprintf\_internal,8.83) (salsa\_core,3.04)
-                    (rotateLeft,14.05) (salsa\_crypt,0.23)};
+            coordinates {(salsa\_core,8.79)
+                    (rotateLeft,41.08) (salsa\_crypt,0.73)};
     
             \legend{V0,V1,V2}
         \end{axis}

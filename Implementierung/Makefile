@@ -2,7 +2,7 @@
 CC=gcc
 
 #defines extra Flags for the compiler
-CFLAGS=-O1 -std=c11 -msse4.1
+CFLAGS=-O0 -std=c11 -msse4.1
 
 #defines extra Flags for debugging
 CFLAGS_DEBUG = -g3 -Wall -Wextra -Wpedantic -Wdouble-promotion -Wformat -Wformat-truncation -Wundef -fno-common -Wmisleading-indentation -fsanitize=address -fsanitize=undefined -fsanitize=leak -static-libasan
