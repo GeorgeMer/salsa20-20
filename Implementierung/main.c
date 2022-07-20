@@ -55,7 +55,7 @@ const char *help_msg =
     "\n"
     "Please note:\n"
     "  Negative Numbers are not allowed.\n"
-    "  If -o is not set, the program will create an output file with the name result.txt in the current directory."
+    "  If -o is not set, the program will create an output file with the name result.txt in the current directory.\n"
     "  To decrypt a file, just call the program with the output file (of the previous encryption) as input file and with the same key and nonce already used for encryption.\n"
     "  If the file contains any key whose respective ASCII value is not in [32;126], decryption will not yield the expected result.\n";
 
