@@ -231,7 +231,7 @@ Der Key lässt sich entweder als Hexadezimalzahl eingeben, indem man das Präfix
 nach ASCII-Codierung interpretiert wird.
 \\Die Eingabe 
 \begin{center}
-  \texttt{./salsa -k 0x48656c6c6f20576f726c64  some\_path}
+  \texttt{./salsa -k 0x48656C6C6F576F726C64  some\_path}
 \end{center} 
 wäre also äquivalent zur Eingabe
 \begin{center}
@@ -239,12 +239,14 @@ wäre also äquivalent zur Eingabe
 \end{center}
 Diese Designentscheidung wurde getroffen, da z.B. eine Eingabe als dezimale Zahlen zu erlauben sehr aufwändig gewesen wäre, denn zusätzlich zur maximalen Länge wäre auf over- bzw. underflows und diverse andere Probleme wie zum
 Beispiel führende Nullen oder unerlaubte Zeichen zu prüfen gewesen. Hexadezimalzahlen lassen sich jedoch sehr leicht konvertieren, genauso wie Strings interpretiert als ihre zugehörigen numerischen ASCII-Code Werte.
-\\Das schreiben ins Output file findet statt als die respektiven Bytes der cipher aneinandergehängt ausgegeben in Hexadezimaler Form, mit einer neuen Zeile alle 76 Zeichen (orientiert an den automatisch generierten Files von udev/random, die ebenfalls alle 76 Zeichen eine neue Zeile haben).
-Jedoch kann per Option auch eine Ausgabe als ASCII-Characters stattfinden, wobei hier darauf zu achten ist, dass nicht ins ASCII-Format konvertierbare Character dementsprechend nicht richtig ausgebenen werden können, und hierfür keine Fehlerbehandlung stattfindet. Diese Designentscheidung wurde getroffen, 
- da eine Ausgabe in Hexadezimaler Form sehr viel besser lesbar ist, als undefinierte Symbole. Die Option zum Ausgeben als ASCII-Characters wurde für die Entschlüsselung eingeführt, um Klartexte nicht als Hexadezimalzahl zu erhalten. Jedoch wurde auf eine interne Überprüfung, ob die Bytes der cipher
-ASCII repräsentierbar sind verzichtet, da die Laufzeit sich dadurch deutlich spürbar verschlechtert hätte. Die Ausgabe der cipher in Hexadezimaler Form kostet zwar auch sehr viel mehr Laufzeit als eine simpler Aufruf der fwrite Funktion, jedoch lohnt sich hier der Trade-off durchaus, 
-denn für den Fall das manche Zeichen nicht im ASCII-Format repräsentierbar sind, wäre die Ausgabe unbrauchbar.
-\\Beispiel: Bezeichne im folgenden some\_path den Pfad eines Text-Files mit folgendem Inhalt:
+\\Das schreiben ins Outputfile findet statt, als die respektiven Bytes der cipher aneinandergehängt ausgegeben in hexadezimaler Form, mit einer neuen Zeile alle 76 Zeichen für bessere Lesbarkeit.
+Für den Fall, dass jedes Byte der Cypher einem darstellbaren ASCII Character enstpricht, so findet die Ausgabe in ASCII Charactern statt. Diese Designentscheidung wurde getroffen, 
+da eine Ausgabe mithilfe von fwrite unbrauchbar ist, weil frwite nur die Binärdaten in das Outputfile schreibt, wohingegen eine Ausgabe in hexadezimaler Form tatsächlich lesbar ist.
+Das eine vollständig in ASCII darstellbare cipher auch in ASCII ausgegeben wird, dient der Entschlüsselung von bereits verschlüsselten Files.
+Das führt zwar zu einer längeren Laufzeit, da erst überprüft werden muss ob die cipher als ASCII Character dargstellt werden kann ist aber unverzichtbar um bei der Entschlüsselung Klartexte und keine Hexadezimalzahlen zu erhalten.
+Der Einfachheit halber werden jedoch nur ASCII Characters im Wertebereich von [32;126] akzeptiert, das heißt insbesondere sind Umlaute nicht unterstüzt.
+\\Beispiel: 
+\\Bezeichne im folgenden some\_path den Pfad eines Text-Files mit folgendem Inhalt:
 \begin{center}
     Hallo ich soll verschluesselt werden.
 \end{center}
@@ -254,11 +256,11 @@ Dann liefer folgender Aufruf
 \end{center}
 als Ergebnis im neu erstellen File result.txt
 \begin{center}
-    8444881893099052ce65bf7480b2c49eef490b1f4ae168cef688f4fe31de09beaad0296a95
+    ffaf8cc85945bbe69fb07860173e0f855ebe070b80c82b91922bcab1f0d85208fde3c49610
 \end{center}
 Sei path\_of\_result der Pfad des gerade erstellten Files result.txt. Dann liefert der Aufruf
 \begin{center}
-   ./salsa -e path\_of\_result
+   ./salsa path\_of\_result
 \end{center}
 das Egebnis (wieder in result.txt, da kein Pfad vom Benutzer angegeben wurde)
 \begin{center}
