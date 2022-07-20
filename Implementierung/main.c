@@ -25,33 +25,37 @@ static struct option long_options[] =
 size_t mlen = 0;
 
 const char *usage_msg =
-    "Usage: %s [-V X | -B X | -t X | -k K | -i I | -o P | -h | --help] file_path    Encrypt a file with Salsa20 encryption\n"
+    "Usage: %s [-V X | -B X | -t X | -k K | -i I | -o P | -h | --help] file_path    Encrypt/Decrypt a file with Salsa20 encryption\n"
     "   or: %s -h                                                                   Show help message and exit\n"
     "   or: %s --help                                                               Show help message and exit\n";
 
 const char *help_msg =
     "Positional arguments:\n"
-    "  path   The path to the file to be encrypted\n"
+    "  path   The path to the file to be encrypted.\n"
     "\n"
     "Optional arguments:\n"
     "  -V X   The implementation to be used (default: X = 0)\n"
-    "         Can be given as a hex with the prefix '0x' or as a decimal number. Leading zeroes are allowed.\n"
+    "         Can be given as a hex with the prefix '0x', Octal with prefix '0' or as a decimal number with no prefix.\n"
     "  -B X   If set, runtime of chosen implementation will be measured and output.\n"
     "         X represents the number of repetition of function calls (default: No runtime measurement)\n"
-    "         Can be given as a hex with the prefix '0x' or as a decimal number. Leading zeroes are allowed.\n"
+    "         Can be given as a hex with the prefix '0x', Octal with prefix '0' or as a decimal number with no prefix.\n"
     "  -t X   If set, tests will be executed that compare the chosen implementation with the reference implementation.\n"
     "         X represents the number of random tests in addition to the set tests that will be executed. (default: No tests are run)\n"
     "         (all tests run with random keys and nonces, random tests also have random messages)\n"
     "  -k K   K resembles the 256bit long key (default: K = 2^237 - 1711)\n"
-    "         The key can be either given as a hex with the '0x' prefix (it shouldn't be greater than 2^256-1, but can have leading zeroes),\n"
-    "         or as a sequence of characters(bytes). If the given string is smaller than 256bit, it will be padded with '0' bytes\n."
-    "         If the given string is greater than 256bit, only the first 32 characters will make up the key.\n"
+    "         The key can be either given as a hex with the '0x' prefix (it mustn't be greater than 2^256-1, but can have leading zeroes which are ignored),\n"
+    "         or as a sequence of characters(bytes). If the given string is longer than 32 characters, only the last 32 characters will make up the key.\n"
+    "         If the string contains a space character, the string has to be surrounded by (double or single) quotation marks.\n"
+    "         Therefore, quotation marks are not taken into consideration when converting the string into the key.\n"
     "  -i I   I resembles the initialization vector (default: I = 2^59 - 427)\n"
-    "         Can be given as a hex with the prefix '0x' or as a decimal number. Leading zeroes are allowed.\n"
+    "         Can be given as a hex with the prefix '0x', Octal with prefix '0' or as a decimal number with no prefix.\n"
     "  -o P   P is the path to the output file\n"
     "  -h     Show help message (this text) and exit\n"
     "  --help Same effect as -h\n"
-    "  Negative Numbers are not allowed.";
+    "Please note:\n"
+    "Negative Numbers are not allowed.\n"
+    "To decrypt a file, just call the program with the output file (of the previous encryption) as input file and with the same key and nonce already used for encryption.\n"
+    "If the file contains any key whose respective ASCII value is not in [32;126], decryption will not yield the expected result.\n";
 
 void print_usage(const char *progname) { fprintf(stderr, usage_msg, progname, progname, progname); }
 void print_help(const char *progname)
