@@ -27,7 +27,7 @@
 Sei es beim Herstellen einer Verbindung mit einem Server oder das Chatten mit Freunden und Bekannten rund um
 den Globus, nie genoss die Kryptographie mehr Relevanz als jetzt. Man möchte nicht, dass die Nachrichten,
 die man an seine Geliebten versendet, von einer dritten Person mitgelesen werden können. Darum existieren
-kryptographische Verfahren zur Verschlüsselung von Informationen. Eines dieser Verschlüsselungsverfahren ist
+kryptographische Verfahren zur Verschlüsselung von Informationen. Eines dieser Ver\-schlüsselungs\-verfahren ist
 Salsa20/20, welches es zu implementieren galt.
 
 \subsection{Funktionsweise Salsa20/20}
@@ -35,7 +35,7 @@ Salsa20/20 ist eine Stromchiffre basierend auf einem sogenannten Add-Rotate-XOR-
 David J. Bernstein.
 \\Salsa20/20 verwendet eine 4$\times$4 Matrix bestehend aus vorzeichenlosen 32-bit Little-Endian-Ganzzahlen,
 welche durch Add, Rotate und XOR Operationen aus bestimmen Startwerten erzeugt wird.
-Auf dieser generierten Matrix wird dann mit der zu verschlüsselnden Nachricht Byte für Byte eine XOR-Operation ausgeführt.
+Auf dieser generierten Matrix wird dann mit der zu ver\-schlü\-ssel\-nden Nachricht Byte für Byte eine XOR-Operation ausgeführt.
 
 \subsubsection{Der Salsa20-Kern:}
 Der Salsa20-Kern ist eine Funktion, welche einen 64-Byte Block generiert, auf dem, wie oben beschrieben, mit 
@@ -254,7 +254,7 @@ arbeitet auf die gleiche Weise wie Implementierung V1, nur das hier zusätzlich,
 aus vier nacheinander ausgeführten ARX-Operationen, die jetzt gleichzeitig vollzogen werden. Auf eine Vektorisierung der Addierung der Ergebnismatrix aus den 10 durchgeführten Runden auf den Startzustand wurde verzichtet,
 da der Overhead der Lade- und Schreiboperationen den Speedup bei der Addition zunichte macht.
 
-\subsubsection{salsa20\_crypt}
+\subsubsection{salsa20\_crypt} \label{crypt}
 Die salsa20\_crypt Funktion wird in allen Implementierungen erstmal der Startzustand der Matrix initalisiert. Für die Little-Endian-Reihenfolge des Keys, der Nonce und des Counters werden built\_in Funktionen verwendet.
 Anschließend wird mithilfe eines Pointercasts des output Pointers (\texttt{\textcolor{blue}{uint32\_t}}) zu einem \texttt{\textcolor{blue}{uint8\_t}} Pointer die XOR-Operationen durchgeführt. Dieser Pointercast stellt kein Undefined Behaviour dar, 
 da \texttt{\textcolor{blue}{uint8\_t}} keine strengeren alignment Anforderungen hat als \texttt{\textcolor{blue}{uint32\_t}}. Des weiteren liefert der Pointercast die Bytes der output Matrix für die XOR-Operation, genau wie vorgesehen, in Little-Endian-Reihenfolge.
@@ -308,6 +308,8 @@ Kompiliert wurde mit GCC 12.1.1.
         \legend{V0,V1,V2}
     \end{axis}
 \end{tikzpicture}
+\captionof{figure}{Laufzeiten der Implementierungen}
+\label{diagram1}
 \end{center}
 
 
@@ -316,7 +318,8 @@ Durch Analyse der drei Implementierung mit dem Tool \emph{perf} - unter
 den gleichen Testbedingungen als zuvor, mit der Änderung, dass nur mit O0 kompiliert wurde 
 - zeigt sich, warum V1 etwas schneller als V0 ist und warum V2 langsamer ist.
 Um eine übersichtliche Dartstellung zu ermöglichen, wurden die Funktionen salsa\_core,
-rowRound und columRound zu salsa\_core zusammengefasst.
+rowRound und columRound zu salsa\_core zusammengefasst. Weiters wird angemerkt, dass
+Funktionssuffixe wie v1 weggelassen werden.
 
 \begin{center}
     \begin{tikzpicture}[trim axis left, trim axis right]
@@ -352,9 +355,23 @@ rowRound und columRound zu salsa\_core zusammengefasst.
             \legend{V0,V1,V2}
         \end{axis}
     \end{tikzpicture}
+    \captionof{figure}{Relative Laufzeiten der Implementierungen}
+\label{diagram2}
 \end{center}
 Aus den erhobenen Daten geht hervor, dass der Hauptgrund für den Performanzvorteil von 
-V1 gegenüber V0 bei salsa\_core liegt, da hier auf das Transponieren der Matrix verzichtet wird.
+V1 gegenüber V0 (bei Kompilierung mit O0) bei \texttt{salsa\_core} liegt, vermutlich da hier auf das 
+Transponieren der Matrix verzichtet wird.
+Die Unterschiede bei \texttt{salsa\_crypt} und \texttt{rotateLeft} sind deutlich geringer und vermutlich dadurch
+entstanden, da der Anteil von \texttt{salsa\_core} in V1 deutlich gesunken ist. V0 und V1 verwenden beide
+dieselbe Implementierung von \texttt{rotateLeft} und \texttt{salsa\_crypt} unterscheidet sich hier auch nur minimal
+wie in Abschnitt \ref{crypt} genauer beschrieben. Während V1 merkbar schneller als V0 ist, ist V2 in Figure 
+\ref{diagram1} signifikant langsamer als die beiden anderen Implementierungen. Dies liegt hauptsächlich an \texttt{rotateLeft}, 
+das für V2 mit SIMD-Instruktionen umgesetzt wurde. Durch das Verwenden des \emph{annotate}-Features von 
+\emph{perf}, erkennt man, dass die meiste Zeit der Laufzeit in rotateLeft in V2 für \texttt{mov}-Operationen in 
+\emph{xmm}-Register verwendet wird. Anzumerken ist, dass die XOR-Operation, die in den beiden anderen Implementierungen
+in \texttt{salsa\_core} stattfindet, in V2 in \texttt{rotateLeft} geschieht, was sich aber nur gering auf die Messung auswirkt,
+da laut \emph{perf} die Instruktion \texttt{pxor} nur zu einem geringen Prozentsatz von < 0.1\% zur Laufzeit beiträgt.
+
 
 
 \section{Zusammenfassung und Ausblick}
