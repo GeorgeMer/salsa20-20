@@ -27,7 +27,7 @@
 Sei es beim Herstellen einer Verbindung mit einem Server oder das Chatten mit Freunden und Bekannten rund um
 den Globus, nie genoss die Kryptographie mehr Relevanz als jetzt. Man möchte nicht, dass die Nachrichten,
 die man an seine Geliebten versendet, von einer dritten Person mitgelesen werden können. Darum existieren
-kryptographische Verfahren zur Verschlüsselung von Informationen. Eines dieser Verschlüsselungsverfahren ist
+kryptographische Verfahren zur Verschlüsselung von Informationen. Eines dieser Ver\-schlüsselungs\-verfahren ist
 Salsa20/20, welches es zu implementieren galt.
 
 \subsection{Definitionen}
@@ -40,7 +40,7 @@ Salsa20/20 ist eine Stromchiffre basierend auf einem sogenannten Add-Rotate-XOR-
 David J. Bernstein.
 \\Salsa20/20 verwendet eine 4$\times$4 Matrix bestehend aus vorzeichenlosen 32-bit Little-Endian-Ganzzahlen,
 welche durch Add, Rotate und XOR Operationen aus bestimmen Startwerten erzeugt wird.
-Auf dieser generierten Matrix wird dann mit der zu verschlüsselnden Nachricht Byte für Byte eine XOR-Operation ausgeführt.
+Auf dieser generierten Matrix wird dann mit der zu ver\-schlü\-ssel\-nden Nachricht Byte für Byte eine XOR-Operation ausgeführt.
 
 \subsubsection{Der Salsa20-Kern:}
 Der Salsa20-Kern ist eine Funktion, welche einen 64-Byte Block generiert, auf dem, wie oben beschrieben, mit 
@@ -86,9 +86,9 @@ Folgende theoretische Fragen waren zu beantworten:
 Zu implementieren  war folgende Funktionalität:
 \begin{itemize}
     \item Ein Rahmenprogramm welches I/O-Operationen unterstützt, mithilfe derer man eine ganze Datei in den Speicher einlesen und als Pointer an eine Unterfunktion übergeben kann. Selbiges soll auch zum Schreiben eines Speicherbereiches mit bekannter Länge in eine Datei möglich sein.
-    \item \textcolor{blue}{void} salsa20\_core (\textcolor{blue} {uint32\_t} output[16] \textcolor{blue}{const uint32\_t} input[16]) \\
+    \item \texttt{ \textcolor{blue}{void} salsa20\_core (\textcolor{blue} {uint32\_t} output[16], \textcolor{blue}{const uint32\_t} input[16])} \\
     Diese Funktion implementiert den oben beschriebenen Salsa20-Kern. input bezeichnet dabei den Startzustand des Kerns, output den finalen 64-Byte-Block. \\
-    \item \textcolor{blue} {void} salsa20\_crypt (\textcolor{blue}{size\_t} mlen, \textcolor{blue} {const uint8\_t} msg[mlen], \textcolor{blue}{uint8\_t} cipher [mlen], \textcolor{blue}{uint32\_t} key[8], \textcolor{blue} {uint64\_t} iv) \\
+    \item \texttt{ \textcolor{blue} {void} salsa20\_crypt (\textcolor{blue}{size\_t} mlen, \textcolor{blue} {const uint8\_t} msg[mlen], \textcolor{blue}{uint8\_t} cipher [mlen], \textcolor{blue}{uint32\_t} key[8], \textcolor{blue} {uint64\_t} iv) }\\
     Diese Funktion verschlüsselt eine Nachricht msg der Länge mlen mit einem gegebenen Schlüssel Key und einer Nonce (iv) und schreibt das Ergebnis in cipher.
 \end{itemize}
 
@@ -161,7 +161,7 @@ Diese Transformation ist ebenfalls invertierbar und bleibt auch, in den meisten 
 kann man eine Vielzahl von \textbf{beiden} auf die ursprüngliche Matrix anwenden und am Ende der Salsa20-Kern Funktion, unabhängig von der Reihenfolge des Anwendens, immer noch dasselbe Ergebnis erhalten.
 \vspace{1mm}
 \\Beim verwenden der Salsa20-Kern Funktion mit beliebigen Matrizen stellen diese Eigenschaften ein großes Sicherheitsrisikio dar.
-Bei kryptographischen Verfahren ist das Ziel normalerweise, eine Struktur so zu zerstören, dass ein Angriff sie nicht wiederherstellen kann.
+Bei kryptographischen Verfahren ist das Ziel normalerweise, die Struktur so zu zerstören, dass ein Angriff sie nicht wiederherstellen kann.
 Die Verschiebungen und Bitrotationen werden von der Funktion jedoch in keiner Weise beeinflusst.
 \vspace{1mm}
 \\An dieser Stelle kommen die Konstanten auf der Diagonale ins Spiel:
@@ -177,7 +177,7 @@ wo die Diagonale nach einer bestimmten Anzahl von Verschiebungen/Rotationen mit 
 auf das in einer anderen Arbeit\cite{onTheSalsa20Core} hingewiesen wurde.\\
 Das Kollisionsproblem besagt, dass:
 \begin{gather*} Salsa20(x) = Salsa20(x + \Delta) \text{  mit z.B.  } \Delta=(0x80000000,0x80000000,...) \end{gather*}
-Ein solches $x+\Delta$ ist keine gültige Eingabe für eine Salsa20-Kern Funktion (sofern $x$ eine gültige Eingabe ist) und wird daher in der Praxis nie vorkommen.
+Ein solches $x+\Delta$ ist aber keine gültige Eingabe für eine Salsa20-Kern Funktion (sofern $x$ eine gültige Eingabe ist) und wird daher in der Praxis nie vorkommen.
 Das Gleiche gilt für andere Beispiele von Kollisionen, die in dieser Arbeit auftauchen.
 
 
@@ -231,11 +231,11 @@ Der Key lässt sich entweder als Hexadezimalzahl eingeben, indem man das Präfix
 nach ASCII-Codierung interpretiert wird.
 \\Die Eingabe 
 \begin{center}
-    ./salsa -k 0x48656c6c6f20576f726c64  some\_path 
+  \texttt{./salsa -k 0x48656c6c6f20576f726c64  some\_path}
 \end{center} 
 wäre also äquivalent zur Eingabe
 \begin{center}
-    ./salsa -k ``Hello World'' some\_path
+   \texttt{./salsa -k ``Hello World'' some\_path}
 \end{center}
 Diese Designentscheidung wurde getroffen, da z.B. eine Eingabe als dezimale Zahlen zu erlauben sehr aufwändig gewesen wäre, denn zusätzlich zur maximalen Länge wäre auf over- bzw. underflows und diverse andere Probleme wie zum
 Beispiel führende Nullen oder unerlaubte Zeichen zu prüfen gewesen. Hexadezimalzahlen lassen sich jedoch sehr leicht konvertieren, genauso wie Strings interpretiert als ihre zugehörigen numerischen ASCII-Code Werte.
@@ -258,7 +258,7 @@ als Ergebnis im neu erstellen File result.txt
 \end{center}
 Sei path\_of\_result der Pfad des gerade erstellten Files result.txt. Dann liefert der Aufruf
 \begin{center}
-    ./salsa -e path\_of\_result
+   ./salsa -e path\_of\_result
 \end{center}
 das Egebnis (wieder in result.txt, da kein Pfad vom Benutzer angegeben wurde)
 \begin{center}
@@ -270,15 +270,22 @@ In der Funktion salsa20\_core wird das Verhalten der in Abschnitt 1.2.1 beschrie
 Als Ansatz zur Optimierung wurden hier die 20 Runden auf nur 10 Runden reduziert, in denen man jedoch die doppelte Arbeit verrichtet. Es ist also eine Art loop unrolling mit zusätzlichem einsparen des 
 transponierens der Matrix. Anstatt zu transponieren werden also einfach nochmals alle ARX-Operationen durchgeführt, jedoch werden die Indizes der Matrix so behandelt, als würde man bereits auf
 der transponierten Matrix arbeiten. Somit spart man sich in jedem Schritt das transponieren der Matrix ein, und führt zusätzlich pro Schleifendruchlauf gleich 2 Arbeitsschritte durch. Implementierung V2
-arbeitet auf die gleiche Weise wie Implementierung V1, nur das hier zusätzlich, unter Zuhilfenahme von SIMD Operationen, eine Viertelrunde vektorisiert ausgeführt wird. Eine Viertelrunde bestand zuvor 
+arbeitet auf die gleiche Weise wie Implementierung V1, nur das hier zusätzlich, unter Zuhilfenahme von SIMD Instruktionen, eine Viertelrunde vektorisiert ausgeführt wird. Eine Viertelrunde bestand zuvor 
 aus vier nacheinander ausgeführten ARX-Operationen, die jetzt gleichzeitig vollzogen werden. Auf eine Vektorisierung der Addierung der Ergebnismatrix aus den 10 durchgeführten Runden auf den Startzustand wurde verzichtet,
 da der Overhead der Lade- und Schreiboperationen den Speedup bei der Addition zunichte macht.
 Ein Beispiel
 
+<<<<<<< HEAD
 \subsubsection{salsa20\_crypt}
 In der salsa20\_crypt Funktion wird in allen Implementierungen erstmal der Startzustand der Matrix initalisiert. Für die Little-Endian-Reihenfolge des Keys, der Nonce und des Counters werden built\_in Funktionen verwendet.
 Anschließend wird mithilfe eines Pointercasts des output Pointers (\textcolor{blue}{uint32\_t}) zu einem \textcolor{blue}{uint8\_t} Pointer die XOR-Operationen durchgeführt. Dieser Pointercast stellt kein Undefined Behaviour dar, 
 da \textcolor{blue}{uint8\_t} keine strengeren alignment Anforderungen hat als \textcolor{blue}{uint32\_t}. Desweiteren liefert der Pointercast die Bytes der output Matrix für die XOR-Operation, genau wie vorgesehen, in Little-Endian-Reihenfolge.
+=======
+\subsubsection{salsa20\_crypt} \label{crypt}
+Die salsa20\_crypt Funktion wird in allen Implementierungen erstmal der Startzustand der Matrix initalisiert. Für die Little-Endian-Reihenfolge des Keys, der Nonce und des Counters werden built\_in Funktionen verwendet.
+Anschließend wird mithilfe eines Pointercasts des output Pointers (\texttt{\textcolor{blue}{uint32\_t}}) zu einem \texttt{\textcolor{blue}{uint8\_t}} Pointer die XOR-Operationen durchgeführt. Dieser Pointercast stellt kein Undefined Behaviour dar, 
+da \texttt{\textcolor{blue}{uint8\_t}} keine strengeren alignment Anforderungen hat als \texttt{\textcolor{blue}{uint32\_t}}. Des weiteren liefert der Pointercast die Bytes der output Matrix für die XOR-Operation, genau wie vorgesehen, in Little-Endian-Reihenfolge.
+>>>>>>> 2737a4b17e5d1231c4d3e3650b86042841d467d6
 Anschließend werden nun die XOR-Operationen auf der message mit der output Matrix ausgeführt und in cipher gespeichert. Alle 64 XOR-Operationen wird der Counter inkrementiert und der Kern neu berechnet. Für V1 wird nur für die letzten $\leq 64$ Bytes mit dem Pointercast gearbeitet.
 Zuvor werden die XOR-Operationen mit der Berechnung des korrekten Index innerhalb der Matrix, der cipher und der message durchgeführt. Das reicht jedoch bereits für einen Signifikanten Speedup, dazu mehr in Abschnitt 4.
 Die Implementierung V2 basiert nahezu vollständig auf der Implementierung von V1, nur mit zusätzlicher Vektorisierung der XOR-Operation mithilfe von SIMD Operationen.
@@ -288,14 +295,14 @@ Die Implementierung V2 basiert nahezu vollständig auf der Implementierung von V
 
 \section{Performanzanalyse}
 \subsection{Vergleich der Implementierungen}
+Während sich zwischen V0 und V1 nur geringe bis zu vernachlässigbar kleine 
+Performanzunterschiede zeigen, ist die V2 deutlich langsamer.
 Es wurden pro GCC-Optimierungsstufe und Implementierungsversion 5 
 Iterationen des Verfahrens auf einer 1GB großen Datei ausgeführt.
 Die Laufzeiten wurden vom Rahmenprogramm selbst durch setzen des -B Flags
 gemessen. Getestet wurde auf einem Notebook mit einem AMD Ryzen 7 5800H, 
 4.4GHz, 16 GiB Arbeitsspeicher, Fedora 36, 64 Bit, Linux Kernel 5.18.11.
 Kompiliert wurde mit GCC 12.1.1.
-Im Folgenden wird die Hauptimplementierung mit V0, die erste optimierte Implementierung
-mit V1 und die mit SIMD-Instruktionen optimierte Implementierung mit V2 bezeichnet.
 
 \begin{center}
 \begin{tikzpicture}[trim axis left, trim axis right]
@@ -307,8 +314,8 @@ mit V1 und die mit SIMD-Instruktionen optimierte Implementierung mit V2 bezeichn
             ybar,
             ymin=0,
             ymajorgrids=true,
-            ylabel=Seconds per iteration,
-            bar width=5mm,
+            ylabel=Sekunden pro Iteration,
+            bar width=6mm,
             width=110mm,
             height=\axisdefaultheight,
             enlarge x limits=0.2,
@@ -316,63 +323,84 @@ mit V1 und die mit SIMD-Instruktionen optimierte Implementierung mit V2 bezeichn
             every node near coord/.append style={font = {\fontsize{7 pt}{12 pt}\selectfont},color=black},
         ]
         \addplot[blue,fill=blue!30]
-        coordinates {(O0,13.55) (O2,6.01)
-                (O3,5.87) (Ofast,5.94) };
+        coordinates {(O0,25.39) (O2,6.21)
+                (O3,6.43) (Ofast,6.76) };
 
         \addplot[red,fill=red!30]
-        coordinates {(O0,12.41) (O2,6.02)
-                (O3,5.47) (Ofast,5.49) };
+        coordinates {(O0,13.26) (O2,6.33)
+                (O3,5.81) (Ofast,5.77) };
 
         \addplot [violet,fill=violet!30]
-        coordinates {(O0,33.08) (O2,7.81)
-                (O3,7.77) (Ofast,7.81) };
+        coordinates {(O0,33.03) (O2,7.86)
+                (O3,7.89) (Ofast,7.82) };
         \legend{V0,V1,V2}
     \end{axis}
 \end{tikzpicture}
+\captionof{figure}{Laufzeiten der Implementierungen}
+\label{diagram1}
 \end{center}
-Während sich zwischen V0 und V1 nur geringe bis zu vernachlässigbar kleine 
-Performanzunterschiede zeigen, ist die V2 deutlich langsamer.
+
 
 \subsection{Analyse der Performanzmessungen}
-Durch Analyse der drei Implementierung mit dem Tool perf - unter 
-den gleichen Testbedingungen als zuvor, mit der Änderung, dass nur mit O3 kompiliert wurde 
+Durch Analyse der drei Implementierung mit dem Tool \emph{perf} - unter 
+den gleichen Testbedingungen als zuvor, mit der Änderung, dass nur mit O0 kompiliert wurde 
 - zeigt sich, warum V1 etwas schneller als V0 ist und warum V2 langsamer ist.
+Um eine übersichtliche Dartstellung zu ermöglichen, wurden die Funktionen salsa\_core,
+rowRound und columRound zu salsa\_core zusammengefasst. Weiters wird angemerkt, dass
+Funktionssuffixe wie v1 weggelassen werden.
 
 \begin{center}
     \begin{tikzpicture}[trim axis left, trim axis right]
         \begin{axis}[
-                symbolic x coords={\_\_vfprintf\_internal, salsa\_core, rowRound, columRound, rotateLeft, salsa\_crypt},
-                xtick = {\_\_vfprintf\_internal, salsa\_core, rowRound, columRound, rotateLeft, salsa\_crypt},
+                symbolic x coords={salsa\_core, salsa\_crypt, rotateLeft},
+                xtick = {salsa\_core, salsa\_crypt, rotateLeft},
                 x tick label style={rotate=45, anchor=east, align=center},
-                legend style={at={(0.5,-0.45)},
+                legend style={at={(0.5,-0.35)},
                         anchor=north,legend columns=-1},
                 ybar,
                 ymin=0,
                 ymajorgrids=true,
-                ylabel=Seconds per iteration,
-                bar width=5.5mm,
-                width=150mm,
+                ylabel=Anteil an der Ausführungszeit in Prozent,
+                bar width=6mm,
+                width=90mm,
                 height=\axisdefaultheight,
-                enlarge x limits=0.1,
+                enlarge x limits=0.3,
                 nodes near coords,
                 every node near coord/.append style={font = {\fontsize{7 pt}{12 pt}\selectfont},color=black},
             ]
             \addplot[blue,fill=blue!30]
-            coordinates {(\_\_vfprintf\_internal,39.40) (salsa\_core,13.64)
-                    (rowRound,0) (columRound,0) (rotateLeft,11.72) (salsa\_crypt,4.59)};
+            coordinates {(salsa\_core,13.61)
+            (rotateLeft,13.27) (salsa\_crypt,4.26)};
     
             \addplot[red,fill=red!30]
-            coordinates {(\_\_vfprintf\_internal,40.27) (salsa\_core,3.47)
-                    (rowRound,3.78) (columRound,3.61) (rotateLeft,12.24) (salsa\_crypt,5.85)};
+            coordinates {(salsa\_core,9.63)
+                    (rotateLeft,11.98) (salsa\_crypt,5.58)};
     
             \addplot[violet,fill=violet!30]
-            coordinates {(\_\_vfprintf\_internal,26.71) (salsa\_core,1.55)
-                    (rowRound,3.88) (columRound,3.77) (rotateLeft,42.49) (salsa\_crypt,0.71)};
+            coordinates {(salsa\_core,8.79)
+                    (rotateLeft,41.08) (salsa\_crypt,0.73)};
     
             \legend{V0,V1,V2}
         \end{axis}
     \end{tikzpicture}
-    \end{center}
+    \captionof{figure}{Relative Laufzeiten der Implementierungen}
+\label{diagram2}
+\end{center}
+Aus den erhobenen Daten geht hervor, dass der Hauptgrund für den Performanzvorteil von 
+V1 gegenüber V0 (bei Kompilierung mit O0) bei \texttt{salsa\_core} liegt, vermutlich da hier auf das 
+Transponieren der Matrix verzichtet wird.
+Die Unterschiede bei \texttt{salsa\_crypt} und \texttt{rotateLeft} sind deutlich geringer und vermutlich dadurch
+entstanden, da der Anteil von \texttt{salsa\_core} in V1 deutlich gesunken ist. V0 und V1 verwenden beide
+dieselbe Implementierung von \texttt{rotateLeft} und \texttt{salsa\_crypt} unterscheidet sich hier auch nur minimal
+wie in Abschnitt \ref{crypt} genauer beschrieben. Während V1 merkbar schneller als V0 ist, ist V2 in Figure 
+\ref{diagram1} signifikant langsamer als die beiden anderen Implementierungen. Dies liegt hauptsächlich an \texttt{rotateLeft}, 
+das für V2 mit SIMD-Instruktionen umgesetzt wurde. Durch das Verwenden des \emph{annotate}-Features von 
+\emph{perf}, erkennt man, dass die meiste Zeit der Laufzeit in rotateLeft in V2 für \texttt{mov}-Operationen in 
+\emph{xmm}-Register verwendet wird. Anzumerken ist, dass die XOR-Operation, die in den beiden anderen Implementierungen
+in \texttt{salsa\_core} stattfindet, in V2 in \texttt{rotateLeft} geschieht, was sich aber nur gering auf die Messung auswirkt,
+da laut \emph{perf} die Instruktion \texttt{pxor} nur zu einem geringen Prozentsatz von < 0.1\% zur Laufzeit beiträgt.
+
+
 
 \section{Zusammenfassung und Ausblick}
 

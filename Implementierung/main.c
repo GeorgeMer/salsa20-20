@@ -210,13 +210,15 @@ int main(int argc, char **argv)
             fprintf(stderr, "Something went wrong measuring the runtime.\n");
             return EXIT_FAILURE;
         }
+        double time = gettime_in_seconds(start, end);
+        double per_iter = time / number_of_iterations;
 
         // printing the result to the console
         printf("\n\nThe runtime for implementation "
                "%" PRIu64 " with "
                "%" PRIu64 " function calls amounts to "
-               "%f seconds.\n\n",
-               implementation_number, number_of_iterations, gettime_in_seconds(start, end));
+               "%f seconds.\nEach iteration took %f seconds.\n\n",
+               implementation_number, number_of_iterations, time, per_iter);
     }
 
     // run one iteration of the algorithm
