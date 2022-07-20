@@ -192,13 +192,13 @@ int main(int argc, char **argv)
             switch (implementation_number)
             {
             case 0:
-                salsa_crypt(mlen, message, cipher, key, iv);
+                salsa20_crypt(mlen, message, cipher, key, iv);
                 break;
             case 1:
-                salsa_crypt_v1(mlen, message, cipher, key, iv);
+                salsa20_crypt_v1(mlen, message, cipher, key, iv);
                 break;
             case 2:
-                salsa_crypt_v2(mlen, message, cipher, key, iv);
+                salsa20_crypt_v2(mlen, message, cipher, key, iv);
                 break;
             default:
                 break;
@@ -226,13 +226,13 @@ int main(int argc, char **argv)
     switch (implementation_number)
     {
     case 0:
-        salsa_crypt(mlen, message, cipher, key, iv);
+        salsa20_crypt(mlen, message, cipher, key, iv);
         break;
     case 1:
-        salsa_crypt_v1(mlen, message, cipher, key, iv);
+        salsa20_crypt_v1(mlen, message, cipher, key, iv);
         break;
     case 2:
-        salsa_crypt_v2(mlen, message, cipher, key, iv);
+        salsa20_crypt_v2(mlen, message, cipher, key, iv);
         break;
     default:
         break;

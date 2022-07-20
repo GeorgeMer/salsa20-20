@@ -30,8 +30,8 @@
 Sei es beim Herstellen einer Verbindung mit einem Server oder das Chatten mit Freunden und Bekannten rund um
 den Globus, nie genoss die Kryptographie mehr Relevanz als jetzt. Man möchte nicht, dass die Nachrichten,
 die man an seine Geliebten versendet, von einer dritten Person mitgelesen werden können. Darum existieren
-kryptographische Verfahren zur Verschlüsselung von Informationen. Eines dieser Ver\-schlüsselungs\-verfahren ist
-Salsa20/20, welches es zu implementieren galt.
+kryptographische Verfahren zur Verschlüsselung von Informationen. Eines dieser Ver\-schlüsselungs\-ver\-fahren ist
+\emph{Salsa20/20}, welches es zu implementieren galt.
 
 \subsection{Definitionen}
 Im Folgenden bezeichne: 
@@ -39,11 +39,12 @@ Im Folgenden bezeichne:
 \\ \hspace*{5mm} 2. $\oplus$ den Binären XOR-Operator.
 
 \subsection{Funktionsweise Salsa20/20}
-Salsa20/20 ist eine Stromchiffre basierend auf einem sogenannten Add-Rotate-XOR-Schema (kurz: ARX-Schema), ins Leben gerufen von
-David J. Bernstein.
-\\Salsa20/20 verwendet eine 4$\times$4 Matrix bestehend aus vorzeichenlosen 32-bit Little-Endian-Ganzzahlen,
-welche durch Add, Rotate und XOR Operationen aus bestimmen Startwerten erzeugt wird.
-Auf dieser generierten Matrix wird dann mit der zu ver\-schlü\-ssel\-nden Nachricht Byte für Byte eine XOR-Operation ausgeführt.
+Salsa20/20, im Folgenden auch Salsa20 genannt, ist eine Stromchiffre basierend auf einem sogenannten 
+\emph{Add-Rotate-XOR-Schema} (kurz: ARX-Schema), ins Leben gerufen von David J. Bernstein.\\
+Salsa20/20 verwendet eine 4$\times$4-Matrix bestehend aus vorzeichenlosen 32-bit \emph{Little-Endian-Ganzzahlen},
+welche durch \emph{Add}, \emph{Rotate} und \emph{XOR} Operationen aus bestimmten Startwerten erzeugt wird.
+Auf dieser generierten Matrix wird dann mit der zu ver\-schlü\-ssel\-nden Nachricht Byte für 
+Byte eine XOR-Operation ausgeführt.
 
 \subsubsection{Der Salsa20-Kern:}
 Der Salsa20-Kern ist eine Funktion, welche einen 64-Byte Block generiert, auf dem, wie oben beschrieben, mit 
@@ -383,15 +384,15 @@ von V0 minimiert werden.
 Durch Analyse der drei Implementierung mit dem Tool \emph{perf} - unter 
 den gleichen Testbedingungen als zuvor, mit der Änderung, dass nur mit \texttt{O0} kompiliert wurde 
 - zeigt sich, warum V1 etwas schneller als V0 ist und warum V2 langsamer ist.
-Um eine übersichtliche Dartstellung zu ermöglichen, wurden die Funktionen \texttt{salsa\_core},
-\texttt{rowRound} und \texttt{columRound} zu \texttt{salsa\_core} zusammengefasst. Weiters wird angemerkt, dass
+Um eine übersichtliche Dartstellung zu ermöglichen, wurden die Funktionen \texttt{salsa20\_core},
+\texttt{rowRound} und \texttt{columRound} zu \texttt{salsa20\_core} zusammengefasst. Weiters wird angemerkt, dass
 Funktionssuffixe wie \texttt{\_v1} weggelassen werden.
 
 \begin{center}
     \begin{tikzpicture}[trim axis left, trim axis right]
         \begin{axis}[
-                symbolic x coords={salsa\_core, salsa\_crypt, rotateLeft},
-                xtick = {salsa\_core, salsa\_crypt, rotateLeft},
+                symbolic x coords={salsa20\_core, salsa20\_crypt, rotateLeft},
+                xtick = {salsa20\_core, salsa20\_crypt, rotateLeft},
                 x tick label style={rotate=45, anchor=east, align=center},
                 legend style={at={(0.5,-0.35)},
                         anchor=north,legend columns=-1},
@@ -407,16 +408,16 @@ Funktionssuffixe wie \texttt{\_v1} weggelassen werden.
                 every node near coord/.append style={font = {\fontsize{7 pt}{12 pt}\selectfont},color=black},
             ]
             \addplot[blue,fill=blue!30]
-            coordinates {(salsa\_core,13.61)
-            (rotateLeft,13.27) (salsa\_crypt,4.26)};
+            coordinates {(salsa20\_core,13.61)
+            (rotateLeft,13.27) (salsa20\_crypt,4.26)};
     
             \addplot[red,fill=red!30]
-            coordinates {(salsa\_core,9.63)
-                    (rotateLeft,11.98) (salsa\_crypt,5.58)};
+            coordinates {(salsa20\_core,9.63)
+                    (rotateLeft,11.98) (salsa20\_crypt,5.58)};
     
             \addplot[violet,fill=violet!30]
-            coordinates {(salsa\_core,8.79)
-                    (rotateLeft,41.08) (salsa\_crypt,0.73)};
+            coordinates {(salsa20\_core,8.79)
+                    (rotateLeft,41.08) (salsa20\_crypt,0.73)};
     
             \legend{V0,V1,V2}
         \end{axis}
@@ -425,21 +426,21 @@ Funktionssuffixe wie \texttt{\_v1} weggelassen werden.
 \label{diagram2}
 \end{center}
 Aus den erhobenen Daten geht hervor, dass der Hauptgrund für den Performanzvorteil von 
-V1 gegenüber V0 (bei Kompilierung mit O0) bei \texttt{salsa\_core} liegt, vermutlich da hier auf das 
+V1 gegenüber V0 (bei Kompilierung mit O0) bei \texttt{salsa20\_core} liegt, vermutlich da hier auf das 
 Transponieren der Matrix verzichtet wird.
-Die Unterschiede bei \texttt{salsa\_crypt} und \texttt{rotateLeft} sind deutlich geringer und vermutlich dadurch
-entstanden, da der Anteil von \texttt{salsa\_core} in V1 deutlich gesunken ist. V0 und V1 verwenden beide
-dieselbe Implementierung von \texttt{rotateLeft} und \texttt{salsa\_crypt} unterscheidet sich hier auch nur minimal
+Die Unterschiede bei \texttt{salsa20\_crypt} und \texttt{rotateLeft} sind deutlich geringer und vermutlich dadurch
+entstanden, da der Anteil von \texttt{salsa20\_core} in V1 deutlich gesunken ist. V0 und V1 verwenden beide
+dieselbe Implementierung von \texttt{rotateLeft} und \texttt{salsa20\_crypt} unterscheidet sich hier auch nur minimal
 wie in Abschnitt \ref{crypt} genauer beschrieben. Während V1 merkbar schneller als V0 ist, ist V2 in Abbildung 
 \ref{diagram1} signifikant langsamer als die beiden anderen Implementierungen. Dies liegt hauptsächlich an \texttt{rotateLeft}, 
 das für V2 mit SIMD-Instruktionen umgesetzt wurde. Durch das Verwenden des \emph{annotate}-Features von 
 \emph{perf}, erkennt man, dass die meiste Zeit der Laufzeit in rotateLeft in V2 für \texttt{mov}-Operationen in 
 \emph{xmm}-Register verwendet wird. Anzumerken ist, dass die XOR-Operationen, die in den beiden anderen Implementierungen
-in \texttt{salsa\_core} stattfinden, in V2 stattdessen in \texttt{rotateLeft} geschehen, was sich aber nur gering 
+in \texttt{salsa20\_core} stattfinden, in V2 stattdessen in \texttt{rotateLeft} geschehen, was sich aber nur gering 
 auf die Messung auswirkt, da laut \emph{perf} die Instruktion \texttt{pxor} nur zu einem geringen 
 Prozentsatz von < 0.1\% zur Laufzeit beiträgt.
 Dadurch, dass \texttt{rotateLeft} in V2 einen beträchtlichen Teil der Laufzeit in Anspruch nimmt,
-haben \texttt{salsa\_core} und \texttt{salsa\_crypt} wahrscheinlich einen geringeren Anteil an der Laufzeit. Es kann 
+haben \texttt{salsa20\_core} und \texttt{salsa20\_crypt} wahrscheinlich einen geringeren Anteil an der Laufzeit. Es kann 
 also nicht festgestellt werden, ob die beiden Funktionen optimiert werden konnten.
 
 
