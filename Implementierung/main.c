@@ -52,10 +52,12 @@ const char *help_msg =
     "  -o P   P is the path to the output file\n"
     "  -h     Show help message (this text) and exit\n"
     "  --help Same effect as -h\n"
+    "\n"
     "Please note:\n"
-    "Negative Numbers are not allowed.\n"
-    "To decrypt a file, just call the program with the output file (of the previous encryption) as input file and with the same key and nonce already used for encryption.\n"
-    "If the file contains any key whose respective ASCII value is not in [32;126], decryption will not yield the expected result.\n";
+    "  Negative Numbers are not allowed.\n"
+    "  If -o is not set, the program will create an output file with the name result.txt in the current directory."
+    "  To decrypt a file, just call the program with the output file (of the previous encryption) as input file and with the same key and nonce already used for encryption.\n"
+    "  If the file contains any key whose respective ASCII value is not in [32;126], decryption will not yield the expected result.\n";
 
 void print_usage(const char *progname) { fprintf(stderr, usage_msg, progname, progname, progname); }
 void print_help(const char *progname)
