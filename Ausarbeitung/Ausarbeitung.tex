@@ -91,9 +91,9 @@ Zu implementieren  war folgende Funktionalität:
 \begin{itemize}
     \item Ein Rahmenprogramm welches I/O-Operationen unterstützt, mithilfe derer man eine ganze Datei in den Speicher einlesen und als Pointer an eine Unterfunktion übergeben kann. Selbiges soll auch zum Schreiben eines Speicherbereiches mit bekannter Länge in eine Datei möglich sein.
     \item \texttt{ \textcolor{blue}{void} salsa20\_core (\textcolor{blue} {uint32\_t} output[16], \textcolor{blue}{const uint32\_t} input[16])} \\
-    Diese Funktion implementiert den oben beschriebenen Salsa20-Kern. \texttt{input} bezeichnet dabei den Startzustand des Kerns, \texttt{output} den finalen 64-Byte-Block. \\
+    Diese Funktion implementiert den oben beschriebenen Salsa20-Kern. \texttt{input} be\-zeich\-net dabei den Startzustand des Kerns, \texttt{output} den finalen 64-Byte-Block. \\
     \item \texttt{ \textcolor{blue} {void} salsa20\_crypt (\textcolor{blue}{size\_t} mlen, \textcolor{blue} {const uint8\_t} msg[mlen], \textcolor{blue}{uint8\_t} \break cipher [mlen], \textcolor{blue}{uint32\_t} key[8], \textcolor{blue} {uint64\_t} iv) }\\
-    Diese Funktion verschlüsselt eine Nachricht \texttt{msg} der Länge \texttt{mlen} mit einem gegebenen Schlüssel \texttt{key} und einer Nonce \texttt{iv} und schreibt das Ergebnis in \texttt{cipher}.
+    Diese Funktion verschlüsselt eine Nachricht \texttt{msg} der Länge \texttt{mlen} mit einem ge\-ge\-be\-nen Schlüssel \texttt{key} und einer Nonce \texttt{iv} und schreibt das Ergebnis in \texttt{cipher}.
 \end{itemize}
 
 
@@ -180,7 +180,7 @@ Das Gleiche gilt für andere Beispiele von Kollisionen, die in dieser Arbeit auf
 Eine Stromchiffre ist ein symmetrischer, kryptographischer Algorithmus, der für Ver- und Entschlüsselung von Daten verwendet wird.
 Dieser Algorithmus nimmt einen Klartext und ein Schlüsselstrom entgegen und führt eine bitweise XOR-Operation aus und gibt am Ende
 einen Geheimtext zurück.
-Man kann durch Benutzung desselben Schlüsselstroms wieder den Klartext erhalten, indem man dem Algorithmus den Geheimtext übergibt.
+Man kann durch Benutzung desselben Schlüsselstroms wieder den Klartext erhalten, indem man dem Algorithmus den Ge\-heim\-text übergibt.
 % TODO: Beispiel von Klartext, Strom und Cipher
 Aufgrund der Symmetrie der XOR-Operation gilt folgendes:
 \begin{table}[!h]
@@ -207,7 +207,6 @@ Aufgrund der Symmetrie der XOR-Operation gilt folgendes:
 \end{table}
 \\
 Wie man sehen kann, führt der Geheimtext als Eingabe unter Verwendung desselben Schlüsselstroms wieder zum Klartext.
-\vspace{3mm}
 \\
 Damit man also für einen durch Salsa20/20 erstellten Geheimtext den dazugehörigen Klartext zurückerhält,
 muss man denselben Schlüssel sowie denselben Initalisierungs\-vektor, mit dem Geheimtext als zu verschlüsselnde Nachricht, übergeben.
@@ -273,7 +272,7 @@ der Einfachheit, andererseits um besser testen zu können.
 In der \texttt{salsa20\_crypt}-Funktion wird in allen Implementierungen erstmal der Start\-zustand der Matrix initalisiert. Für die Little-Endian-Reihenfolge des Keys, der Nonce und des Counters werden \texttt{built\_in}-Funktionen verwendet.
 Anschließend wird mithilfe eines Pointercasts des \texttt{output} Pointers (\texttt{\textcolor{blue}{uint32\_t}}) zu einem \texttt{\textcolor{blue}{uint8\_t}} Pointer die XOR-Operationen durchgeführt. Dieser Pointercast stellt kein \texttt{Undefined Behaviour} dar, 
 da \texttt{\textcolor{blue}{uint8\_t}} keine strengeren \texttt{alignment}-Anforderungen hat als \texttt{\textcolor{blue}{uint32\_t}}. Des weiteren liefert der Pointercast die Bytes der \texttt{output}-Matrix für die XOR-Operation, genau wie vorgesehen, in Little-Endian-Reihenfolge.
-Anschließend werden nun die XOR-Operationen auf die Nachricht mit der \texttt{output}-Matrix ausgeführt und in \texttt{cipher} gespeichert. Alle 64 XOR-Operationen wird der Counter inkrementiert und der Kern neu berechnet. Für V1 wird nur für die letzten $\leq 64$ Bytes mit dem Pointercast gearbeitet.
+Anschließend werden nun die XOR-Operationen auf die Nachricht mit der \texttt{output}-Matrix ausgeführt und in \texttt{cipher} ge\-spei\-chert. Alle 64 XOR-Operationen wird der Counter inkrementiert und der Kern neu berechnet. Für V1 wird nur für die letzten $\leq 64$ Bytes mit dem Pointercast gearbeitet.
 Zuvor werden die XOR-Operationen mit der Berechnung des korrekten Index innerhalb der Matrix, der Chiffre und der Nachricht durchgeführt. Das reicht jedoch bereits für einen signifikanten Speedup, dazu mehr in Abschnitt \ref{perf}.
 Die Implementierung V2 basiert nahezu vollständig auf der Implementierung von V1, nur mit zusätzlicher Vektorisierung der XOR-Operation mithilfe von SIMD-Operationen.
 
@@ -286,7 +285,8 @@ nur richtig oder falsch und eben kein ``ungenau'' gibt.
 Die Korrektheit aller drei Implementierungen hängt von der Korrektheit der jeweiligen Kryptfunktion \texttt{salsa20\_crypt} 
 und der jeweiligen Kernfunktion \texttt{salsa20\_core}, sowie vom Einlesen des Schlüssels ab. (Das Einlesen der Nonce nutzt 
 Funktionen der Standard-Bibliothek, von denen man annehmen kann, dass sie korrekt sind). Im Folgenden werden mit ``die Kryptfunktion''
-und ``die Kernfunktion'' \texttt{salsa20\_core} beziehungsweise \texttt{salsa20\_crypt} \textbf{aller} drei Implementierungen gemeint.
+und ``die Kernfunktion'' \texttt{salsa20\_core} beziehungsweise
+\\\texttt{salsa20\_crypt} \textbf{aller} drei Implementierungen gemeint.
 
 \subsection{Einlesen des Schlüssels}
 Beim Einlesen ist es irrelevant, ob eine Hexzahl oder ein String eingeben wird, da diese auf die gleiche Weise interpretiert werden, 
@@ -295,7 +295,7 @@ Wie das Parsen des Keys funktioniert wird in Abschnitt \ref{main} genauer erläu
 Um die Korrektheit der geparsten Eingaben zu überprüfen, mussten nur einige repräsentative Unit-Tests angefertigt werden, 
 die als Eingabe einen String nehmen, wie man ihn von der Eingabe als \texttt{optarg} erhalten würde. Die Ausgabe 
 von \texttt{convert\_string\_to\_uint32\_t\_array} wird dann mit einem Array mit den erwarteten Werten verglichen.
-Es wurden Testfälle angefertigt, die die Ergebnisse zwischen gleichwertigen Eingaben jeweils hexadezimal und als String vergleichen.
+Es wurden Testfälle angefertigt, die die Ergebnisse zwischen gleichwertigen Eingaben jeweils hexadezimal und als String ver\-glei\-chen.
 
 
 \subsection{Die Kryptfunktion}
@@ -308,14 +308,14 @@ und viele automatisierte Zufallstests geschrieben werden, die die Kryptfunktion 
 Beim ersten Aufruf ist die Eingabe ein Array, das die zu verschlüsselnde Nachricht enthält und die Ausgabe ist eine Chiffre. 
 Beim zweiten Aufruf ist die Eingabe diese Chiffre und die Ausgabe ein anderes Array. 
 Am Ende wird das ursprüngliche Array mit dem Array, das nach dem zweiten 
-Funktionsaufruf ausgegeben wird, verglichen.
+Funktionsaufruf ausgegeben wird, ver\-gli\-chen.
 
 
 \subsection{Die Kernfunktion}
 Die Spezifikationen der Kernfunktion werden in einem Paper von Daniel J. Bernstein beschrieben. \cite{salsa20specification}
 Die Kernfunktion wurde mit der vom Autor selbst in C geschriebenen Referenzimplementierung verglichen. \cite{salsa20}
 Der Aufruf dieser Referenzimplementierung sollte in allen Fällen mit denselben Eingaben auch dieselben Ausgaben
-als die Kernfunktion produzieren. 
+als die Kern\-funk\-tion produzieren. 
 \\Hierzu wurden einige repräsentative, manuelle Tests und eine viele automatisierte Zufallstests 
 geschrieben, die dies bestätigen.
 \\Weiters wurden auch manuelle Tests geschrieben, die die Kernfunktion direkt aufrufen und dabei 
@@ -332,7 +332,7 @@ wobei \texttt{X} für die jeweilige Implementierung - 0, 1 oder 2 - steht.
 Es wurden pro GCC-Optimierungsstufe und Implementierungsversion 25 
 Iterationen des Verfahrens auf einer 100MB großen Datei ausgeführt. Die Datei
 wurde durch den Befehl \texttt{base64 /dev/urandom | head -c 100000000 > 100mb.txt}
-in \texttt{Ausarbeitung/} erzeugt.
+in \texttt{Ausarbeitung/} er\-zeugt.
 Die Laufzeiten wurden vom Rahmenprogramm selbst durch setzen des \texttt{-B}-Flags
 gemessen. Getestet wurde auf einem Notebook mit einem AMD Ryzen 7 5800H, 
 4.4GHz, 16 GiB Arbeitsspeicher, Fedora 36, 64 Bit, Linux Kernel 5.18.11.
@@ -351,7 +351,7 @@ Kompiliert wurde mit GCC 12.1.1 mit den Optionen \texttt{O0}, \texttt{O2} und \t
             ylabel=Sekunden pro Iteration,
             bar width=6mm,
             width=100mm,
-            height=\axisdefaultheight,
+            height=70mm,
             enlarge x limits=0.3,
             nodes near coords,
             every node near coord/.append style={font = {\fontsize{7 pt}{12 pt}\selectfont},color=black},
@@ -385,9 +385,9 @@ den gleichen Testbedingungen als zuvor, mit der Änderung, dass nur mit \texttt{
 - zeigt sich, warum V1 etwas schneller als V0 ist und warum V2 langsamer ist.
 Um eine übersichtliche Dartstellung zu ermöglichen, wurden die Funktionen \texttt{salsa20\_core},
 \texttt{rowRound} und \texttt{columRound} zu \texttt{salsa20\_core} zusammengefasst. 
-Die Reihenrundenfunktion\texttt{rowRound} und die Spaltenrundenfunktion \texttt{columRound} werden 
+Die Reihen\-runden\-funk\-tion \texttt{rowRound} und die Spaltenrundenfunktion \texttt{columRound} werden 
 nur in V1 und V2 eingesetzt und In Abschnitt \ref{transpose} genauer beschrieben.
-Weiters wird angemerkt, dass Funktionssuffixe wie \texttt{\_v1} weggelassen werden.
+Weiters wird angemerkt, dass Funk\-tions\-suf\-fixe wie \texttt{\_v1} weggelassen werden.
 
 \begin{center}
     \begin{tikzpicture}[trim axis left, trim axis right]
@@ -403,7 +403,7 @@ Weiters wird angemerkt, dass Funktionssuffixe wie \texttt{\_v1} weggelassen werd
                 ylabel=Anteil an der Ausführungszeit in Prozent,
                 bar width=6mm,
                 width=100mm,
-                height=\axisdefaultheight,
+                height=70mm,
                 enlarge x limits=0.3,
                 nodes near coords,
                 every node near coord/.append style={font = {\fontsize{7 pt}{12 pt}\selectfont},color=black},
@@ -426,11 +426,12 @@ Weiters wird angemerkt, dass Funktionssuffixe wie \texttt{\_v1} weggelassen werd
     \captionof{figure}{Relative Laufzeiten der Implementierungen}
 \label{diagram2}
 \end{center}
-Aus den erhobenen Daten geht hervor, dass der Hauptgrund für den Performanzvorteil von 
+Aus den erhobenen Daten geht hervor, dass der Hauptgrund für den Per\-formanz\-vor\-teil von 
 V1 gegenüber V0 (bei Kompilierung mit O0) bei \texttt{salsa20\_core} liegt, vermutlich da hier auf das 
 Transponieren der Matrix verzichtet wird.
-Die Unterschiede bei \texttt{salsa20\_crypt} und \texttt{rotateLeft} sind deutlich geringer und vermutlich dadurch
-entstanden, da der Anteil von \texttt{salsa20\_core} in V1 deutlich gesunken ist. V0 und V1 verwenden beide
+Die Unterschiede bei 
+\\\texttt{salsa20\_crypt} und \texttt{rotateLeft} sind deutlich geringer und vermutlich dadurch
+ent\-stan\-den, da der Anteil von \texttt{salsa20\_core} in V1 deutlich gesunken ist. V0 und V1 verwenden beide
 dieselbe Implementierung von \texttt{rotateLeft} und \texttt{salsa20\_crypt} unterscheidet sich hier auch nur minimal
 wie in Abschnitt \ref{crypt} genauer beschrieben. Während V1 merkbar schneller als V0 ist, ist V2 in Abbildung 
 \ref{diagram1} signifikant langsamer als die beiden anderen Implementierungen. Dies liegt hauptsächlich an \texttt{rotateLeft}, 
@@ -446,11 +447,11 @@ also nicht festgestellt werden, ob die beiden Funktionen optimiert werden konnte
 
 
 \section{Zusammenfassung und Ausblick}
-Ziel dieses Gruppenprojekts war es, das Salsa20-Verschlüsselungsverfahren in C umzusetzen und zu optimieren.
+Ziel dieses Gruppenprojekts war es, das Salsa20-Verschlüsselungsverfahren in C um\-zu\-setzen und zu optimieren.
 
 \subsection{Ansatz}
-Der gewählte Ansatz war zuerst das Rahmenprogramm und die Hauptimplementierung V0 umzusetzen 
-und zwei alternative Implementierungen anzufertigen. Die Hauptimplementierung sollte genau wie 
+Der gewählte Ansatz war zuerst das Rahmenprogramm und die Haupt\-implemen\-tierung V0 umzusetzen 
+und zwei alternative Implementierungen anzufertigen. Die Haupt\-implemen\-tierung sollte genau wie 
 in der Aufgabenstellung beschrieben umgesetzt werden.
 Die erste Alternativimplementierung V1 sollte nur die Transposition der $4\times 4$-Matrix aus 
 dem Algorithmus entfernen und durch Verwendung transponierter Indizes ersetzt werden. Die zweite Alternative V2
@@ -470,9 +471,9 @@ geworden wäre.
 Weiters könnte der I/O-Teil des Rahmenprogramms dahingehend verbessert werden, dass auch Dezimal- und
 Oktalzahlen als Eingabe entgegengenommen werden können. Allgemein hätte das Rahmenprogramm auch mit einem 
 \emph{Terminal UI} umgesetzt werden können, sodass Optionen graphisch über die Tastatur ausgewählt werden können.
-Wie in Abschnitt \ref{core} angesprochen wurde, sind die Standardwerte für Key und Nonce im Rahmenprogramm 
+Wie in Abschnitt \ref{core} angesprochen wurde, sind die Standardwerte für Key und Nonce im Ra\-hmen\-pro\-gramm 
 in Bezug auf die Sicherheit nicht praxistauglich.
-Man könnte in einer das Rahmenprogramm so abändern, dass anhand eines vom User eingebenen Passworts, 
+Man könnte in einer das Ra\-hmen\-pro\-gramm so abändern, dass anhand eines vom User eingebenen Passworts, 
 eindeutige Werte für Key und Nonce berechnet werden, um das File zu verschlüsseln. Wenn der User nun 
 sein File entschlüsseln möchte, kann er sein Passwort eingeben und es werden dieselben Werte für 
 Key und Nonce berechnet mit denen das File wieder entschlüsselt werden kann.
