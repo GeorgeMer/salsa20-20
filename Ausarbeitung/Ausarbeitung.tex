@@ -28,8 +28,7 @@
 \section{Einleitung}
 \subsection{Einführung}
 Sei es beim Herstellen einer Verbindung mit einem Server oder das Chatten mit Freunden und Bekannten rund um
-den Globus, nie genoss die Kryptographie mehr Relevanz als jetzt. Man möchte nicht, dass die Nachrichten,
-die man an seine Geliebten versendet, von einer dritten Person mitgelesen werden können. Darum existieren
+den Globus. Man möchte nicht, dass diese Informationen von Dritten mitgelesen werden können. Darum existieren
 kryptographische Verfahren zur Verschlüsselung von Informationen. Eines dieser Ver\-schlüsselungs\-ver\-fahren ist
 \emph{Salsa20/20}, welches es zu implementieren galt.
 
@@ -300,7 +299,6 @@ Es wurden Testfälle angefertigt, die die Ergebnisse zwischen gleichwertigen Ein
 
 \subsection{Die Kryptfunktion}
 Die Kryptfunktion nutzt XOR-Operationen, um die Nachricht mit der Ausgabe der Kernfunktion \texttt{salsa20\_core} zu verschlüsseln.
-In Abschnitt \ref{crypt} wird die Funktionsweise der Kryptfunktion genauer beschrieben.
 Wie bereits in den theoretischen (Abschnitt \ref{streamcipher}) und in den praktischen (Abschnitt \ref{crypt}) Teilen des Lösungsansatzes gezeigt,
 wird die XOR-Operation zum Ver- und Entschlüsseln benutzt. 
 Um also die Korrektheit der Kryptfunktion zu testen, mussten nur einige repräsentative, manuelle
@@ -395,7 +393,7 @@ Weiters wird angemerkt, dass Funk\-tions\-suf\-fixe wie \texttt{\_v1} weggelasse
                 symbolic x coords={salsa20\_core, salsa20\_crypt, rotateLeft},
                 xtick = {salsa20\_core, salsa20\_crypt, rotateLeft},
                 x tick label style={rotate=45, anchor=east, align=center},
-                legend style={at={(0.5,-0.35)},
+                legend style={at={(0.5,-0.4)},
                         anchor=north,legend columns=-1},
                 ybar,
                 ymin=0,
@@ -453,27 +451,26 @@ Ziel dieses Gruppenprojekts war es, das Salsa20-Verschlüsselungsverfahren in C 
 Der gewählte Ansatz war zuerst das Rahmenprogramm und die Haupt\-implemen\-tierung V0 umzusetzen 
 und zwei alternative Implementierungen anzufertigen. Die Haupt\-implemen\-tierung sollte genau wie 
 in der Aufgabenstellung beschrieben umgesetzt werden.
-Die erste Alternativimplementierung V1 sollte nur die Transposition der $4\times 4$-Matrix aus 
+Die erste Alternativimplementierung V1 sollte nur die Transposition der 4$\times$4-Matrix aus 
 dem Algorithmus entfernen und durch Verwendung transponierter Indizes ersetzt werden. Die zweite Alternative V2
 sollte denselben Algorithmus wie die erste verwenden, aber zusätzlich wo möglich \emph{SIMD}-Instruktionen verwenden.
 
 \subsection{Ergebnisse}
 V0 konnte erfolgreich umgesetzt werden und V1 konnte 
-diese erfolgreich verbessern. Durch weitere Optimierungen von \emph{GCC} wurde die V0 aber
+diese erfolgreich verbessern. Durch weitere Optimierungen von \emph{GCC} wurde V0 aber
 genauso performant.
 Eine weitere Performanzsteigerung durch den Einsatz von SIMD-Instruktionen konnte jedoch nicht erreicht werden
 und es wurde sogar eine starke Performanzverminderung von V2 gegenüber der beiden anderen Implementierungen erreicht.
 
 \subsection{Verbesserungspotenzial}
-Durch klügeres und vor allem weniger häufiges Bewegen von Werten in und aus \emph{xmm}-Register heraus
+Durch klügeres und vor allem weniger häufiges Bewegen von Werten in und aus \emph{xmm}-Registern heraus
 in V2 hätte vermutlich ein Speedup erreicht werden können, sodass V2 die performanteste Implementierung
 geworden wäre.
 Weiters könnte der I/O-Teil des Rahmenprogramms dahingehend verbessert werden, dass auch Dezimal- und
-Oktalzahlen als Eingabe entgegengenommen werden können. Allgemein hätte das Rahmenprogramm auch mit einem 
-\emph{Terminal UI} umgesetzt werden können, sodass Optionen graphisch über die Tastatur ausgewählt werden können.
+Oktalzahlen als Eingabe entgegengenommen werden können.
 Wie in Abschnitt \ref{core} angesprochen wurde, sind die Standardwerte für Key und Nonce im Ra\-hmen\-pro\-gramm 
 in Bezug auf die Sicherheit nicht praxistauglich.
-Man könnte in einer das Ra\-hmen\-pro\-gramm so abändern, dass anhand eines vom User eingebenen Passworts, 
+Man könnte in das Ra\-hmen\-pro\-gramm so abändern, dass anhand eines vom User eingebenen Passworts, 
 eindeutige Werte für Key und Nonce berechnet werden, um das File zu verschlüsseln. Wenn der User nun 
 sein File entschlüsseln möchte, kann er sein Passwort eingeben und es werden dieselben Werte für 
 Key und Nonce berechnet mit denen das File wieder entschlüsselt werden kann.
