@@ -100,7 +100,7 @@ Zu implementieren  war folgende Funktionalität:
 
 \section{Lösungsansatz}
 \subsection{Theoretischer Teil}
-\subsubsection{Transponieren}
+\subsubsection{Transponieren} \label{transpose}
 
 Das Transponieren der Matrix ist Teil des Salsa20-Kern-Algorithmus, ist aber nicht sonderlich performant.
 Um an dieser Stelle weiter zu optimieren, kann man anstatt zwanzig Runden, die jeweils eine Transposition enthalten, zehn sogenannte \emph{Doppelrunden}
@@ -257,7 +257,7 @@ das Egebnis (wieder in \texttt{result.txt}, da kein Pfad vom Benutzer angegeben 
     \texttt{Hallo ich soll verschluesselt werden.}
 \end{center}
 
-\subsubsection{salsa20\_core}
+\subsubsection{salsa20\_core} \label{core}
 In der Funktion \texttt{salsa20\_core} wird das Verhalten der in Abschnitt \ref{salsa20-kern} beschriebenen Salsa20-Kern-Funktion exakt nachempfunden. Für die Implementierung V1 wurden jedoch kleine Änderungen vorgenommen.
 Als Ansatz zur Optimierung wurden hier die 20 Runden auf nur 10 Runden reduziert, in denen jedoch die doppelte Arbeit verrichtet wird. Es ist also eine Art \emph{loop unrolling} mit zusätzlichem Einsparen des 
 Transponierens der Matrix. Anstatt zu transponieren werden also einfach nochmals alle ARX-Operationen durchgeführt, jedoch werden die Indizes der Matrix so behandelt, als würde man bereits auf
@@ -267,9 +267,7 @@ aus vier nacheinander ausgeführten ARX-Operationen, die jetzt gleichzeitig voll
 da der \emph{Overhead} der Lade- und Schreiboperationen den \emph{Speedup} bei der Addition zunichte machen würde.
 \\Als Standardwerte für Key und Nonce wurden, jeweils für den respektiven Wertebereich, große Primzahlen gewählt. Ein fester Wert für diese beiden Parameter stellt in Realität ein großes Sicherheitsrisiko dar, 
 da ein Angreifer nur diese beiden Werte benötigen würde, um jedes, mit diesen Werten verschlüsselte, File wieder zu entschlüsseln. In dieser Implementierung wurden jedoch feste Standardwerte verwendet, einerseits aus Gründen
-der Einfachheit, andererseits um besser testen zu können. Man könnte in einer reellen Anwendung zum Beispiel anhand eines vom User eingebenen Passworts, 
-eindeutige Werte für Key und Nonce berechnen, um das File zu verschlüsseln. Wenn der User nun sein File entschlüsseln möchte, kann er sein Passwort eingeben und es werden dieselben Werte für Key und Nonce berechnet, anhand derer
-das File wieder entschlüsselt werden kann.
+der Einfachheit, andererseits um besser testen zu können. 
 
 \subsubsection{salsa20\_crypt} \label{crypt}
 In der \texttt{salsa20\_crypt}-Funktion wird in allen Implementierungen erstmal der Start\-zustand der Matrix initalisiert. Für die Little-Endian-Reihenfolge des Keys, der Nonce und des Counters werden \texttt{built\_in}-Funktionen verwendet.
@@ -285,42 +283,48 @@ Im Folgenden wird auf die Korrektheit der Hauptimplementierung eingegangen.
 Es wird \textbf{nicht} auf die Genauigkeit des Programms eingegangen, da es bei Ver\-schlüsse\-lungsverfahren
 nur richtig oder falsch und eben kein ``ungenau'' gibt.
 \\
-Die Korrektheit unserer Implementationen des Salsa20/20-Verfahrens hängt von der Korrektheit der Kryptfunktion und der Kernfunktion, sowie vom Einlesen des Schlüssels ab. (Das Einlesen der Nonce nutzt Funktionen der Standard-Bibliothek, von denen wir annehmen können, dass sie korrekt sind).
+Die Korrektheit aller drei Implementierungen hängt von der Korrektheit der jeweiligen Kryptfunktion \texttt{salsa20\_crypt} 
+und der jeweiligen Kernfunktion \texttt{salsa20\_core}, sowie vom Einlesen des Schlüssels ab. (Das Einlesen der Nonce nutzt 
+Funktionen der Standard-Bibliothek, von denen man annehmen kann, dass sie korrekt sind). Im Folgenden werden mit ``die Kryptfunktion''
+und ``die Kernfunktion'' \texttt{salsa20\_core} beziehungsweise \texttt{salsa20\_crypt} \textbf{aller} drei Implementierungen gemeint.
 
 \subsection{Einlesen des Schlüssels}
-Beim Einlesen ist es irrelevant, ob eine Hexzahl oder einen String eingeben wird, da sie auf die gleiche Weise interpretiert werden, 
-auch wenn sie einen etwas anderen Algorithmus erfordern, um sie in ein Array von \texttt{\textcolor{blue}{uint32\_t}} zu parsen. 
+Beim Einlesen ist es irrelevant, ob eine Hexzahl oder ein String eingeben wird, da diese auf die gleiche Weise interpretiert werden, 
+auch wenn dies zwei leicht unterschiedliche Algorithmen erfordert, um diese in ein \texttt{\textcolor{blue}{uint32\_t}}-Array zu parsen. 
 Wie das Parsen des Keys funktioniert wird in Abschnitt \ref{main} genauer erläutert.
-Um dann die Korrektheit der geparsten Eingabe zu überprüfen, müssen nur einige repräsentative Unit-Tests geschrieben werden, 
+Um die Korrektheit der geparsten Eingaben zu überprüfen, mussten nur einige repräsentative Unit-Tests angefertigt werden, 
 die als Eingabe einen String nehmen, wie man ihn von der Eingabe als \texttt{optarg} erhalten würde. Die Ausgabe 
 von \texttt{convert\_string\_to\_uint32\_t\_array} wird dann mit einem Array mit den erwarteten Werten verglichen.
-Es wurden einige Testfälle angefertigt, die die Ergebnisse zwischen gleichwertigen Eingaben jeweils hexadezimal und als String vergleichen.
+Es wurden Testfälle angefertigt, die die Ergebnisse zwischen gleichwertigen Eingaben jeweils hexadezimal und als String vergleichen.
 
 
 \subsection{Die Kryptfunktion}
-Die Kryptfunktion \texttt{salsa20\_crypt} nutzt XOR-Operationen, um die Nachricht mit der Ausgabe der Kernfunktion \texttt{salsa20\_core} zu verschlüsseln.
+Die Kryptfunktion nutzt XOR-Operationen, um die Nachricht mit der Ausgabe der Kernfunktion \texttt{salsa20\_core} zu verschlüsseln.
 In Abschnitt \ref{crypt} wird die Funktionsweise der Kryptfunktion genauer beschrieben.
 Wie bereits in den theoretischen (Abschnitt \ref{streamcipher}) und in den praktischen (Abschnitt \ref{crypt}) Teilen des Lösungsansatzes gezeigt,
-wird die XOR Operation zum Ver- und Entschlüsseln benutzt. 
-Um also die Korrektheit der Kryptfunktion zu testen, müssen nur einige repräsentative, manuelle
-und viele automatisierte Zufallstests geschrieben werden, die die Kryptfunktion zweimal aufrufen.
-Beim ersten Aufruf ist dann die Eingabe ein Array, das die zu verschlüsselnde Nachricht enthält und die Ausgabe ist eine Chiffre. 
+wird die XOR-Operation zum Ver- und Entschlüsseln benutzt. 
+Um also die Korrektheit der Kryptfunktion zu testen, mussten nur einige repräsentative, manuelle
+und viele automatisierte Zufallstests geschrieben werden, die die Kryptfunktion jeweils zweimal aufrufen.
+Beim ersten Aufruf ist die Eingabe ein Array, das die zu verschlüsselnde Nachricht enthält und die Ausgabe ist eine Chiffre. 
 Beim zweiten Aufruf ist die Eingabe diese Chiffre und die Ausgabe ein anderes Array. 
-Am Ende vergleichen wir das ursprüngliche Array mit dem Array, das nach dem zweiten 
-Funktionsaufruf ausgegeben wird.
+Am Ende wird das ursprüngliche Array mit dem Array, das nach dem zweiten 
+Funktionsaufruf ausgegeben wird, verglichen.
 
 
 \subsection{Die Kernfunktion}
 Die Spezifikationen der Kernfunktion werden in einem Paper von Daniel J. Bernstein beschrieben. \cite{salsa20specification}
 Die Kernfunktion wurde mit der vom Autor selbst in C geschriebenen Referenzimplementierung verglichen. \cite{salsa20}
-Der Aufruf dieser Referenzimplementierung für eine Menge von Eingaben und auch eine der Versionen unserer Implementierung mit denselben Eingaben ergibt dieselbe Chiffre, wenn die Version tatsächlich korrekt implementiert wurde. 
-Auch hier kann man einige repräsentative manuelle Tests und eine Menge von automatisierten Zufallstests schreiben, um zu pruefen, ob das eigentlich stimmt. 
-
-Es können auch einige manuelle Tests geschrieben werden, die die Kernfunktion direkt aufrufen und dabei die Eingabe und die erwartete Ausgabe aus Abschnitt 8 "Die Salsa20-Hash-Funktion" der Spezifikation verwenden \cite{salsa20specification}.
-
-
-
-Die obengenannten Tests können mit der Option -t X aufgerufen werden, wobei X für die Anzahl der automatisierten Tests steht, die durchgeführt werden. Die manuellen Tests werden in ihrer Gesamtheit durchgeführt, unabhängig davon, was X ist. Um die verschiedene Implementationen zu testen, man kann das Programm mit -V X ausfuehren, wobei X fuer die jeweilige Implementation (0,1 oder 2) steht.
+Der Aufruf dieser Referenzimplementierung sollte in allen Fällen mit denselben Eingaben auch dieselben Ausgaben
+als die Kernfunktion produzieren. 
+\\Hierzu wurden einige repräsentative, manuelle Tests und eine viele automatisierte Zufallstests 
+geschrieben, die dies bestätigen.
+\\Weiters wurden auch manuelle Tests geschrieben, die die Kernfunktion direkt aufrufen und dabei 
+die Eingaben und die erwartete Ausgaben aus Abschnitt 8 "The Salsa20 hash function" der Spezifikation 
+verwenden. \cite{salsa20specification}
+\\Die obengenannten Tests können mit der Option \texttt{-t X} aufgerufen werden, wobei \texttt{X} für die Anzahl der automatisierten 
+Tests steht, die durchgeführt werden. Die manuellen Tests werden in ihrer Gesamtheit durchgeführt, unabhängig davon, 
+wie groß \texttt{X} ist. Um die verschiedene Implementierungen zu testen, kann das Programm mit \texttt{-V X} ausgeführt werden, 
+wobei \texttt{X} für die jeweilige Implementierung - 0, 1 oder 2 - steht.
 
 
 \section{Performanzanalyse} \label{perf}
@@ -328,8 +332,8 @@ Die obengenannten Tests können mit der Option -t X aufgerufen werden, wobei X f
 Es wurden pro GCC-Optimierungsstufe und Implementierungsversion 25 
 Iterationen des Verfahrens auf einer 100MB großen Datei ausgeführt. Die Datei
 wurde durch den Befehl \texttt{base64 /dev/urandom | head -c 100000000 > 100mb.txt}
-erzeugt.
-Die Laufzeiten wurden vom Rahmenprogramm selbst durch setzen des -B Flags
+in \texttt{Ausarbeitung/} erzeugt.
+Die Laufzeiten wurden vom Rahmenprogramm selbst durch setzen des \texttt{-B}-Flags
 gemessen. Getestet wurde auf einem Notebook mit einem AMD Ryzen 7 5800H, 
 4.4GHz, 16 GiB Arbeitsspeicher, Fedora 36, 64 Bit, Linux Kernel 5.18.11.
 Kompiliert wurde mit GCC 12.1.1 mit den Optionen \texttt{O0}, \texttt{O2} und \texttt{O3}.
@@ -369,19 +373,21 @@ Kompiliert wurde mit GCC 12.1.1 mit den Optionen \texttt{O0}, \texttt{O2} und \t
 \captionof{figure}{Laufzeiten der Implementierungen}
 \label{diagram1}
 \end{center}
-Wie in Abbildung \ref{diagram1} zu sehen ist, gibt es bei Kompilierung mit \texttt{O0} starke
+Wie in Abbildung \ref{diagram1} zu sehen ist, gibt es bei der Kompilierung mit \texttt{O0} starke
 Unterschiede in den Laufzeiten der drei Implementierungen. V1 ist deutlich schneller als V0 
 und V2 wiederum deutlich langsamer. Durch Kompilierung mit \texttt{O2} beziehungsweise \texttt{O3}
 konnte die Performanz aller drei Implementierungen merkbar verbessert werden und der Laufzeitnachteil
-von V0 minimiert werden.
+von V0 minimiert und von V2 stark verringert werden.
 
 \subsection{Analyse der Performanzmessungen}
 Durch Analyse der drei Implementierung mit dem Tool \emph{perf} - unter 
 den gleichen Testbedingungen als zuvor, mit der Änderung, dass nur mit \texttt{O0} kompiliert wurde 
 - zeigt sich, warum V1 etwas schneller als V0 ist und warum V2 langsamer ist.
 Um eine übersichtliche Dartstellung zu ermöglichen, wurden die Funktionen \texttt{salsa20\_core},
-\texttt{rowRound} und \texttt{columRound} zu \texttt{salsa20\_core} zusammengefasst. Weiters wird angemerkt, dass
-Funktionssuffixe wie \texttt{\_v1} weggelassen werden.
+\texttt{rowRound} und \texttt{columRound} zu \texttt{salsa20\_core} zusammengefasst. 
+Die Reihenrundenfunktion\texttt{rowRound} und die Spaltenrundenfunktion \texttt{columRound} werden 
+nur in V1 und V2 eingesetzt und In Abschnitt \ref{transpose} genauer beschrieben.
+Weiters wird angemerkt, dass Funktionssuffixe wie \texttt{\_v1} weggelassen werden.
 
 \begin{center}
     \begin{tikzpicture}[trim axis left, trim axis right]
@@ -463,9 +469,13 @@ in V2 hätte vermutlich ein Speedup erreicht werden können, sodass V2 die perfo
 geworden wäre.
 Weiters könnte der I/O-Teil des Rahmenprogramms dahingehend verbessert werden, dass auch Dezimal- und
 Oktalzahlen als Eingabe entgegengenommen werden können. Allgemein hätte das Rahmenprogramm auch mit einem 
-TUI umgesetzt werden können, sodass Optionen graphisch ausgewählt werden können.
-% TODO: key random generieren und ausgeben oder mit passwort umsetzen
-
+\emph{Terminal UI} umgesetzt werden können, sodass Optionen graphisch über die Tastatur ausgewählt werden können.
+Wie in Abschnitt \ref{core} angesprochen wurde, sind die Standardwerte für Key und Nonce im Rahmenprogramm 
+in Bezug auf die Sicherheit nicht praxistauglich.
+Man könnte in einer das Rahmenprogramm so abändern, dass anhand eines vom User eingebenen Passworts, 
+eindeutige Werte für Key und Nonce berechnet werden, um das File zu verschlüsseln. Wenn der User nun 
+sein File entschlüsseln möchte, kann er sein Passwort eingeben und es werden dieselben Werte für 
+Key und Nonce berechnet mit denen das File wieder entschlüsselt werden kann.
 
 % TODO: Fuegen Sie Ihre Quellen der Datei Ausarbeitung.bib hinzu
 % Referenzieren Sie diese dann mit \cite{}.
