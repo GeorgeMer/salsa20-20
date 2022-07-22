@@ -309,15 +309,15 @@ Funktionsaufruf ausgegeben wird, ver\-gli\-chen.
 
 
 \subsection{Die Kernfunktion}
-Die Spezifikationen der Kernfunktion werden in einem Paper von Daniel J. Bernstein beschrieben. \cite{salsa20specification}
-Die Kernfunktion wurde mit der vom Autor selbst in C geschriebenen Referenzimplementierung verglichen. \cite{salsa20}
+Die Spezifikationen der Kernfunktion werden in einem Paper von Daniel J. Bernstein beschrieben.\cite{salsa20specification}
+Die Kernfunktion wurde mit der vom Autor selbst in C geschriebenen Referenzimplementierung verglichen.\cite{salsa20}
 Der Aufruf dieser Referenzimplementierung sollte in allen Fällen mit denselben Eingaben auch dieselben Ausgaben
 als die Kern\-funk\-tion produzieren. 
 \\Hierzu wurden einige repräsentative, manuelle Tests und eine viele automatisierte Zufallstests 
 geschrieben, die dies bestätigen.
 \\Weiters wurden auch manuelle Tests geschrieben, die die Kernfunktion direkt aufrufen und dabei 
 die Eingaben und die erwartete Ausgaben aus Abschnitt 8 "The Salsa20 hash function" der Spezifikation 
-verwenden. \cite{salsa20specification}
+verwenden.\cite{salsa20specification}
 \\Die obengenannten Tests können mit der Option \texttt{-t X} aufgerufen werden, wobei \texttt{X} für die Anzahl der automatisierten 
 Tests steht, die durchgeführt werden. Die manuellen Tests werden in ihrer Gesamtheit durchgeführt, unabhängig davon, 
 wie groß \texttt{X} ist. Um die verschiedene Implementierungen zu testen, kann das Programm mit \texttt{-V X} ausgeführt werden, 
