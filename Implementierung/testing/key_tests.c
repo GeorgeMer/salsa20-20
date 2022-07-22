@@ -3,20 +3,29 @@
 #include "../testing/asserts.h"
 #include "../number_conversions/number_conversions.h"
 
-bool run_test(const char *key, uint32_t expected[8], uint32_t actual[8])
+// run a test with input string key(as one would get from optarg) and expected output key array
+bool run_test(const char *key, uint32_t expected[8])
 {
+    // initialize, print debug
+    uint32_t actual[8];
     printf("Key to test: ");
     for (size_t i = 0; i < strlen(key); i++)
     {
         printf("%c", key[i]);
     }
     printf("\n");
+
+    // convert
     convert_string_to_uint32_t_array(key, actual);
+
+    // assert equals
     return assertEqualsArrays_32bit(8, expected, 8, actual);
 }
 
+// test if giving same value keys in hex and string representation delivers same key array ("HelloWorld" ~~~ "0x48656C6C6F576F726C64")
 bool compareHexWithString(const char *hex, const char *str)
 {
+    // print debug hex
     uint32_t hexarr[8], strarr[8];
     printf("Keys to compare:\n");
     printf("Key hex: ");
@@ -25,22 +34,28 @@ bool compareHexWithString(const char *hex, const char *str)
         printf("%c", hex[i]);
     }
     printf("\n");
+
+    // convert hex to hexArr
     convert_string_to_uint32_t_array(hex, hexarr);
+
+    // print debug string
     printf("\nKey string: ");
     for (size_t i = 0; i < strlen(str); i++)
     {
         printf("%c", str[i]);
     }
     printf("\n");
+
+    // convert str to strarr
     convert_string_to_uint32_t_array(str, strarr);
+
+    // assert
     return assertEqualsArrays_32bit(8, hexarr, 8, strarr);
 }
 
 void test_keys()
 {
-
-    uint32_t actual[8];
-
+    // initialize tests
     char *key_shorterThan32 = "A short key";
 
     uint32_t exp_shorterThan32[] = {
@@ -87,45 +102,48 @@ void test_keys()
     char *key_str2 = "This is a bit long maybe no? Well now yes";
     char *key_hex2 = "0x20626974206C6F6E67206D61796265206E6F3F2057656C6C206E6F7720796573";
 
+    // run tests, if test returns false, break program execution
     printf("\n\n-- Tests for key input: --\n\n");
-    if (!run_test(key_shorterThan32, exp_shorterThan32, actual))
+    if (!run_test(key_shorterThan32, exp_shorterThan32))
     {
         exit(EXIT_FAILURE);
     }
 
-    if (!run_test(key_exactly32, exp_exactly32, actual))
+    if (!run_test(key_exactly32, exp_exactly32))
     {
         exit(EXIT_FAILURE);
     }
 
-    if (!run_test(key_moreThan32, exp_moreThan32, actual))
+    if (!run_test(key_moreThan32, exp_moreThan32))
     {
         exit(EXIT_FAILURE);
     }
 
-    if (!run_test(key_hexShorterThan4, exp_hexShorterThan4, actual))
+    if (!run_test(key_hexShorterThan4, exp_hexShorterThan4))
     {
         exit(EXIT_FAILURE);
     }
 
-    if (!run_test(key_hexExactly4, exp_hexExactly4, actual))
+    if (!run_test(key_hexExactly4, exp_hexExactly4))
     {
         exit(EXIT_FAILURE);
     }
 
-    if (!run_test(key_hexMoreThan4, exp_hexMoreThan4, actual))
+    if (!run_test(key_hexMoreThan4, exp_hexMoreThan4))
     {
         exit(EXIT_FAILURE);
     }
 
-    if (!run_test(key_leadingZeroes, exp_leadingZeroes, actual))
+    if (!run_test(key_leadingZeroes, exp_leadingZeroes))
     {
         exit(EXIT_FAILURE);
     }
-    if (!run_test(key_huge, exp_huge, actual))
+    if (!run_test(key_huge, exp_huge))
     {
         exit(EXIT_FAILURE);
     }
+
+    // compare hex string tests
     if (!compareHexWithString(key_hex1, key_str1))
     {
         exit(EXIT_FAILURE);

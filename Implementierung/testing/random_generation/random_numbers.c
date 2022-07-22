@@ -4,6 +4,8 @@
 #include <stdbool.h>
 #include <assert.h>
 
+// https://stackoverflow.com/a/822361
+// Returns an integer in the range [0, n).
 int randint(int n)
 {
     if ((n - 1) == RAND_MAX)
@@ -32,6 +34,7 @@ int randint(int n)
     }
 }
 
+// return an int in range [from, to)
 int randomInt(int from, int to)
 {
     return from + randint(to - from);

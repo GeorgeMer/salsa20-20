@@ -96,11 +96,14 @@ void convert_string_to_uint32_t_array(const char *string, uint32_t key[8])
             // every 8 characters of the string are converted to one key
             if (j == 8)
             {
+                // invert for correct endianness
                 for (size_t ii = 0, jj = 7; ii < 8; ii++, jj--)
                 {
                     inv[ii] = hexnum[jj];
                 }
                 inv[8] = '\0';
+
+                // convert
                 key[k] = convert_string_to_uint32_t(inv, base);
                 k++;
                 j = 0;
@@ -109,6 +112,7 @@ void convert_string_to_uint32_t_array(const char *string, uint32_t key[8])
             hexnum[j] = *(string + i - 1);
         }
 
+        // leftover
         for (; j <= 8; j++)
         {
             if (j == 8)
@@ -134,13 +138,6 @@ void convert_string_to_uint32_t_array(const char *string, uint32_t key[8])
     }
 
     // key is interpreted as a string
-    /*
-        (eg: "HelloWorld" will be interpreted as
-        key[0] = 6F 72 6C 64
-        key[1] = 6C 6C 6F 57
-        key[2] = 00 00 48 65
-        key 3 to 7 will be padded with 0s
-    */
     else
     {
         uint8_t chars[4];
@@ -158,6 +155,7 @@ void convert_string_to_uint32_t_array(const char *string, uint32_t key[8])
             chars[j--] = *(string + i - 1);
         }
 
+        // leftovers
         for (int8_t jcnt = 3; jcnt > j && k < 8; jcnt--)
         {
             key[k] |= (chars[jcnt]) << (24 - 8 * jcnt);

@@ -5,6 +5,9 @@
 #include <stdlib.h>
 
 // assertions used for testing
+// they test equality of arrays, first compare length, then compare content.
+// if something is wrong, assertion stops and false is returned with an error message printed to console
+// all methods are the same apart from the array values
 
 bool assertEqualsArrays_8bit(uint64_t xlen, const uint8_t expected[xlen], uint64_t alen, uint8_t actual[alen])
 {

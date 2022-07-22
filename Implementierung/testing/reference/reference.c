@@ -51,6 +51,7 @@ void salsa20_word_specification(uint32_t out[16], uint32_t in[16])
         out[i] = x[i] + in[i];
 }
 
+// crypt to initialize matrix
 void salsa_crypt_reference(size_t mlen, const uint8_t msg[mlen], uint8_t cipher[mlen], uint32_t key[8], uint64_t iv)
 {
     uint32_t in[16];

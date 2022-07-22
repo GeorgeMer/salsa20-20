@@ -11,8 +11,10 @@
 #include "../testing/random_generation/random_numbers.h"
 #include "../testing/random_generation/random_msg_key_iv.h"
 
+// run a testcase
 bool run_testcase_crypt(uint64_t implementation, size_t mlen, const uint8_t msg[mlen])
 {
+    // initialize and get random key and nonce
     uint8_t cipher[mlen], final[mlen];
 
     srand(mlen + msg[0] + time(NULL));
@@ -21,6 +23,7 @@ bool run_testcase_crypt(uint64_t implementation, size_t mlen, const uint8_t msg[
     randomKey(key);
     iv = randomNonce();
 
+    // run twice to then compare final with original
     switch (implementation)
     {
     case 1:
@@ -37,14 +40,18 @@ bool run_testcase_crypt(uint64_t implementation, size_t mlen, const uint8_t msg[
         break;
     }
 
+    // print debug
     printf("Original message: ");
     print_char_arr(mlen, msg);
     printf("\nFinal message after two crypt calls: ");
     print_char_arr(mlen, final);
     printf("\n");
+
+    // assert original equals with output of 2 crypt calls
     return assertEqualsArrays_8bit(mlen, msg, mlen, final);
 }
 
+// sets up test on random message
 bool execute_random_crypt(uint64_t implementation)
 {
     size_t mlen = randomInt(10, 1025);
@@ -56,6 +63,7 @@ bool execute_random_crypt(uint64_t implementation)
 
 void test_crypt(uint64_t implementation, uint64_t random_tests)
 {
+    // initialize test values
     uint8_t msg_lessthan64[] = {
         68, 105, 101, 115, 101, 32, 78, 97, 99, 104, 114, 105, 99, 104, 116,
         32, 105, 115, 116, 32, 107, 117, 101, 114, 122, 101, 114, 32, 97, 108, 115, 32, 54, 52, 32, 98, 121, 116, 101, 115};
@@ -78,6 +86,7 @@ void test_crypt(uint64_t implementation, uint64_t random_tests)
         115, 111, 32, 97, 110, 103, 101, 112, 97, 115, 115, 116, 44, 32, 100, 97, 115, 32, 115, 105, 101, 32, 103, 101, 110, 97, 117,
         32, 54, 52, 32, 98, 121, 116, 101, 115, 32, 105, 115, 116};
 
+    // if run_testcase_crypt returns false, break execution
     printf("\n\n\n-- Crypt tests: --\n\n");
     printf("\n- Test 1:\n\n");
     if (!run_testcase_crypt(implementation, sizeof(msg_lessthan64), msg_lessthan64))
@@ -95,6 +104,7 @@ void test_crypt(uint64_t implementation, uint64_t random_tests)
         exit(EXIT_FAILURE);
     }
 
+    // execute a number of random tests
     for (uint64_t i = 0; i < random_tests; i++)
     {
         printf("\n- Random Test %lu:\n\n", i + 1);

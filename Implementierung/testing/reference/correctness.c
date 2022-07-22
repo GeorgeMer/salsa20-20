@@ -15,17 +15,21 @@
 #include "../random_generation/random_numbers.h"
 #include "../random_generation/random_msg_key_iv.h"
 
+// runs a test case
 bool run_testcase(uint64_t implementation, size_t mlen, const uint8_t msg[mlen])
 {
+    // initialize values
     srand(mlen + msg[0] + time(NULL));
     uint32_t key[8];
     uint64_t iv;
     uint8_t cipher[mlen];
     uint8_t cipher_reference[mlen];
 
+    // random key and nonce
     randomKey(key);
     iv = randomNonce();
 
+    // print debug
     printf("Message: ");
     print_char_arr(mlen, msg);
     printf("Key: ");
@@ -45,6 +49,7 @@ bool run_testcase(uint64_t implementation, size_t mlen, const uint8_t msg[mlen])
         break;
     }
 
+    // reference implementation
     salsa_crypt_reference(mlen, msg, cipher_reference, key, iv);
 
     printf("Cipher from implementation %lu:\n", implementation);
@@ -52,25 +57,33 @@ bool run_testcase(uint64_t implementation, size_t mlen, const uint8_t msg[mlen])
     printf("Cipher from reference:\n");
     print_arr_8bit(mlen, cipher_reference);
     printf("\n");
+
+    // assert
     return assertEqualsArrays_8bit(mlen, cipher_reference, mlen, cipher);
 }
 
+// executes a random test
 bool execute_random(uint64_t implementation)
 {
+    // random message
     size_t mlen = randomInt(10, 1025);
     uint8_t msg[mlen];
     randomMsg(mlen, msg);
 
+    // runs testcase
     return run_testcase(implementation, mlen, msg);
 }
 
+// tests core function
 bool test_specification(uint64_t implementation, uint32_t input[16], uint32_t expected[16])
 {
+    // print debug
     printf("Input:\n");
     print_arr_32bit(16, input);
     printf("\n\n");
     uint32_t actual[16];
 
+    // run test to get actual
     switch (implementation)
     {
     case 1:
@@ -83,15 +96,20 @@ bool test_specification(uint64_t implementation, uint32_t input[16], uint32_t ex
         salsa20_core(actual, input);
         break;
     }
+
+    // print debug
     printf("After calling salsa on input: \n");
     print_arr_32bit(16, actual);
     printf("Expected: \n");
     print_arr_32bit(16, expected);
+
+    // assert
     return assertEqualsArrays_32bit(16, expected, 16, actual);
 }
 
 void test_correctness(uint64_t implementation, uint64_t random_tests)
 {
+    // initialize messages to test
     uint8_t msg_lessthan64[] = {
         68, 105, 101, 115, 101, 32, 78, 97, 99, 104, 114, 105, 99, 104, 116,
         32, 105, 115, 116, 32, 107, 117, 101, 114, 122, 101, 114, 32, 97, 108, 115, 32, 54, 52, 32, 98, 121, 116, 101, 115};
@@ -114,6 +132,7 @@ void test_correctness(uint64_t implementation, uint64_t random_tests)
         115, 111, 32, 97, 110, 103, 101, 112, 97, 115, 115, 116, 44, 32, 100, 97, 115, 32, 115, 105, 101, 32, 103, 101, 110, 97, 117,
         32, 54, 52, 32, 98, 121, 116, 101, 115, 32, 105, 115, 116};
 
+    // if run_testcase fails assertion, break program execution
     printf("\n\n\n-- Core tests: --\n\n");
     printf("\n\n- Test 1:\n\n");
     if (!run_testcase(implementation, sizeof(msg_lessthan64), msg_lessthan64))
@@ -131,6 +150,7 @@ void test_correctness(uint64_t implementation, uint64_t random_tests)
         exit(EXIT_FAILURE);
     }
 
+    // run a number of random tests, break if assertion fails
     for (uint64_t i = 0; i < random_tests; i++)
     {
         printf("\n\n- Random Test %lu:\n\n", i + 1);
@@ -140,6 +160,7 @@ void test_correctness(uint64_t implementation, uint64_t random_tests)
         }
     }
 
+    // specification tests (see section 8 of salsa specification (https://cr.yp.to/snuffle/spec.pdf) )
     uint32_t spec1[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
     uint32_t spec1_exp[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
