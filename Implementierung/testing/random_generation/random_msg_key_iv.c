@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include "random_numbers.h"
 
+// these functions generate random values used for testing
+
 void randomMsg(size_t mlen,uint8_t msg[mlen]){
     for (uint64_t i = 0; i < mlen; i++)
     {

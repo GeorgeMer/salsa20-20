@@ -8,6 +8,7 @@ uint32_t rotateLeft(uint32_t number, uint32_t amount)
     return (number << amount) | (number >> (32 - amount));
 }
 
+// same as function above, but using SIMD and also xor'ing
 void rotateLeftSIMD_32_xor(uint32_t amount, uint32_t n0, uint32_t *output0, uint32_t n1, uint32_t *output1,
                            uint32_t n2, uint32_t *output2, uint32_t n3, uint32_t *output3)
 {

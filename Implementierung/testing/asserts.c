@@ -4,6 +4,8 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
+// assertions used for testing
+
 bool assertEqualsArrays_8bit(uint64_t xlen, const uint8_t expected[xlen], uint64_t alen, uint8_t actual[alen])
 {
     if (xlen != alen)

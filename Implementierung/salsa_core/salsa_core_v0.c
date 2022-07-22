@@ -7,10 +7,11 @@ void salsa20_core(uint32_t output[16], const uint32_t input[16])
         output[i] = input[i];
     }
 
-    // 20 rounds
+    // 20 rounds consisting of 4 quarterrounds each
     for (size_t i = 0; i < 20; i++)
     {
-        // rotating left by 7 bits
+        // rotating left by 7 bits and xor'ing
+        // aka one quarterround
         output[4] = (rotateLeft((output[0] + output[12]), 7)) ^ output[4];
         output[9] = (rotateLeft((output[5] + output[1]), 7)) ^ output[9];
         output[14] = (rotateLeft((output[10] + output[6]), 7)) ^ output[14];
