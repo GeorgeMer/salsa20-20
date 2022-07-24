@@ -1,3 +1,6 @@
+# inspired by Johannes Nonnast
+# https://gitlab.lrz.de/00000000014AB37C/basic-structure-for-gra/-/tree/main
+
 #define C-Compiler
 CC=gcc
 
