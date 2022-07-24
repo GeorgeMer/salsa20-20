@@ -236,6 +236,7 @@ int main(int argc, char **argv)
                "%f seconds.\nEach iteration took %f seconds.\n\n",
                implementation_number, number_of_iterations, time, per_iter);
     }
+    
     // run one iteration of the algorithm
     switch (implementation_number)
     {
