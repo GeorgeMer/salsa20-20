@@ -4,7 +4,7 @@ uint64_t convert_string_to_uint64_t(const char *string)
 {
     if (*string == '-')
     {
-        fprintf(stderr, "Negative numbers are not allowed as options.\n");
+        fprintf(stderr, "Negative numbers are not allowed as arguments of options.\n");
         exit(EXIT_FAILURE);
     }
 

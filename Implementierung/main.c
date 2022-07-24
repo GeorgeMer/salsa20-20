@@ -119,6 +119,13 @@ int main(int argc, char **argv)
         case 'B':
             number_of_iterations = convert_string_to_uint64_t(optarg);
             measure_runtime = true;
+
+            if (number_of_iterations == 0)
+            {
+                fprintf(stderr, "You can't measure the runtime of 0 iterations.\n");
+                return EXIT_FAILURE;
+            }
+
             break;
         case 't':
             random_tests = convert_string_to_uint64_t(optarg);
@@ -229,7 +236,6 @@ int main(int argc, char **argv)
                "%f seconds.\nEach iteration took %f seconds.\n\n",
                implementation_number, number_of_iterations, time, per_iter);
     }
-
     // run one iteration of the algorithm
     switch (implementation_number)
     {
