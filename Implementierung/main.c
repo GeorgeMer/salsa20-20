@@ -16,6 +16,7 @@
 #include "testing/reference/correctness.h"
 #include "testing/key_tests.h"
 #include "testing/crypt_tests.h"
+#include "testing/input_tests.h"
 
 static struct option long_options[] =
     {
@@ -99,7 +100,7 @@ int main(int argc, char **argv)
     key[7] = 0x1fff;
 
     uint64_t iv = 0x7ffffff76b48c40;
-    const char *output_file = NULL;
+    const char *output_path = NULL;
 
     // option parsing
     while ((opt = getopt_long(argc, argv, "V:B:t:k:i:o:h", long_options, NULL)) != -1)
@@ -138,7 +139,7 @@ int main(int argc, char **argv)
             iv = convert_string_to_uint64_t(optarg);
             break;
         case 'o':
-            output_file = optarg;
+            output_path = optarg;
             break;
         case 'h':
             print_help(progname);
@@ -163,16 +164,7 @@ int main(int argc, char **argv)
         return EXIT_FAILURE;
     }
 
-    // read the file and start the encryption using implementation according to implementation_number
-
-    const uint8_t *message = read_file(argv[optind]);
-    uint8_t *cipher = malloc(mlen);
-
-    if (cipher == NULL)
-    {
-        fprintf(stderr, "Couldn't allocate enough memory.\n");
-        return EXIT_FAILURE;
-    }
+    const char *input_path = argv[optind];
 
     /*if run_tests is set to true, run the tests comparing implementation (given by 1st argument) with reference,
     run as many random tests as specified by the 2nd argument in addition to that.
@@ -181,11 +173,23 @@ int main(int argc, char **argv)
     */
     if (run_tests)
     {
-        printf("\n\n\n--- TESTS: ---\n\n");
+        printf("\n\n------ TESTS: ------\n\n\n");
         test_correctness(implementation_number, random_tests);
         test_crypt(implementation_number, random_tests);
         test_keys();
-        printf("\n\n--- END OF TESTS ---\n\n\n");
+        input_tests(implementation_number, random_tests, input_path, output_path);
+        printf("\n\n------ END OF TESTS ------\n\n\n");
+    }
+
+    // read the file and start the encryption using implementation according to implementation_number
+
+    const uint8_t *message = read_file(input_path);
+    uint8_t *cipher = malloc(mlen);
+
+    if (cipher == NULL)
+    {
+        fprintf(stderr, "Couldn't allocate enough memory.\n");
+        return EXIT_FAILURE;
     }
 
     // if measure_runtime == true then measure runtime with function being called number_of_iterations times
@@ -236,7 +240,7 @@ int main(int argc, char **argv)
                "%f seconds.\nEach iteration took %f seconds.\n\n",
                implementation_number, number_of_iterations, time, per_iter);
     }
-    
+
     // run one iteration of the algorithm
     switch (implementation_number)
     {
@@ -254,7 +258,7 @@ int main(int argc, char **argv)
     }
 
     // free input and cipher pointer and write to output file
-    write_file(output_file, cipher);
+    write_file(output_path, cipher);
     free((void *)message);
     free((void *)cipher);
     return EXIT_SUCCESS;

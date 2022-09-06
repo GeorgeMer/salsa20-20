@@ -87,18 +87,18 @@ void test_crypt(uint64_t implementation, uint64_t random_tests)
         32, 54, 52, 32, 98, 121, 116, 101, 115, 32, 105, 115, 116};
 
     // if run_testcase_crypt returns false, break execution
-    printf("\n\n\n-- Crypt tests: --\n\n");
-    printf("\n- Test 1:\n\n");
+    printf("\n\n-- Crypt tests: --\n\n");
+    printf("- Test 1:\n\n");
     if (!run_testcase_crypt(implementation, sizeof(msg_lessthan64), msg_lessthan64))
     {
         exit(EXIT_FAILURE);
     }
-    printf("\n- Test 2:\n\n");
+    printf("- Test 2:\n\n");
     if (!run_testcase_crypt(implementation, sizeof(msg_morethan64), msg_morethan64))
     {
         exit(EXIT_FAILURE);
     }
-    printf("\n- Test 3:\n\n");
+    printf("- Test 3:\n\n");
     if (!run_testcase_crypt(implementation, sizeof(msg_exactly64), msg_exactly64))
     {
         exit(EXIT_FAILURE);
@@ -107,12 +107,12 @@ void test_crypt(uint64_t implementation, uint64_t random_tests)
     // execute a number of random tests
     for (uint64_t i = 0; i < random_tests; i++)
     {
-        printf("\n- Random Test %lu:\n\n", i + 1);
+        printf("- Random Test %lu:\n\n", i + 1);
         if (!execute_random_crypt(implementation))
         {
             exit(EXIT_FAILURE);
         }
     }
 
-    printf("\n-- Executed all crypt tests successfully!--\n\n");
+    printf("-- Executed all crypt tests successfully!--\n\n\n");
 }

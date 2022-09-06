@@ -8,5 +8,5 @@
 #include <stdbool.h>
 
 extern size_t mlen;
-const uint8_t *read_file(const char *path);
+uint8_t *read_file(const char *path);
 void write_file(const char *path, uint8_t *cipher);

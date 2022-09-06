@@ -27,7 +27,7 @@ bool compareHexWithString(const char *hex, const char *str)
 {
     // print debug hex
     uint32_t hexarr[8], strarr[8];
-    printf("Keys to compare:\n");
+    printf("Keys to compare:\n\n");
     printf("Key hex: ");
     for (size_t i = 0; i < strlen(hex); i++)
     {
@@ -39,7 +39,7 @@ bool compareHexWithString(const char *hex, const char *str)
     convert_string_to_uint32_t_array(hex, hexarr);
 
     // print debug string
-    printf("\nKey string: ");
+    printf("Key string: ");
     for (size_t i = 0; i < strlen(str); i++)
     {
         printf("%c", str[i]);

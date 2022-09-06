@@ -133,18 +133,18 @@ void test_correctness(uint64_t implementation, uint64_t random_tests)
         32, 54, 52, 32, 98, 121, 116, 101, 115, 32, 105, 115, 116};
 
     // if run_testcase fails assertion, break program execution
-    printf("\n\n\n-- Core tests: --\n\n");
-    printf("\n\n- Test 1:\n\n");
+    printf("-- Core tests: --\n\n");
+    printf("- Test 1:\n\n");
     if (!run_testcase(implementation, sizeof(msg_lessthan64), msg_lessthan64))
     {
         exit(EXIT_FAILURE);
     }
-    printf("\n\n- Test 2:\n\n");
+    printf("- Test 2:\n\n");
     if (!run_testcase(implementation, sizeof(msg_morethan64), msg_morethan64))
     {
         exit(EXIT_FAILURE);
     }
-    printf("\n\n- Test 3:\n\n");
+    printf("- Test 3:\n\n");
     if (!run_testcase(implementation, sizeof(msg_exactly64), msg_exactly64))
     {
         exit(EXIT_FAILURE);
@@ -153,7 +153,7 @@ void test_correctness(uint64_t implementation, uint64_t random_tests)
     // run a number of random tests, break if assertion fails
     for (uint64_t i = 0; i < random_tests; i++)
     {
-        printf("\n\n- Random Test %lu:\n\n", i + 1);
+        printf("- Random Test %lu:\n\n", i + 1);
         if (!execute_random(implementation))
         {
             exit(EXIT_FAILURE);
@@ -186,5 +186,5 @@ void test_correctness(uint64_t implementation, uint64_t random_tests)
         exit(EXIT_FAILURE);
     }
 
-    printf("\n-- Executed all core tests successfully!--\n\n");
+    printf("-- Executed all core tests successfully!--\n\n");
 }
