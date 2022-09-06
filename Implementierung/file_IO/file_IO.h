@@ -9,4 +9,4 @@
 
 extern size_t mlen;
 uint8_t *read_file(const char *path);
-void write_file(const char *path, uint8_t *cipher);
+void write_file(const char *path, uint8_t *cipher, int input_perms);

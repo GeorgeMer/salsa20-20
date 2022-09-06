@@ -177,7 +177,7 @@ int main(int argc, char **argv)
         test_correctness(implementation_number, random_tests);
         test_crypt(implementation_number, random_tests);
         test_keys();
-        input_tests(implementation_number, random_tests, input_path, output_path);
+        input_tests(implementation_number, random_tests, input_path);
         printf("\n\n------ END OF TESTS ------\n\n\n");
     }
 
@@ -257,8 +257,21 @@ int main(int argc, char **argv)
         break;
     }
 
+    struct stat fs;
+    int r, input_perms = 384; // === 0600
+
+    r = stat(input_path, &fs);
+    if (r == -1)
+    {
+        fprintf(stderr, "Error, couldn't read input file permissions\n");
+    }
+    else
+    {
+        input_perms = fs.st_mode;
+    }
+
     // free input and cipher pointer and write to output file
-    write_file(output_path, cipher);
+    write_file(output_path, cipher, input_perms);
     free((void *)message);
     free((void *)cipher);
     return EXIT_SUCCESS;

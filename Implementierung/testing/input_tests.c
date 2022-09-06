@@ -14,6 +14,19 @@
 
 bool input_test(uint64_t implementation_number, const char *input_path)
 {
+    struct stat fs;
+    int r, input_perms = 384; // === 0600
+
+    r = stat(input_path, &fs);
+    if (r == -1)
+    {
+        fprintf(stderr, "Error, couldn't read input file permissions\n");
+    }
+    else
+    {
+        input_perms = fs.st_mode;
+    }
+
     uint8_t *msg;
     uint32_t key[8];
     uint64_t iv;
@@ -44,7 +57,7 @@ bool input_test(uint64_t implementation_number, const char *input_path)
     free(msg);
 
     // write to output
-    write_file(output_path, cipher);
+    write_file(output_path, cipher, input_perms);
 
     // read output
     msg = read_file(output_path);
@@ -63,7 +76,7 @@ bool input_test(uint64_t implementation_number, const char *input_path)
         break;
     }
     // write to output
-    write_file(output_path, cipher);
+    write_file(output_path, cipher, input_perms);
 
     uint8_t *expected, *actual;
     // read input
@@ -80,8 +93,37 @@ bool input_test(uint64_t implementation_number, const char *input_path)
     print_arr_8bit(actLen, actual);
     printf("\n");
 
+    int exp_perms, act_perms;
+
+    r = stat(input_path, &fs);
+    if (r == -1)
+    {
+        fprintf(stderr, "Error, couldn't read file permissions\n");
+        return false;
+    }
+    else
+    {
+        exp_perms = fs.st_mode;
+    }
+
+    r = stat(output_path, &fs);
+    if (r == -1)
+    {
+        fprintf(stderr, "Error, couldn't read file permissions\n");
+        return false;
+    }
+    else
+    {
+        act_perms = fs.st_mode;
+    }
+
+    if (exp_perms != act_perms)
+    {
+        printf("Permissions of input and output file don't match: %d != %d\n", exp_perms, act_perms);
+    }
+
     // compare
-    bool ret = assertEqualsArrays_8bit(expLen, expected, actLen, actual);
+    bool ret = (assertEqualsArrays_8bit(expLen, expected, actLen, actual));
     free(expected);
     free(actual);
     free(msg);
@@ -91,6 +133,7 @@ bool input_test(uint64_t implementation_number, const char *input_path)
 bool random_input_test(uint64_t implementation_number)
 {
     const char *input_path = "testing/io_binfiles/input.bin";
+    int input_perms = 384; // === 0600
 
     // generate random values
     mlen = randomInt(10, 1025);
@@ -98,7 +141,7 @@ bool random_input_test(uint64_t implementation_number)
     randomMsg(mlen, msg);
 
     // write to input
-    write_file(input_path, msg);
+    write_file(input_path, msg, input_perms);
     return input_test(implementation_number, input_path);
 }
 

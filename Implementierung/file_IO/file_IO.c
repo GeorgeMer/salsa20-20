@@ -52,7 +52,7 @@ error:
     exit(EXIT_FAILURE);
 }
 
-void write_file(const char *path, uint8_t *cipher)
+void write_file(const char *path, uint8_t *cipher, int input_perms)
 {
     FILE *file;
 
@@ -65,7 +65,7 @@ void write_file(const char *path, uint8_t *cipher)
             perror("Error creating file");
             exit(EXIT_FAILURE);
         }
-        if (chmod("encrypted.bin", 448) < 0)
+        if (chmod("encrypted.bin", input_perms) < 0)
         {
 
             fprintf(stderr, "Error changing file permissions\n");
@@ -79,7 +79,7 @@ void write_file(const char *path, uint8_t *cipher)
             perror("Error opening output file");
             exit(EXIT_FAILURE);
         }
-        if (chmod(path, 448) < 0)
+        if (chmod(path, input_perms) < 0)
         {
 
             fprintf(stderr, "Error changing file permissions\n");
