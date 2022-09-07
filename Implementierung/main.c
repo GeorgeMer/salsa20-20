@@ -40,7 +40,10 @@ const char *help_msg =
     "  -B X   If set, runtime of chosen implementation will be measured and output.\n"
     "         X represents the number of repetition of function calls (default: No runtime measurement)\n"
     "         Can be given as a hex with the prefix '0x', Octal with prefix '0' or as a decimal number with no prefix.\n"
-    "  -t X   If set, tests will be executed that compare the chosen implementation with the reference implementation.\n"
+    "  -t X   If set, tests will be executed that compare the chosen implementation with the reference implementation,\n"
+    "         as well as tests that run encryption twice (when output of the second encryption is the input of the first encryption)\n"
+    "         and also tests that run the whole program from file input to file output twice with the same principle as the previous tests.\n"
+    "         There are also test for key conversion from string input (as it would received from the console) into 256bit long 8 element array.\n"
     "         X represents the number of random tests in addition to the set tests that will be executed. (default: No tests are run)\n"
     "         (all tests run with random keys and nonces, random tests also have random messages)\n"
     "  -k K   K resembles the 256bit long key (default: K = 2^237 - 1711)\n"
@@ -56,9 +59,9 @@ const char *help_msg =
     "\n"
     "Please note:\n"
     "  Negative Numbers are not allowed.\n"
-    "  If -o is not set, the program will create an output file with the name result.txt in the current directory.\n"
+    "  If -o is not set, the program will create an output file with the name encrypted.bin in the current directory.\n"
     "  To decrypt a file, just call the program with the output file (of the previous encryption) as input file and with the same key and nonce already used for encryption.\n"
-    "  If the file contains any key whose respective ASCII value is not in [32;126], decryption will not yield the expected result.\n";
+    "  In such a case the file name and format must be specified in the -o argument, else the decrypted file will be a binary.\n";
 
 void print_usage(const char *progname) { fprintf(stderr, usage_msg, progname, progname, progname); }
 void print_help(const char *progname)
@@ -181,8 +184,7 @@ int main(int argc, char **argv)
         printf("\n\n------ END OF TESTS ------\n\n\n");
     }
 
-    // read the file and start the encryption using implementation according to implementation_number
-
+    // read the file and allocate memory for cipher
     const uint8_t *message = read_file(input_path);
     uint8_t *cipher = malloc(mlen);
 
@@ -241,7 +243,7 @@ int main(int argc, char **argv)
                implementation_number, number_of_iterations, time, per_iter);
     }
 
-    // run one iteration of the algorithm
+    // run one iteration of the algorithm if no flags are set
     switch (implementation_number)
     {
     case 0:
@@ -257,6 +259,7 @@ int main(int argc, char **argv)
         break;
     }
 
+    // get permissions of input file
     struct stat fs;
     int r, input_perms = 384; // === 0600
 
